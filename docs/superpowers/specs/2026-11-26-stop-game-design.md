@@ -56,6 +56,12 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 ### 5.2 Home
 - Two primary actions: **Host a game** and **Join a game**. Join shows nearby games live (host name + player count), tap to join.
 
+### 5.2b Practice with bots (owner decision, 2026-11-26)
+- Home has a third action, **Practice with bots**: a solo game on one phone against 1–5 computer players. It lets App Review exercise every screen with a single device, and lets people learn the game.
+- It uses the same setup screen (categories, stops required, allow giving up) plus the number of bots and their speed (Relaxed / Normal / Fast). It runs the real host and client code over an in-memory connection, with no network or Bonjour, so it never shows the Local Network prompt.
+- Bots answer from bundled per-language word lists for the built-in categories. They sometimes leave an answer blank (always for custom categories), stop at plausible times, and score themselves honestly (10 if no one else gave the same answer ignoring case and accents, 5 if someone did, 0 if blank).
+- Practice games aren't restored after the app is killed.
+
 ### 5.3 Game setup (host)
 - Pick from built-in categories (localized defaults) and/or add custom ones; custom categories are remembered on the host device for future games. Any number of categories, minimum 1. Reorderable.
 - **Categories are fixed for the whole game** once it starts (owner decision).
@@ -169,6 +175,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - All 26 letters in both languages.
 - New players join only in the lobby; mid-game additions require a new game.
 - Bundle ID `com.gchapiewski.stopapp`; app name decided later.
+- Practice with bots ships in the app (solo mode, also for App Review).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.
 - STOP requires all categories filled; "give up" counts as a stop when the host allows it (configurable).
