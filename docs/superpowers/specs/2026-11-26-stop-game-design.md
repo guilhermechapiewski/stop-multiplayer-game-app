@@ -63,12 +63,10 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 - **Allow giving up:** toggle (default off), editable between rounds. See §5.4.
 - Lobby shows players as they join; host taps **Start** (needs ≥ 2 players including host). Host can remove a player at any time (confirm).
 - Players have a **Leave game** action (confirm). See §5.7 for presence states.
-- Players may join between rounds (start with 0 total). Someone arriving mid-round waits in a "joining next round" state.
+- **New players can only join in the lobby.** Once the game starts it is closed to newcomers; adding someone means starting a new game (owner decision). Existing players (known UUID) can always reconnect or rejoin.
 
 ### 5.4 Round flow
-1. **Letter reveal** — short animation. Letters are drawn without repetition within a game; when the set is exhausted it resets. Letter set comes from the **host's** language:
-   - Portuguese: A–Z excluding K, W, Y.
-   - English: A–Z excluding Q, X, Z.
+1. **Letter reveal** — short animation. Letters are drawn without repetition within a game; when the set is exhausted it resets. All 26 letters A–Z are used in both languages (owner decision); if a hard letter comes up, players can all give up the round together.
 2. **3-2-1 countdown**, then all fields unlock simultaneously.
 3. **Writing** — single scrolling form, one field per category, keyboard stays up, Return moves to next field. Autocorrect off, auto-capitalize words. Each keystroke is local only.
 4. **STOP** — big button, enabled only when every category is filled. If the host enabled "allow giving up", a secondary **Give up** button is always available and counts as a stop. Each player can stop at most once per round. **Tapping STOP or Give up immediately freezes that player's own answers** (owner decision); their answers are sent to the host right away and the screen shows "You stopped — waiting for others". Everyone sees the live count ("Stops 1/2 — Ana").
@@ -136,7 +134,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Small on-device store (Codable files in Application Support, or SwiftData — builder's call): profile (UUID, name), custom categories, host game state, client in-progress answers keyed by game+round, last game reference for reconnection.
 
 ### 6.8 Localization
-- String Catalog with pt-BR and en. Each device's UI follows its own language. Default categories and letter set follow the host's language; category names are shown exactly as the host configured them.
+- String Catalog with pt-BR and en. Each device's UI follows its own language. Default categories follow the host's language; category names are shown exactly as the host configured them.
 
 ### 6.9 UX polish
 - Haptics on letter reveal, countdown ticks, STOP, scoring taps. Optional sounds (toggle, off when phone is silent).
@@ -144,7 +142,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Keep the screen awake during a game (idle timer disabled while in a game).
 
 ## 7. Testing strategy
-- **StopCore unit tests** (Swift Testing): letter picker (no repeats, reset on exhaustion, per-language sets), stop rule (filled vs give-up, once per player, required-count clamp), scoring and ranking with ties, full reducer phase transitions including invalid intents.
+- **StopCore unit tests** (Swift Testing): letter picker (no repeats, reset on exhaustion, full A–Z), stop rule (filled vs give-up, once per player, required-count clamp), scoring and ranking with ties, full reducer phase transitions including invalid intents.
 - **Session tests** with `InMemoryTransport` + test clock: full games with N simulated players; players dropping/returning in every phase; host dropping/returning; duplicate and retried intents; stale snapshots; app-kill restore from persisted state; protocol version mismatch.
 - **NWTransport integration tests** on loopback (listener + connections in one process).
 - **UI tests** (XCUITest): app launch argument starts a game with simulated bot players over the in-memory transport, so an entire game (setup → rounds → scoring → game over) runs in the simulator. Includes typing latency measurement.
@@ -158,7 +156,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 
 ## 9. App Store readiness
 - Free, no data collection (privacy label: no data collected), no tracking.
-- Placeholder app name/bundle ID/icon until the owner decides; app icon and launch experience to be designed.
+- Bundle ID: `com.gchapiewski.stopapp`. App name TBD by the owner (placeholder until then); app icon and launch experience to be designed.
 
 ## 10. Decided by the owner
 - Approach A (Network.framework), iOS 27+ only.
@@ -168,6 +166,9 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Host waits ~2 min then "host may be gone"; no host migration.
 - Tapping STOP / Give up freezes that player's own answers.
 - Categories are fixed for the whole game.
+- All 26 letters in both languages.
+- New players join only in the lobby; mid-game additions require a new game.
+- Bundle ID `com.gchapiewski.stopapp`; app name decided later.
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.
 - STOP requires all categories filled; "give up" counts as a stop when the host allows it (configurable).
@@ -176,9 +177,8 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Free App Store app, open source on GitHub.
 
 ## 11. Calls made by the designer (owner may override)
-- Letter sets: PT excludes K, W, Y; EN excludes Q, X, Z.
 - 3-2-1 countdown; heartbeat 1 s, away after ~3 s.
-- Minimum 2 players to start; join between rounds allowed; host can remove players.
+- Minimum 2 players to start; host can remove players.
 - Host can force-end a round and score for away players.
 - Stops required and Allow giving up are editable between rounds.
 - Blank answers fixed at 0.
