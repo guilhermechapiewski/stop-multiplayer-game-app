@@ -1,0 +1,26 @@
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.xcodeproj/project.xcworkspace/
+*.xcresult
+*.xcscmblueprint
+*.xccheckout
+App/Stop.xcodeproj/xcshareddata/xcodecloud/
+# SwiftPM
+.build/
+.swiftpm/
+Package.resolved
+# macOS
+.DS_Store
+# Misc
+*.ipa
+*.dSYM*
+
+# Claude Code local worktrees and agent working files
+.claude/
+.superpowers/
+
+# Owner-specific signing (see Config/Local.example.xcconfig)
+Config/Local.xcconfig
