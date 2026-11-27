@@ -12,8 +12,10 @@ final class JoinModel {
         case joinable
         /// Already started: new players can only join in the lobby.
         case inProgress
-        /// Hosted with a different app version.
-        case updateRequired
+        /// Hosted with an older app version: this phone is the newer one, so updating wouldn't help.
+        case hostOnOlderVersion
+        /// Hosted with a newer app version: this phone needs the update.
+        case hostOnNewerVersion
     }
 
     /// How long to wait before replacing a browser that failed or finished.
@@ -39,7 +41,9 @@ final class JoinModel {
     }
 
     static func availability(of game: DiscoveredGame) -> Availability {
-        if game.advertisement.protocolVersion != currentProtocolVersion { return .updateRequired }
+        let version = game.advertisement.protocolVersion
+        if version < currentProtocolVersion { return .hostOnOlderVersion }
+        if version > currentProtocolVersion { return .hostOnNewerVersion }
         return game.advertisement.joinable ? .joinable : .inProgress
     }
 

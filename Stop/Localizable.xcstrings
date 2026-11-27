@@ -677,6 +677,17 @@
         }
       }
     },
+    "Check that every phone has the latest version of Stop from the App Store, then try again." : {
+      "comment" : "Message for an app version mismatch; neutral because this phone may be the newer one.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confira se todos os celulares têm a versão mais recente do Stop na App Store e tente de novo."
+          }
+        }
+      }
+    },
     "Collecting answers…" : {
       "comment" : "Title of the screen between the end of a round and scoring.",
       "localizations" : {
@@ -875,8 +886,8 @@
         }
       }
     },
-    "Everyone needs the same app version" : {
-      "comment" : "Title when the host runs a different app version.",
+    "Everyone needs the same version of the app" : {
+      "comment" : "Title when the host runs a different app version (older or newer).",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2470,6 +2481,17 @@
         }
       }
     },
+    "This game uses an older version of Stop" : {
+      "comment" : "Join list: the host's phone has an older app version, so this phone can't join it.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este jogo usa uma versão mais antiga do Stop"
+          }
+        }
+      }
+    },
     "This round" : {
       "comment" : "Round results section: ranking for the round just played.",
       "localizations" : {
@@ -2514,24 +2536,13 @@
         }
       }
     },
-    "Update the app" : {
-      "comment" : "Join list: this game needs a different app version.",
+    "Update the app to join" : {
+      "comment" : "Join list: the host's phone has a newer app version; this phone needs the update.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Atualize o app"
-          }
-        }
-      }
-    },
-    "Update the app on every phone from the App Store, then try again." : {
-      "comment" : "Message for an app version mismatch.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Atualize o app em todos os celulares pela App Store e tente de novo."
+            "value" : "Atualize o app para entrar"
           }
         }
       }

@@ -33,17 +33,19 @@ struct JoinModelTests {
     }
 
     @Test func gamesThatCannotBeJoinedSayWhy() async throws {
-        let listeners = [advertise("Bia", joinable: false), advertise("Caio", protocolVersion: 99),
-                         advertise("Ana")]
+        let listeners = [advertise("Bia", joinable: false), advertise("Caio", protocolVersion: currentProtocolVersion + 1),
+                         advertise("Ana"), advertise("Duda", protocolVersion: currentProtocolVersion - 1)]
         defer { listeners.forEach { $0.stop() } }
         let model = JoinModel(factory: network)
 
         model.start()
         defer { model.stop() }
 
-        try await waitUntil { model.games.count == 3 }
-        #expect(model.games.map(\.advertisement.hostName) == ["Ana", "Bia", "Caio"])
-        #expect(model.games.map(JoinModel.availability(of:)) == [.joinable, .inProgress, .updateRequired])
+        try await waitUntil { model.games.count == 4 }
+        #expect(model.games.map(\.advertisement.hostName) == ["Ana", "Bia", "Caio", "Duda"])
+        // Only the phone that is behind is told to update.
+        #expect(model.games.map(JoinModel.availability(of:))
+                == [.joinable, .inProgress, .hostOnNewerVersion, .hostOnOlderVersion])
     }
 
     @Test func hostsWithTheSameNameGetSuffix() async throws {

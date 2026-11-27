@@ -336,8 +336,9 @@ struct EndReasonCopy {
         switch reason {
         case .versionMismatch:
             systemImage = "arrow.down.app.fill"
-            title = "Everyone needs the same app version"
-            message = "Update the app on every phone from the App Store, then try again."
+            // Neutral: this phone may be the newer one, so it isn't told to update.
+            title = "Everyone needs the same version of the app"
+            message = "Check that every phone has the latest version of Stop from the App Store, then try again."
         case .removed:
             systemImage = "person.fill.xmark"
             title = "You were removed from the game"

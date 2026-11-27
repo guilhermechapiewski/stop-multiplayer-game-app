@@ -85,7 +85,7 @@ private struct GameRow: View {
     let onJoin: () -> Void
 
     /// Joinable, or in progress (to rejoin); not when it needs another app version.
-    private var isTappable: Bool { availability != .updateRequired }
+    private var isTappable: Bool { availability == .joinable || availability == .inProgress }
 
     var body: some View {
         Button(action: onJoin) {
@@ -122,7 +122,8 @@ private struct GameRow: View {
         switch availability {
         case .joinable: players
         case .inProgress: Text("In progress · tap to rejoin if you were playing")
-        case .updateRequired: Text("Update the app")
+        case .hostOnOlderVersion: Text("This game uses an older version of Stop")
+        case .hostOnNewerVersion: Text("Update the app to join")
         }
     }
 
@@ -130,7 +131,7 @@ private struct GameRow: View {
         switch availability {
         case .joinable: Text("Joins this game.")
         case .inProgress: Text("Rejoins this game if you were playing in it.")
-        case .updateRequired: Text(verbatim: "")
+        case .hostOnOlderVersion, .hostOnNewerVersion: Text(verbatim: "")
         }
     }
 }

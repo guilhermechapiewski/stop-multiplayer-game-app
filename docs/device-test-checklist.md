@@ -100,9 +100,11 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 ### Mismatched app versions
 
 - [ ] Install a build with a different protocol version on one phone (an older TestFlight build, or a local
-      build with the wire `protocolVersion` changed). On **Join a game**, the other phone's game appears
-      dimmed with "Update the app" and can't be joined. If a phone does connect (for example, rejoining a
-      saved game), it shows "Everyone needs the same app version". Neither phone crashes or gets stuck.
+      build with the wire `protocolVersion` changed; build 3 speaks version 2, builds 1 and 2 version 1). On
+      **Join a game**, the other phone's game appears dimmed and can't be joined: on the older phone with
+      "Update the app to join", on the newer one with "This game uses an older version of Stop". If a phone
+      does connect (for example, rejoining a saved game), it shows "Everyone needs the same version of the
+      app". Neither phone crashes or gets stuck.
 
 ## Also check once per release
 
