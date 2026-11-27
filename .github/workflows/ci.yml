@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  package-tests:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+          swift --version
+      - name: StopKit tests
+        env:
+          CI: "1"
+        run: swift test --package-path Packages/StopKit
+
+  # Unit and UI tests run as separate jobs in parallel; the UI tests take most of the time.
+  app-tests:
+    runs-on: xcode-27
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: unit
+            only: StopTests
+          - suite: ui
+            only: StopUITests
+    name: app-tests (${{ matrix.suite }})
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+          swift --version
+      - name: Build for device (unsigned)
+        if: matrix.suite == 'unit'
+        run: >
+          xcodebuild build -project App/Stop.xcodeproj -scheme Stop
+          -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO
+      - name: Pick newest iPhone simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, re, sys
+          runtimes = json.load(sys.stdin)["devices"]
+          # Runtime keys look like com.apple.CoreSimulator.SimRuntime.iOS-27-0, sometimes with a suffix.
+          def version(k):
+              m = re.search(r"\.iOS-(\d+)-(\d+)", k)
+              return (int(m[1]), int(m[2])) if m else None
+          # Prefer the model the project is tested on (iPhone 17), then any "iPhone NN", then any
+          # iPhone; newer runtimes break ties. Unusual models (e.g. foldables) launch apps unreliably.
+          def rank(d):
+              n = d["name"]
+              return 0 if n == "iPhone 17" else 1 if re.fullmatch(r"iPhone \d+", n) else 2
+          phones = [(rank(d), tuple(-v for v in version(k)), d["udid"])
+                    for k in runtimes if version(k) for d in runtimes[k] if d["name"].startswith("iPhone")]
+          print(min(phones)[2])')
+          xcrun simctl list devices | grep "$UDID"
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+      - name: App ${{ matrix.suite }} tests
+        env:
+          CI: "1"
+        run: >
+          xcodebuild test -project App/Stop.xcodeproj -scheme Stop
+          -destination "id=$SIM_UDID"
+          -only-testing:${{ matrix.only }}
+          -parallel-testing-enabled NO
+          -retry-tests-on-failure -test-iterations 2
