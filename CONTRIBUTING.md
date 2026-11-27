@@ -39,9 +39,9 @@ settings belong in the git-ignored `Config/Local.xcconfig`.
 ## Running tests
 
 ```sh
-tools/test.sh            # everything
-tools/test.sh package    # swift test --package-path Packages/StopKit
-tools/test.sh app        # xcodebuild test on an iPhone simulator
+tools/test.sh            # unit tests, then UI tests
+tools/test.sh unit       # StopKit package tests + app unit tests (StopTests)
+tools/test.sh ui         # app UI tests (StopUITests); extra args go to xcodebuild
 ```
 
 ## Style

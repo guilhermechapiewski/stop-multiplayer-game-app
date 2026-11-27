@@ -20,9 +20,9 @@ for the overview and `CONTRIBUTING.md` for the full ground rules; this file is t
 ## Build and test
 
 ```sh
-tools/test.sh            # package tests, plus app tests once Stop.xcodeproj exists
-tools/test.sh package    # swift test --package-path Packages/StopKit
-tools/test.sh app        # xcodebuild test on an iPhone simulator
+tools/test.sh            # unit tests, then UI tests
+tools/test.sh unit       # StopKit package tests + app unit tests (StopTests)
+tools/test.sh ui         # app UI tests (StopUITests); extra args go to xcodebuild
 ```
 
 ## When behaviour changes

@@ -55,20 +55,17 @@
 			exceptions = (
 				570000000000000000070001 /* Exceptions for "Stop" folder in "Stop" target */,
 			);
-			name = Stop;
-			path = App/Stop;
+			path = Stop;
 			sourceTree = "<group>";
 		};
 		570000000000000000020002 /* StopTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			name = StopTests;
-			path = App/StopTests;
+			path = StopTests;
 			sourceTree = "<group>";
 		};
 		570000000000000000020003 /* StopUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			name = StopUITests;
-			path = App/StopUITests;
+			path = StopUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -407,7 +404,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = App/Stop/Info.plist;
+				INFOPLIST_FILE = Stop/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";
@@ -434,7 +431,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = App/Stop/Info.plist;
+				INFOPLIST_FILE = Stop/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";

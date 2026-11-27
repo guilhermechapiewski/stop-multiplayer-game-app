@@ -4,7 +4,7 @@
 //   a-tinted — a grayscale sign on black (the icon's tinted appearance)
 //   b        — a big letter tile with a pencil (alternative)
 //   c        — a hand-stamped "STOP!" (alternative)
-// Run: swift tools/make_icon.swift a App/Stop/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+// Run: swift tools/make_icon.swift a Stop/Assets.xcassets/AppIcon.appiconset/AppIcon.png
 import AppKit
 import CoreGraphics
 

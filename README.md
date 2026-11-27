@@ -62,9 +62,10 @@ version, deployment target, Swift settings) live in `Config/Project.xcconfig`.
 ## Testing
 
 ```sh
-tools/test.sh            # everything: package tests, then app tests (default)
-tools/test.sh package    # StopKit only: swift test --package-path Packages/StopKit (seconds, runs on the Mac)
-tools/test.sh app        # app unit and UI tests: xcodebuild test on an iPhone simulator (several minutes)
+tools/test.sh            # everything: unit tests, then UI tests (default)
+tools/test.sh unit       # StopKit package tests (seconds, on the Mac) + the app's unit tests (StopTests) on a simulator
+tools/test.sh ui         # the app's UI tests (StopUITests) on a simulator (several minutes)
+tools/test.sh ui -only-testing:StopUITests/PracticeUITests   # extra args go to xcodebuild
 ```
 
 `tools/test.sh` uses the `iPhone 17` simulator, or the first available iPhone if that isn't installed. The
@@ -72,7 +73,7 @@ package tests are where most of the logic is tested and finish quickly; the app 
 whole game in the simulator with XCUITest, so they take most of the time. CI (`.github/workflows/ci.yml`) runs
 both on pushes and pull requests to `main`.
 
-The UI tests (`App/StopUITests`) cover a full two-round game, a force-ended round, a relaunch that restores
+The UI tests (`StopUITests`) cover a full two-round game, a force-ended round, a relaunch that restores
 the draft, practice with bots in both languages, typing latency (`XCTClockMetric`, under 3 s for 30
 characters) and an accessibility audit of every main screen.
 
@@ -110,7 +111,7 @@ For example: `tools/run-sim.sh "iPhone 17" build/shot.png -mockGame -playerName 
 | `  StopSession` | Host and client sessions: wire protocol, heartbeat and presence, acknowledgements and retries, reconnection, snapshot resync, persistence |
 | `  StopSimulation` | Bot players and in-memory games, used by Practice with bots, mock mode and tests |
 | `  StopTestSupport` | Test clock, seeded random numbers and other test helpers |
-| `App/` | SwiftUI app: views, view models, localization (`Localizable.xcstrings`, en and pt-BR), haptics and sounds, on-device store |
+| `Stop/`, `StopTests/`, `StopUITests/` | SwiftUI app, its unit tests and its UI tests: views, view models, localization (`Localizable.xcstrings`, en and pt-BR), haptics and sounds, on-device store |
 | `Config/` | Shared build settings; your local signing settings |
 | `docs/` | Website and privacy policy (GitHub Pages), device test checklist, design spec |
 | `appstore/` | App Store publishing guide and screenshots |
