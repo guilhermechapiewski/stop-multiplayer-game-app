@@ -12,11 +12,30 @@ public enum BotSpeed: String, CaseIterable, Sendable {
         case .fast: .seconds(20) ... .seconds(35)
         }
     }
+
+    /// Chance that the bot fills every category in a round (otherwise it struggles).
+    public var finishProbability: Double {
+        switch self {
+        case .relaxed: 0.35
+        case .normal: 0.55
+        case .fast: 0.75
+        }
+    }
+}
+
+/// What a bot writes in one round.
+public struct BotRoundPlan: Sendable, Equatable {
+    /// One non-blank answer per category.
+    public var answers: [String]
+    /// Categories the bot can't think of in time: it leaves them blank and gives up if it may, else guesses
+    /// them last. Empty when the bot finishes the round.
+    public var late: [Int]
+    public var finishes: Bool { late.isEmpty }
 }
 
 /// Decides a practice bot's answers, STOP timing and self-scores. Deterministic per seed.
 public struct BotBrain: Sendable {
-    /// Probability that the bot leaves a category blank even when it knows an answer.
+    /// When struggling, the probability that the bot blanks a category even when it knows an answer.
     static let blankProbability = 0.15
 
     private let bank: BotAnswerBank
@@ -29,14 +48,26 @@ public struct BotBrain: Sendable {
         self.rng = SplitMix64(seed: seed)
     }
 
-    /// One answer per category, in order; `""` for a skipped or unknown category.
-    public mutating func answers(categories: [String], letter: String) -> [String] {
-        categories.map { category in
+    /// Decides the round: finish (weighted by speed) or struggle. A finisher answers every category, from the
+    /// bank or, when the category has nothing for the letter (custom categories), with any bank word starting
+    /// with it. A struggler blanks unknown categories and each known one with `blankProbability` (at least one).
+    public mutating func plan(categories: [String], letter: String) -> BotRoundPlan {
+        let fallback = bank.anyCandidates(letter: letter)
+        let finishes = Double.random(in: 0..<1, using: &rng) < speed.finishProbability
+        var answers: [String] = []
+        var late: [Int] = []
+        for (index, category) in categories.enumerated() {
             let candidates = bank.candidates(category: category, letter: letter)
-            guard !candidates.isEmpty, Double.random(in: 0..<1, using: &rng) >= Self.blankProbability
-            else { return "" }
-            return candidates.randomElement(using: &rng) ?? ""
+            if !finishes, candidates.isEmpty || Double.random(in: 0..<1, using: &rng) < Self.blankProbability {
+                late.append(index)
+            }
+            let pool = candidates.isEmpty ? fallback : candidates
+            answers.append(pool.randomElement(using: &rng) ?? letter)
         }
+        if !finishes, late.isEmpty, !categories.isEmpty {
+            late.append(Int.random(in: categories.indices, using: &rng))
+        }
+        return BotRoundPlan(answers: answers, late: late)
     }
 
     /// A random delay (millisecond resolution) within the speed's stop window.

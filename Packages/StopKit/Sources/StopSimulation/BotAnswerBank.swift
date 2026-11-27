@@ -34,6 +34,12 @@ public struct BotAnswerBank: Sendable {
         return entries[Self.fold(category)]?[key] ?? []
     }
 
+    /// Every answer starting with `letter`, from any category, sorted (so seeded picks are reproducible).
+    public func anyCandidates(letter: String) -> [String] {
+        let key = letter.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
+        return Set(entries.values.flatMap { $0[key] ?? [] }).sorted()
+    }
+
     /// Trimmed, case- and diacritic-insensitive form used for comparisons.
     static func fold(_ s: String) -> String {
         s.trimmingCharacters(in: .whitespacesAndNewlines)

@@ -48,7 +48,8 @@ import StopSession
     private var scoring: Task<Void, Never>?
     /// The round being typed, its answers so far, and whether typing finished / the bot stopped.
     private var writingRound: Int?
-    private var typed: [String] = []
+    /// What the bot has typed in the current (or last) round: local only, like a person's text fields.
+    public private(set) var typed: [String] = []
     private var doneTyping = false
     private var hasStopped = false
     private var scoringKey: (round: Int, category: Int)?
@@ -98,7 +99,8 @@ import StopSession
             }
         case .scoring(let category, false):
             stopTyping()
-            scheduleScore(round: round.number, category: category)
+            scheduleScore(round: round.number, category: category,
+                          scored: round.scores[me]?[category] != nil)
         default:
             stopTyping()
         }
@@ -114,18 +116,23 @@ import StopSession
         let categories = state.settings.categories
         typed = Array(repeating: "", count: categories.count)
         var brain = brain ?? BotBrain(language: state.language, speed: behavior.speed, seed: seed)
-        let planned = brain.answers(categories: categories, letter: round.letter)
+        let roundPlan = brain.plan(categories: categories, letter: round.letter)
         let stopAt = behavior.stopAfter ?? brain.stopDelay()
         self.brain = brain
+        let planned = roundPlan.answers
+        let allowGiveUp = state.settings.allowGiveUp
+        // A struggling bot leaves its late categories blank and gives up if it may; otherwise it guesses them
+        // last and still STOPs.
+        let known = planned.indices.filter { !roundPlan.late.contains($0) }
+        let order = allowGiveUp ? known : known + roundPlan.late
 
         enum Step { case type(Int), done, giveUp }
         // Answers appear evenly spread before `stopAt`; a give-up due at the same moment comes first.
-        var plan = planned.indices.map { (at: stopAt / (planned.count + 1) * ($0 + 1), step: Step.type($0)) }
+        var plan = order.enumerated().map { (at: stopAt / (order.count + 1) * ($0.offset + 1), step: Step.type($0.element)) }
         plan.append((stopAt, .done))
         if let giveUp = behavior.giveUpAfter { plan.insert((giveUp, .giveUp), at: 0) }
         plan = plan.enumerated().sorted { ($0.element.at, $0.offset) < ($1.element.at, $1.offset) }.map(\.element)
 
-        let allowGiveUp = state.settings.allowGiveUp
         let number = round.number
         writing = Task { [weak self, clock] in
             var elapsed = Duration.zero
@@ -177,14 +184,18 @@ import StopSession
 
     // MARK: Scoring
 
-    /// Scores the bot's own answer for `category` after `scoreDelay`, unless someone already did.
-    private func scheduleScore(round: Int, category: Int) {
-        guard scoringKey?.round != round || scoringKey?.category != category else { return }
+    /// Scores the bot's own answer for `category` after `scoreDelay`, unless someone already did. Called on
+    /// every snapshot: re-arms while its score is still missing (e.g. a score sent before a reconnect was lost).
+    private func scheduleScore(round: Int, category: Int, scored: Bool) {
+        let same = scoringKey?.round == round && scoringKey?.category == category
+        guard !scored, !same || scoring == nil else { return }
         scoringKey = (round, category)
         scoring?.cancel()
         scoring = Task { [weak self, clock, behavior] in
             do { try await clock.sleep(for: behavior.scoreDelay) } catch { return }
-            guard !Task.isCancelled, let self, let state = self.client.state, let current = state.currentRound,
+            guard !Task.isCancelled, let self else { return }
+            self.scoring = nil
+            guard let state = self.client.state, let current = state.currentRound,
                   current.number == round, state.phase == .scoring(categoryIndex: category, completed: false),
                   current.scores[self.me]?[category] == nil, let mine = current.answers[self.me]?[category]
             else { return }

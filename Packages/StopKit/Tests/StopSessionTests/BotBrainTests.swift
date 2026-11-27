@@ -53,33 +53,56 @@ struct BotBrainTests {
         var seeds = SeededRNG(seed: 17)
         for letter in Self.letters {
             var brain = BotBrain(language: language, speed: .normal, seed: seeds.next())
-            let answers = brain.answers(categories: categories, letter: letter)
-            #expect(answers.count == categories.count)
-            for answer in answers where !AnswerText.isBlank(answer) {
+            let answers = brain.plan(categories: categories + ["Dinosaur"], letter: letter).answers
+            #expect(answers.count == categories.count + 1)
+            for answer in answers {
                 #expect(fold(answer).hasPrefix(fold(letter)), "\(letter): \(answer)")
             }
         }
     }
 
-    @Test func blankRateIsAboutFifteenPercent() {
-        var seeds = SeededRNG(seed: 99)
-        var blanks = 0, total = 0
-        for _ in 0..<200 {
-            var brain = BotBrain(language: .en, speed: .normal, seed: seeds.next())
-            let answers = brain.answers(categories: ["Animal", "Fruit", "Color", "Food", "Name"], letter: "B")
-            blanks += answers.filter(AnswerText.isBlank).count
-            total += answers.count
+    @Test(arguments: [(BotSpeed.fast, 0.75), (.normal, 0.55), (.relaxed, 0.35)])
+    func finishRateFollowsSpeed(_ speed: BotSpeed, _ expected: Double) {
+        #expect(speed.finishProbability == expected)
+        var seeds = SeededRNG(seed: 5)
+        var finished = 0
+        for _ in 0..<400 {
+            var brain = BotBrain(language: .en, speed: speed, seed: seeds.next())
+            if brain.plan(categories: DefaultCategories.list(for: .en), letter: "M").finishes { finished += 1 }
         }
-        let rate = Double(blanks) / Double(total)
-        #expect(rate > 0.10 && rate < 0.20, "blank rate \(rate)")
+        let rate = Double(finished) / 400
+        #expect(abs(rate - expected) < 0.08, "\(speed) finish rate \(rate)")
     }
 
-    @Test func botLeavesCustomCategoriesBlank() {
+    @Test func finishersFillEveryCategoryIncludingCustomOnes() {
         var seeds = SeededRNG(seed: 3)
-        for _ in 0..<20 {
+        var finishers = 0
+        for letter in Self.letters {
             var brain = BotBrain(language: .ptBR, speed: .fast, seed: seeds.next())
-            let answers = brain.answers(categories: ["Dinossauro", "Time de futebol"], letter: "C")
-            #expect(answers == ["", ""])
+            let plan = brain.plan(categories: ["Dinossauro", "Animal", "Time de futebol"], letter: letter)
+            #expect(plan.answers.count == 3)
+            #expect(!plan.answers.contains(where: AnswerText.isBlank))
+            if plan.finishes { finishers += 1 }
+        }
+        #expect(finishers > 10)
+    }
+
+    @Test func strugglersLeaveOneOrTwoBlanksAndAlwaysCustomOnes() {
+        var seeds = SeededRNG(seed: 99)
+        var strugglers = 0, late = 0
+        for _ in 0..<400 {
+            var brain = BotBrain(language: .en, speed: .relaxed, seed: seeds.next())
+            let plan = brain.plan(categories: DefaultCategories.list(for: .en), letter: "B")
+            guard !plan.finishes else { continue }
+            strugglers += 1
+            late += plan.late.count
+        }
+        let mean = Double(late) / Double(strugglers)
+        #expect(mean >= 1 && mean <= 2.5, "mean blanks \(mean)")
+        var brain = BotBrain(language: .ptBR, speed: .relaxed, seed: 1)
+        for _ in 0..<20 {
+            let plan = brain.plan(categories: ["Dinossauro", "Animal"], letter: "C")
+            if !plan.finishes { #expect(plan.late.contains(0)) }
         }
     }
 
@@ -107,7 +130,7 @@ struct BotBrainTests {
         var a = BotBrain(language: .ptBR, speed: .normal, seed: 7)
         var b = BotBrain(language: .ptBR, speed: .normal, seed: 7)
         let categories = DefaultCategories.list(for: .ptBR)
-        #expect(a.answers(categories: categories, letter: "M") == b.answers(categories: categories, letter: "M"))
+        #expect(a.plan(categories: categories, letter: "M") == b.plan(categories: categories, letter: "M"))
         #expect(a.stopDelay() == b.stopDelay())
     }
 
