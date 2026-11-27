@@ -12,6 +12,7 @@ extension ClientSession {
     func connect(to endpoint: EndpointRef) {
         closeConnection()
         lastEndpoint = endpoint
+        dialed = Stopwatch(clock)
         let connection = factory.connect(to: endpoint)
         self.connection = connection
         Task { [weak self] in
@@ -38,6 +39,17 @@ extension ClientSession {
         guard connection?.id == closed.id else { return }
         connection = nil
         isWelcomed = false
+        lostConnection()
+    }
+
+    /// Drops a connection the host stopped answering on and reconnects. The host stays away; only a message
+    /// from it resets the time it has been gone.
+    func recycleConnection() {
+        closeConnection()
+        lostConnection()
+    }
+
+    private func lostConnection() {
         guard shouldReconnect else { return }
         hostWentAway()
         startBrowsing()

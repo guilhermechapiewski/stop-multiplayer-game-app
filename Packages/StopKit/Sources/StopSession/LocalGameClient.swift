@@ -24,8 +24,7 @@ public final class LocalGameClient: GameClient {
                                        debounce: timing.draftDebounce)
         drafts.onSubmit = { [weak self] round, answers in
             guard let self, let host else { return }
-            // Errors (the round moved on meanwhile) are expected and not the user's doing.
-            _ = host.apply(.submitAnswers(round: round, answers: answers), from: localPlayerID)
+            lastError = host.apply(.submitAnswers(round: round, answers: answers), from: localPlayerID)
         }
     }
 

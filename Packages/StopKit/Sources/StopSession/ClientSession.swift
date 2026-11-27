@@ -48,14 +48,14 @@ public final class ClientSession: GameClient {
     private struct PendingIntent {
         let id: UUID
         let intent: Intent
-        /// Sent by the session itself (lock submission): its errors aren't the user's.
-        let isInternal: Bool
     }
     @ObservationIgnored private var pending: [PendingIntent] = []
     @ObservationIgnored private var leaveID: UUID?
     @ObservationIgnored private var leaveTimeout: Task<Void, Never>?
     @ObservationIgnored private var watchdog: Task<Void, Never>?
     @ObservationIgnored private var lastHeard: Stopwatch
+    /// Started when the current connection was dialed.
+    @ObservationIgnored var dialed: Stopwatch
     @ObservationIgnored private var awaySince: Stopwatch?
 
     public init(profile: Profile, target: Target, factory: any TransportFactory, store: any GameStore,
@@ -69,6 +69,7 @@ public final class ClientSession: GameClient {
                                        debounce: timing.draftDebounce)
         (presenceChanges, presenceContinuation) = AsyncStream.makeStream(of: PresenceChange.self)
         lastHeard = Stopwatch(clock)
+        dialed = Stopwatch(clock)
         switch target {
         case .discovered(let game):
             gameID = game.advertisement.gameID
@@ -77,7 +78,7 @@ public final class ClientSession: GameClient {
             gameID = id
         }
         drafts.onSubmit = { [weak self] round, answers in
-            self?.enqueue(.submitAnswers(round: round, answers: answers), isInternal: true)
+            self?.enqueue(.submitAnswers(round: round, answers: answers))
         }
     }
 
@@ -138,7 +139,7 @@ public final class ClientSession: GameClient {
     public func send(_ intent: Intent) {
         guard !isEnded else { return }
         drafts.willSend(intent)
-        enqueue(intent, isInternal: false)
+        enqueue(intent)
     }
 
     public func saveDraft(_ answers: [String]) { drafts.saveDraft(answers) }
@@ -148,7 +149,7 @@ public final class ClientSession: GameClient {
     /// Sends `.leave`, waits up to 1 s for its ack, then says `.bye` and ends.
     public func leave() {
         guard !isEnded, leaveID == nil else { return }
-        leaveID = enqueue(.leave, isInternal: false)
+        leaveID = enqueue(.leave)
         leaveTimeout = Task { [weak self, clock] in
             do { try await clock.sleep(for: .seconds(1)) } catch { return }
             guard !Task.isCancelled else { return }
@@ -165,8 +166,8 @@ public final class ClientSession: GameClient {
     // MARK: Intents
 
     @discardableResult
-    private func enqueue(_ intent: Intent, isInternal: Bool) -> UUID {
-        let item = PendingIntent(id: UUID(), intent: intent, isInternal: isInternal)
+    private func enqueue(_ intent: Intent) -> UUID {
+        let item = PendingIntent(id: UUID(), intent: intent)
         pending.append(item)
         if isWelcomed { transmit(.intent(id: item.id, intent)) }
         return item.id
@@ -175,7 +176,7 @@ public final class ClientSession: GameClient {
     private func acked(_ id: UUID, error: GameError?) {
         guard let index = pending.firstIndex(where: { $0.id == id }) else { return }
         let item = pending.remove(at: index)
-        if let error, !item.isInternal {
+        if let error {
             lastError = error
             switch item.intent {
             case .stop, .giveUp: drafts.stopRejected()
@@ -285,12 +286,17 @@ public final class ClientSession: GameClient {
         watchdog = nil
     }
 
-    /// Every heartbeat interval: send a heartbeat and update the host's status from how long it's been quiet.
+    /// Every heartbeat interval: send a heartbeat, update the host's status from how long it's been quiet, and
+    /// recycle a connection that has gone silent (half-open) or never got a welcome.
     private func watch() {
         guard !isEnded else { return stopWatchdog() }
         if isWelcomed {
             transmit(.heartbeat)
-            if lastHeard.elapsed >= timing.awayAfter { hostWentAway() }
+            let quiet = lastHeard.elapsed
+            if quiet >= timing.awayAfter { hostWentAway() }
+            if quiet >= timing.reconnectAfterSilence { recycleConnection() }
+        } else if connection != nil, dialed.elapsed >= timing.reconnectAfterSilence {
+            recycleConnection()
         }
         if hostStatus == .away, let awaySince, awaySince.elapsed >= timing.hostGoneAfter {
             hostStatus = .mayBeGone

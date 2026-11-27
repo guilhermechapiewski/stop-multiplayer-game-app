@@ -23,6 +23,17 @@ private func poll(_ condition: () -> Bool) async {
     for _ in 0..<100 where !condition() { try? await Task.sleep(for: .milliseconds(1)) }
 }
 
+/// Advances the clock a second at a time (up to `seconds`) until `done` holds, letting timers re-arm between
+/// steps. Timers that re-arm late only fire later, never earlier.
+@MainActor
+private func stepUntil(_ clock: TestClock, seconds: Int, _ done: () -> Bool) async {
+    for _ in 0..<seconds where !done() {
+        await waitUntil("a timer armed") { clock.sleeperCount >= 1 }
+        await clock.advance(by: .seconds(1))
+        for _ in 0..<20 where !done() { await Task.yield() }
+    }
+}
+
 /// A real `HostSession` plus `ClientSession`s on one in-memory network and test clock.
 @MainActor
 private final class Harness {
@@ -297,12 +308,44 @@ struct ClientSessionTests {
         await waitUntil("2 heartbeats") { fake.received.filter { $0 == .heartbeat }.count == 2 }
         await advance(1)
         #expect(ana.hostStatus == .away)
-        await advance(119)
+        // From 6 s of silence on, the client keeps recycling connections the host never welcomes; that doesn't
+        // restart the 120 s "may be gone" timer.
+        await stepUntil(clock, seconds: 119) { false }
         #expect(ana.hostStatus == .away)
-        await advance(1)
-        #expect(ana.hostStatus == .mayBeGone)
-        fake.send(.heartbeat)
-        await waitUntil("back") { ana.hostStatus == .connected }
+        #expect(fake.connections.count > 2)
+        await stepUntil(clock, seconds: 10) { ana.hostStatus == .mayBeGone }
+        await waitUntil("may be gone") { ana.hostStatus == .mayBeGone }
+    }
+
+    @Test func silentHalfOpenHostConnectionIsDroppedAndReconnected() async throws {
+        let h = try Harness()
+        let store = InMemoryGameStore()
+        let ana = try await h.join("Ana", store: store)
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing }
+        // The host app is suspended and comes back on a new listener; the old socket stays open but carries
+        // nothing (its messages, the goingAway included, never arrive).
+        h.net.setLatency(.seconds(3600))
+        h.host.suspend()
+        h.host.listener?.stop()
+        h.net.setLatency(.zero)
+        let restored = HostSession(state: h.host.state, factory: h.net, store: h.hostStore, clock: h.clock)
+        restored.start()
+        h.host = restored
+        await stepUntil(h.clock, seconds: 3) { false }
+        #expect(ana.hostStatus == .away)
+        // While away, intents queue and drafts keep saving.
+        ana.send(.stop(answers: ["Ana", "Anta"]))
+        ana.saveDraft(["Ana", "Anta"])
+        await stepUntil(h.clock, seconds: 2) { false }
+        await waitUntil("draft saved") { await store.loadDraft(gameID: h.gameID, round: 1) == ["Ana", "Anta"] }
+        #expect(ana.hostStatus == .away)
+        await stepUntil(h.clock, seconds: 5) { ana.hostStatus == .connected }
+        await waitUntil("reconnected") { ana.hostStatus == .connected }
+        await waitUntil("present on restored host") {
+            restored.state.player(ana.localPlayerID)?.presence == .present
+        }
+        await waitUntil("queued stop applied") { restored.state.currentRound?.stops.count == 1 }
     }
 
     @Test func goingAwayFromHostShowsAwayImmediately() async throws {
