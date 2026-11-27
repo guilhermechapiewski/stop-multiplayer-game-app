@@ -45,3 +45,15 @@ import Testing
     let payload = Data(repeating: 1, count: 8)
     #expect(try decoder.append(FrameEncoder.encode(payload)) == [payload])
 }
+
+@Test func decoderKeepsPartialFrameAcrossManyCompleteOnes() throws {
+    let payloads = (0..<50).map { Data(repeating: UInt8($0), count: $0 * 7) }
+    let stream = payloads.map(FrameEncoder.encode).reduce(Data(), +)
+    // A chunk boundary inside the last frame: everything but the tail arrives first.
+    let split = stream.count - 3
+    var decoder = FrameDecoder()
+    let first = try decoder.append(stream.prefix(split))
+    #expect(first == Array(payloads.dropLast()))
+    #expect(try decoder.append(stream.suffix(from: split)) == [payloads.last!])
+    #expect(try decoder.append(Data()) == [])
+}

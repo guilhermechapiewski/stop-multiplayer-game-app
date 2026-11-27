@@ -29,13 +29,16 @@ public struct FrameDecoder {
     public mutating func append(_ data: Data) throws -> [Data] {
         buffer.append(data)
         var frames: [Data] = []
-        while buffer.count >= 4 {
-            let start = buffer.startIndex
-            let length = buffer[start..<start + 4].reduce(0) { $0 << 8 | Int($1) }
+        // Consume frames by advancing a read offset, then drop the consumed prefix once, so a chunk carrying
+        // many frames costs one compaction instead of one per frame.
+        var offset = buffer.startIndex
+        defer { buffer.removeSubrange(buffer.startIndex..<offset) }
+        while buffer.endIndex - offset >= 4 {
+            let length = buffer[offset..<offset + 4].reduce(0) { $0 << 8 | Int($1) }
             guard length <= maxFrameSize else { throw FrameError.tooLarge(length) }
-            guard buffer.count >= 4 + length else { break }
-            frames.append(Data(buffer[start + 4..<start + 4 + length]))
-            buffer.removeSubrange(start..<start + 4 + length)
+            guard buffer.endIndex - offset >= 4 + length else { break }
+            frames.append(Data(buffer[offset + 4..<offset + 4 + length]))
+            offset += 4 + length
         }
         return frames
     }
