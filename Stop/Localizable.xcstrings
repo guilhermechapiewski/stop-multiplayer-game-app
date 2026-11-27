@@ -512,6 +512,17 @@
         }
       }
     },
+    "Back to scoring" : {
+      "comment" : "Host button on round results: reopens the round's last scoring category so a score can be corrected.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar à pontuação"
+          }
+        }
+      }
+    },
     "Blank" : {
       "comment" : "VoiceOver value of an answer left blank.",
       "localizations" : {
@@ -1601,6 +1612,17 @@
       },
       "comment" : "Home button for a solo game against computer players."
     },
+    "Previous category" : {
+      "comment" : "Host button at the bottom of scoring, beside Next category: takes everyone back to the category before.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoria anterior"
+          }
+        }
+      }
+    },
     "Privacy policy" : {
       "localizations" : {
         "pt-BR" : {
@@ -2037,6 +2059,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "STOPs para encerrar a rodada"
+          }
+        }
+      }
+    },
+    "Takes everyone back to the category before." : {
+      "comment" : "VoiceOver hint of the host's Previous category button on the scoring screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leva todo mundo de volta à categoria anterior."
+          }
+        }
+      }
+    },
+    "Takes everyone back to the last category to correct a score." : {
+      "comment" : "VoiceOver hint of the host's Back to scoring button on round results.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leva todo mundo de volta à última categoria para corrigir uma pontuação."
           }
         }
       }

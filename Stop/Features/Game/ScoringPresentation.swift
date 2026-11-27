@@ -36,6 +36,9 @@ struct ScoringPresentation: Equatable {
     /// The host can move on now.
     var canAdvance: Bool { showsAdvanceButton && isCompleted }
 
+    /// The host can go back to the category before, to review or correct it (any time, complete or not).
+    var showsPreviousButton: Bool { showsAdvanceButton && categoryIndex > 0 }
+
     static let blankAnswer = "—"
 
     init(state: GameState, viewer: PlayerID) {

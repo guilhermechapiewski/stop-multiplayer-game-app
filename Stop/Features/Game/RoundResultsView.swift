@@ -103,6 +103,28 @@ struct RoundResultsView: View {
         })
     }
 
+    /// Host only: reopens the round's last category, to correct a score before the next round starts.
+    private var backToScoringButton: some View {
+        Button {
+            client.send(.previousCategory(round: round.number, category: state.settings.categories.count))
+        } label: {
+            Label("Back to scoring", systemImage: "arrow.uturn.backward")
+        }
+        .font(Theme.Typography.headline)
+        .foregroundStyle(Theme.accent)
+        .frame(minHeight: 44)
+        .accessibilityHint(Text("Takes everyone back to the last category to correct a score."))
+        .accessibilityIdentifier("backToScoringButton")
+    }
+
+    private var endGameButton: some View {
+        Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
+            .font(Theme.Typography.headline)
+            .foregroundStyle(Theme.accent)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("endGameButton")
+    }
+
     @ViewBuilder private var bottomBar: some View {
         BottomActionBar {
             if client.isHost {
@@ -111,11 +133,11 @@ struct RoundResultsView: View {
                 }
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("nextRoundButton")
-                Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
-                    .font(Theme.Typography.headline)
-                    .foregroundStyle(Theme.accent)
-                    .frame(minHeight: 44)
-                    .accessibilityIdentifier("endGameButton")
+                // Side by side when they fit, stacked at large text sizes.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Theme.Spacing.l) { backToScoringButton; endGameButton }
+                    VStack(spacing: Theme.Spacing.xs) { backToScoringButton; endGameButton }
+                }
             } else {
                 HStack(spacing: Theme.Spacing.s) {
                     ProgressView()

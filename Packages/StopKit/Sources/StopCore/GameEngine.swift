@@ -68,6 +68,8 @@ public enum GameEngine {
                                 sender: sender, state: &state)
         case .nextCategory(let round, let category):
             return try nextCategory(round: round, category: category, sender: sender, state: &state)
+        case .previousCategory(let round, let category):
+            return try previousCategory(round: round, category: category, sender: sender, state: &state)
         case .nextRound:
             return try nextRound(sender: sender, state: &state, using: &rng)
         case .endGame:

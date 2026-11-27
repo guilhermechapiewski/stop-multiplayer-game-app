@@ -86,6 +86,7 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 - Each player scores **only their own** answer: 10 / 5 / 0. A blank answer is fixed at 0.
 - **Everyone sees everyone's points** as they are picked: each row shows a 10 / 5 / 0 badge, or "…" while that player hasn't scored.
 - Category completes when all present and away players have scored (left/removed players count 0). Nothing advances on its own (owner decision, 2026-11-27): the **host** taps **Next category** (**See results** after the last), enabled only once the category is complete; the others see "Waiting for (host) to continue…". Until the host moves on, players can still change their pick, so a wrong tap can be fixed. A stale or repeated Next is ignored, so a category is never skipped. In practice the local player is the host.
+- **Going back** (owner decision, 2026-11-27): from the second category on, the host also has **Previous category**, and on the round results **Back to scoring** (reopens the last category), so a score can be reviewed or corrected; everyone follows. Scores there stay editable as usual, and totals follow. It's guarded by the category index like Next, so a repeated tap never moves twice. Once the next round starts, earlier rounds are final. Late answers still fill only categories scoring hasn't reached yet.
 - If a player is away during scoring, the host can score on their behalf after they've been away a few seconds (host sees an "Away — score for Ana" control).
 - The app never judges answers.
 
@@ -180,6 +181,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Bundle ID `com.gchapiewski.stopapp`; app name decided later.
 - Practice with bots ships in the app (solo mode, also for App Review). Revised 2026-11-27: Debug builds only; App Review uses two iPhones.
 - Scoring never auto-advances: everyone sees all the points, and the host moves on to the next category (2026-11-27).
+- The host can go back to a previous category, or from the round results back to scoring, until the next round starts (2026-11-27).
   The `.nextCategory` intent replaced the tick auto-advance within protocolVersion 1 on 2026-11-27 (version not bumped): builds before build 2 still auto-advance, so every phone in a game needs build 2 or later.
 - The last hosted game's categories are preselected in setup (2026-11-27).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.

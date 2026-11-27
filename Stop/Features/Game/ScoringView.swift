@@ -148,8 +148,39 @@ struct ScoringView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("waitingForHost")
             }
-            if presentation.showsAdvanceButton { nextButton(presentation) }
+            if presentation.showsAdvanceButton { hostButtons(presentation) }
         }
+    }
+
+    /// Host only: Previous beside Next (from the second category on), stacked when they don't fit side by side
+    /// (large text, long labels).
+    @ViewBuilder private func hostButtons(_ presentation: ScoringPresentation) -> some View {
+        if presentation.showsPreviousButton {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Theme.Spacing.s) {
+                    previousButton(presentation)
+                    nextButton(presentation)
+                }
+                VStack(spacing: Theme.Spacing.s) {
+                    nextButton(presentation)
+                    previousButton(presentation)
+                }
+            }
+        } else {
+            nextButton(presentation)
+        }
+    }
+
+    /// Host only: takes everyone back to the category before, to review or correct its scores.
+    private func previousButton(_ presentation: ScoringPresentation) -> some View {
+        Button {
+            client.send(.previousCategory(round: round.number, category: presentation.categoryIndex))
+        } label: {
+            Label("Previous category", systemImage: "arrow.backward")
+        }
+        .buttonStyle(.secondary)
+        .accessibilityHint(Text("Takes everyone back to the category before."))
+        .accessibilityIdentifier("previousCategoryButton")
     }
 
     /// Host only: moves everyone on once the category is complete.

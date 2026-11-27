@@ -122,6 +122,14 @@ struct ScoringPresentationTests {
         #expect(anaDone.hostName == "Gui")
     }
 
+    @Test func onlyTheHostGoesBackAndNotFromTheFirstCategory() {
+        let second = makeState(category: 1, answers: answers, scores: allScored)
+        #expect(ScoringPresentation(state: second, viewer: host.id).showsPreviousButton)
+        #expect(!ScoringPresentation(state: second, viewer: ana.id).showsPreviousButton)
+        let first = makeState(category: 0, completed: true, answers: answers, scores: allScored)
+        #expect(!ScoringPresentation(state: first, viewer: host.id).showsPreviousButton)
+    }
+
     @Test func lastCategoryLeadsToResults() {
         #expect(!ScoringPresentation(state: makeState(category: 1, completed: true, answers: answers,
                                                       scores: allScored), viewer: host.id).isLastCategory)

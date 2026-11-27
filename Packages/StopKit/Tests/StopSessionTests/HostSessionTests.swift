@@ -403,6 +403,37 @@ struct HostSessionTests {
         #expect(await ana.nextSnapshot { $0.phase == .scoring(categoryIndex: 1, completed: false) } != nil)
     }
 
+    @Test func hostGoesBackFromResultsAndAPlayerCorrectsTheirScore() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        await h.toWriting()
+        ana.send(.stop(answers: ["Ana", "Anta"]))
+        await waitUntil("scoring") { h.host.state.phase == .scoring(categoryIndex: 0, completed: false) }
+        for category in 0..<2 {
+            h.host.localClient.send(.setScore(round: 1, category: category, points: 10, player: h.hostID))
+            ana.send(.setScore(round: 1, category: category, points: 10, player: ana.playerID))
+            await waitUntil("completed \(category)") {
+                h.host.state.phase == .scoring(categoryIndex: category, completed: true)
+            }
+            h.host.localClient.send(.nextCategory(round: 1, category: category))
+        }
+        #expect(h.host.state.phase == .roundResults)
+        // Only the host goes back.
+        let id = ana.send(.previousCategory(round: 1, category: 2))
+        #expect(await ana.ack(for: id) == .ack(id: id, error: .notHost))
+        #expect(h.host.state.phase == .roundResults)
+        h.host.localClient.send(.previousCategory(round: 1, category: 2))
+        // A repeated tap is rejected by the category guard: it never moves twice.
+        h.host.localClient.send(.previousCategory(round: 1, category: 2))
+        #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: true))
+        #expect(await ana.nextSnapshot { $0.phase == .scoring(categoryIndex: 1, completed: true) } != nil)
+        ana.send(.setScore(round: 1, category: 1, points: 5, player: ana.playerID))
+        await waitUntil("corrected") { h.host.state.currentRound?.scores[ana.playerID]?[1] == 5 }
+        h.host.localClient.send(.nextCategory(round: 1, category: 1))
+        #expect(h.host.state.phase == .roundResults)
+        #expect(h.host.state.totals[ana.playerID] == 15)
+    }
+
     @Test func suspendStopsTicksSoCountdownPauses() async throws {
         let h = try Harness()
         let ana = try await h.join("Ana")

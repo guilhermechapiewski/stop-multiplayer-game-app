@@ -40,6 +40,9 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
       other phones as soon as it's made. A player can change their pick after everyone has scored. Only the
       host has **Next category** (**See results** on the last); the others see "Waiting for (host) to
       continue…". Results and totals match on every phone.
+- [ ] The host taps **Previous category** on the second category, and later **Back to scoring** on the round
+      results: every phone goes back together, a player changes their pick, and after moving on again the
+      round totals on every phone show the change. Guests have neither button.
 - [ ] Known limit: a pick changed at the same moment the host taps **Next category** is dropped (the host has
       moved on); the player's phone then shows the host's score for that category, and results agree.
 

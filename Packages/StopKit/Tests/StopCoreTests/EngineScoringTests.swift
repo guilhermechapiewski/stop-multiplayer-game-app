@@ -258,6 +258,143 @@ private let full = ["Ana", "Uva"]
     #expect(s.totals == [ids[0]: 10, ids[1]: 10, ids[2]: 10])
 }
 
+/// The host goes back one category from the current scoring category (or from the results).
+private func previous(_ s: inout GameState) throws {
+    let category: Int
+    switch s.phase {
+    case .scoring(let current, _): category = current
+    case .roundResults: category = s.settings.categories.count
+    default: Issue.record("can't go back from \(s.phase)"); return
+    }
+    try send(.previousCategory(round: s.currentRound?.number ?? 0, category: category), s.hostID, &s)
+}
+
+private let three = ["Animal", "Fruta", "Lugar"]
+private let threeAnswers = [["Ana", "Uva", "Rio"], ["Asno", "Abacate", "Roma"], ["Arara", "Amora", "Acre"]]
+
+@Test func previousCategoryGoesBackOneCategory() throws {
+    var (s, ids) = try writingGame(categories: three)
+    try collect(&s, ids, threeAnswers)
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    try next(&s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
+    let v = s.version
+    try previous(&s)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    #expect(s.version == v + 1)
+    // Category 0's scores stay editable, and going forward again lands on category 1 as it was left.
+    try score(&s, ids[1], category: 0, points: 5)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    try next(&s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
+    #expect(s.totals[ids[1]] == 5)
+}
+
+@Test func previousCategoryIsHostOnly() throws {
+    var (s, ids) = try writingGame(categories: three)
+    try collect(&s, ids, threeAnswers)
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    try next(&s)
+    let before = s
+    #expect(throws: GameError.notHost) { try send(.previousCategory(round: 1, category: 1), ids[1], &s) }
+    #expect(s == before)
+}
+
+@Test func previousCategoryGuardsPhaseRoundAndCategory() throws {
+    var (s, ids) = try writingGame(categories: three)
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 1), ids[0], &s) }
+    try collect(&s, ids, threeAnswers)
+    // Nothing before the first category.
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 0), ids[0], &s) }
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    try next(&s)
+    let before = s
+    #expect(throws: GameError.staleRound) { try send(.previousCategory(round: 2, category: 1), ids[0], &s) }
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 2), ids[0], &s) }
+    #expect(s == before)
+}
+
+@Test func repeatedPreviousCategoryNeverMovesTwice() throws {
+    var (s, ids) = try writingGame(categories: three)
+    try collect(&s, ids, threeAnswers)
+    for c in 0..<2 {
+        for id in ids { try score(&s, id, category: c, points: 10) }
+        try next(&s)
+    }
+    #expect(s.phase == .scoring(categoryIndex: 2, completed: false))
+    try send(.previousCategory(round: 1, category: 2), ids[0], &s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: true))
+    let before = s
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 2), ids[0], &s) }
+    #expect(s == before)
+}
+
+@Test func backFromResultsReopensTheLastCategoryForCorrections() throws {
+    var (s, ids) = try writingGame(categories: three)
+    try collect(&s, ids, threeAnswers)
+    for c in 0..<3 {
+        for id in ids { try score(&s, id, category: c, points: 10) }
+        try next(&s)
+    }
+    #expect(s.phase == .roundResults)
+    #expect(s.totals[ids[1]] == 30)
+    // Only "back from results" (the category count) is accepted there.
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 2), ids[0], &s) }
+    try previous(&s)
+    #expect(s.phase == .scoring(categoryIndex: 2, completed: true))
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 1, category: 3), ids[0], &s) }
+    try previous(&s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: true))
+    // A player corrects their score; the totals follow.
+    try score(&s, ids[1], category: 1, points: 5)
+    #expect(s.totals[ids[1]] == 25)
+    try next(&s)
+    try next(&s)
+    #expect(s.phase == .roundResults)
+    #expect(s.totals == [ids[0]: 30, ids[1]: 25, ids[2]: 30])
+}
+
+@Test func earlierRoundsAreFinalOnceTheNextRoundStarts() throws {
+    var (s, ids) = try writingGame()
+    try playBlankRound(&s, ids)
+    try send(.nextRound, ids[0], &s)
+    let before = s
+    #expect(throws: GameError.staleRound) { try send(.previousCategory(round: 1, category: 2), ids[0], &s) }
+    #expect(throws: GameError.wrongPhase) { try send(.previousCategory(round: 2, category: 2), ids[0], &s) }
+    #expect(s == before)
+}
+
+@Test func hostCanStillScoreForAwayPlayerAfterGoingBack() throws {
+    var (s, ids) = try writingGame(categories: three)
+    try collect(&s, ids, threeAnswers)
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    try next(&s)
+    #expect(GameEngine.setPresence(.away, for: ids[2], in: &s))
+    try previous(&s)
+    try score(&s, ids[0], category: 0, points: 0, for: ids[2])
+    #expect(s.currentRound?.scores[ids[2]]?[0] == 0)
+    #expect(throws: GameError.cannotScoreForOthers) { try score(&s, ids[0], category: 0, points: 5, for: ids[1]) }
+}
+
+@Test func lateAnswersAfterGoingBackLeaveCategoriesAlreadyReached() throws {
+    var (s, ids) = try writingGame(categories: ["Animal", "Fruta", "Lugar", "Cor"])
+    #expect(GameEngine.setPresence(.away, for: ids[2], in: &s))
+    try collect(&s, ids, [["Ana", "Uva", "Rio", "Azul"], ["Asno", "Abacate", "Roma", "Anil"], nil])
+    for c in 0..<2 {
+        try score(&s, ids[0], category: c, points: 10)
+        try score(&s, ids[1], category: c, points: 10)
+        try next(&s)
+    }
+    #expect(s.phase == .scoring(categoryIndex: 2, completed: false))
+    try previous(&s)
+    try previous(&s)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    #expect(GameEngine.setPresence(.present, for: ids[2], in: &s))
+    try send(.submitAnswers(round: 1, answers: ["Arara", "Amora", "Acre", "Amarelo"]), ids[2], &s)
+    // Categories 0 to 2 were reached already; only the last one is still unscored.
+    #expect(s.currentRound?.scores[ids[2]] == [0, 0, 0, nil])
+}
+
 @Test func leftPlayersSkippedAndZeroed() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [full, full, full])
