@@ -65,7 +65,7 @@ struct GameMenu: View {
             if let id = pickedForRemoval { confirmation = .remove(id) }
             pickedForRemoval = nil
         }) {
-            RemovePlayerSheet(players: removable, names: names) { id in
+            RemovePlayerSheet(players: removable, names: names, me: client.localPlayerID) { id in
                 pickedForRemoval = id
                 showsRemoveSheet = false
             }
@@ -182,6 +182,7 @@ struct GameMenu: View {
 private struct RemovePlayerSheet: View {
     let players: [Player]
     let names: [PlayerID: String]
+    let me: PlayerID
     let onPick: (PlayerID) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -192,7 +193,7 @@ private struct RemovePlayerSheet: View {
                 let name = names[player.id] ?? player.name
                 Button { onPick(player.id) } label: {
                     HStack(spacing: Theme.Spacing.m) {
-                        PlayerInitial(name: name, dimmed: player.presence == .away)
+                        PlayerInitial(name: name, dimmed: player.presence == .away, isYou: player.id == me)
                         VStack(alignment: .leading) {
                             Text(verbatim: name)
                                 .font(Theme.Typography.body.weight(.semibold))

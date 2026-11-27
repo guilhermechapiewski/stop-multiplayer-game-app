@@ -1,6 +1,10 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@%@" : {
+      "comment" : "Joins two styled pieces of text (a name and its badges). Not translated.",
+      "shouldTranslate" : false
+    },
     "%@ hasn’t sent answers. Continue anyway?" : {
       "comment" : "Host confirmation on the collecting screen, one player missing. %@ is the player's name.",
       "localizations" : {

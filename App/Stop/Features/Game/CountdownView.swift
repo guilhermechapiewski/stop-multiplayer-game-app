@@ -46,6 +46,7 @@ struct CountdownView: View {
             Text("Get ready to write!")
                 .font(Theme.Typography.headline)
                 .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
         }
         .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.45, bounce: 0.35),
                    value: secondsRemaining)

@@ -10,7 +10,13 @@ struct RoundResultsView: View {
     let round: Round
 
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.isPracticeGame) private var isPractice
     @State private var confirmingEnd = false
+
+    /// The host's way out: a practice game ends as a practice, not as a game for everyone.
+    nonisolated static func endTitle(isPractice: Bool) -> LocalizedStringResource {
+        isPractice ? "End practice" : "End game"
+    }
 
     private var names: [PlayerID: String] { state.displayNames }
     private var hostName: String { names[state.hostID] ?? "" }
@@ -47,12 +53,12 @@ struct RoundResultsView: View {
             .padding(.bottom, Theme.Spacing.l)
         }
         .safeAreaInset(edge: .bottom) { bottomBar }
-        .alert("End the game?", isPresented: $confirmingEnd) {
-            Button("End game", role: .destructive) { client.send(.endGame) }
+        .alert(isPractice ? "End the practice?" : "End the game?", isPresented: $confirmingEnd) {
+            Button(role: .destructive) { client.send(.endGame) } label: { Text(Self.endTitle(isPractice: isPractice)) }
                 .accessibilityIdentifier("confirmEndGameButton")
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Everyone sees the final standings.")
+            Text(isPractice ? "You’ll see the final standings." : "Everyone sees the final standings.")
         }
     }
 
@@ -105,7 +111,7 @@ struct RoundResultsView: View {
                 }
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("nextRoundButton")
-                Button("End game") { confirmingEnd = true }
+                Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
                     .font(Theme.Typography.headline)
                     .foregroundStyle(Theme.accent)
                     .frame(minHeight: 44)
@@ -168,35 +174,28 @@ struct StandingRow: View {
     var hasLeft = false
     var crowned = false
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     var body: some View {
-        HStack(spacing: Theme.Spacing.m) {
-            Text(entry.rank, format: .number)
-                .font(Theme.Typography.headline.monospacedDigit())
-                .foregroundStyle(entry.rank == 1 ? Theme.accent : .secondary)
-                .frame(minWidth: 28)
-            HStack(spacing: Theme.Spacing.xs) {
-                Text(verbatim: name)
-                    .font(Theme.Typography.body.weight(isMe ? .bold : .semibold))
-                if crowned {
-                    Image(systemName: "crown.fill")
-                        .font(.caption)
-                        .foregroundStyle(.yellow)
-                        .accessibilityHidden(true)
+        Group {
+            if dynamicTypeSize.isAccessibilitySize {
+                // Rank and points on one line, the name wrapping freely below.
+                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                    HStack {
+                        rank
+                        Spacer(minLength: Theme.Spacing.s)
+                        points
+                    }
+                    nameLine
                 }
-                if isMe {
-                    Text("(you)")
-                        .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
-                }
-                if hasLeft {
-                    Text("· left")
-                        .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+            } else {
+                HStack(spacing: Theme.Spacing.m) {
+                    rank
+                    nameLine
+                    Spacer(minLength: Theme.Spacing.s)
+                    points
                 }
             }
-            Spacer(minLength: Theme.Spacing.s)
-            Text("\(entry.points) pts")
-                .font(Theme.Typography.headline.monospacedDigit())
         }
         .padding(.horizontal, Theme.Spacing.s)
         .padding(.vertical, Theme.Spacing.s + 2)
@@ -204,8 +203,45 @@ struct StandingRow: View {
         .padding(.horizontal, Theme.Spacing.s)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Rank \(entry.rank), \(name)"))
-        .accessibilityValue(Text("\(entry.points) points"))
+        .accessibilityValue(Text(verbatim: AccessibilityText.score(entry.points)))
     }
+
+    private var rank: some View {
+        Text(entry.rank, format: .number)
+            .font(Theme.Typography.headline.monospacedDigit())
+            .foregroundStyle(entry.rank == 1 ? Theme.accent : .secondary)
+            .frame(minWidth: 28, alignment: .leading)
+    }
+
+    private var points: some View {
+        Text("\(entry.points) pts")
+            .font(Theme.Typography.headline.monospacedDigit())
+    }
+
+    /// "Gui 👑 (you) · left" as one Text, so it wraps as a sentence instead of splitting into columns.
+    private var nameLine: some View {
+        var parts = [Text(verbatim: name).font(Theme.Typography.body.weight(isMe ? .bold : .semibold))]
+        if crowned {
+            parts.append(Text(verbatim: " "))
+            parts.append(Text(Image(systemName: "crown.fill")).font(.caption).foregroundStyle(.yellow))
+        }
+        if isMe {
+            parts.append(Text(verbatim: " "))
+            parts.append(Text("(you)").font(Theme.Typography.caption).foregroundStyle(.secondary))
+        }
+        if hasLeft {
+            parts.append(Text(verbatim: " "))
+            parts.append(Text("· left").font(Theme.Typography.caption).foregroundStyle(.secondary))
+        }
+        return parts.dropFirst().reduce(parts[0]) { Text(TextJoin.pair($0, $1)) }
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Joins two styled `Text`s through interpolation (`Text + Text` is deprecated). The "%@%@" key is marked
+/// not-for-translation in the string catalog.
+private enum TextJoin {
+    static func pair(_ first: Text, _ second: Text) -> LocalizedStringKey { "\(first)\(second)" }
 }
 
 @MainActor private func previewResultsClient(isHost: Bool) -> PreviewGameClient {

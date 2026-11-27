@@ -6,6 +6,7 @@ struct RootView: View {
     let model: AppModel
 
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
         content
@@ -16,6 +17,18 @@ struct RootView: View {
             } message: { reason in
                 Text(EndReasonCopy(reason).message)
             }
+            // The Settings toggle (and `-uiTesting`, which always mutes) drives the sound effects. The unit
+            // tests' host app never starts audio.
+            .onChange(of: model.soundsEnabled && !StopApp.isHostingUnitTests, initial: true) { _, enabled in
+                SoundEngine.shared.enabled = enabled
+            }
+            // Warm the audio engine up on entering a game, not on the first frame; stop it in the background.
+            .onChange(of: isInGame, initial: true) { _, inGame in
+                if inGame { SoundEngine.shared.warmUp() }
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .background { SoundEngine.shared.pause() }
+            }
     }
 
     private var endNoticeTitle: Text {
@@ -24,6 +37,10 @@ struct RootView: View {
 
     private var showsEndNotice: Binding<Bool> {
         Binding(get: { model.endNotice != nil }, set: { if !$0 { model.dismissEndNotice() } })
+    }
+
+    private var isInGame: Bool {
+        if case .game = model.route { true } else { false }
     }
 
     @ViewBuilder private var content: some View {

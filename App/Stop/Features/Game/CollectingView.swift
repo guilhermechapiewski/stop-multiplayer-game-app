@@ -92,7 +92,7 @@ struct CollectingView: View {
         let name = names[player.id] ?? player.name
         let away = player.presence == .away
         return HStack(spacing: Theme.Spacing.m) {
-            PlayerInitial(name: name, dimmed: away, size: 32)
+            PlayerInitial(name: name, dimmed: away, size: 32, isYou: player.id == client.localPlayerID)
             Text(verbatim: name)
                 .font(Theme.Typography.body.weight(.semibold))
             Spacer(minLength: Theme.Spacing.s)

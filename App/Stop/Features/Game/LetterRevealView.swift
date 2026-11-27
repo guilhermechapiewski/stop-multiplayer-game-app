@@ -88,7 +88,7 @@ enum LetterAnnouncement {
         let key = Key(gameID: gameID, number: round.number, letter: round.letter)
         guard announced != key else { return false }
         announced = key
-        AccessibilityNotification.Announcement(String(localized: "Letter \(round.letter)")).post()
+        AccessibilityNotification.Announcement(AccessibilityText.letter(round.letter)).post()
         return true
     }
 }
