@@ -1,0 +1,6 @@
+title: Stop
+description: Stop, the classic word game, for iPhones in the same room. No internet, no accounts, no ads.
+# Developer docs live next to the site; keep them off the public pages.
+exclude:
+  - superpowers
+  - device-test-checklist.md
