@@ -21,9 +21,9 @@ work, and two or more devices help for multiplayer changes. See "Building" in th
 
 ## Never commit personal data
 
-This is a public repository. Do not commit, paste into issues, or include in test fixtures your Team ID,
-certificates, provisioning profiles, real names, or network details (IP addresses, Wi-Fi names). Signing
-settings belong in the git-ignored `Config/Local.xcconfig`.
+This is a public repository. Do not commit, paste into issues, or include in test fixtures certificates,
+provisioning profiles, real names, or network details (IP addresses, Wi-Fi names). If you sign with your own
+team to run on a device, don't commit the team or bundle identifier changes Xcode makes to the project file.
 
 ## Workflow
 

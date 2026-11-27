@@ -22,5 +22,3 @@ Package.resolved
 .claude/
 .superpowers/
 
-# Owner-specific signing (see Config/Local.example.xcconfig)
-Config/Local.xcconfig

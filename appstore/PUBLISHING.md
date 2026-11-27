@@ -11,20 +11,12 @@ Every push to `main` updates them. Check that both open:
    - https://guilhermechapiewski.github.io/stop-multiplayer-game-app/
    - https://guilhermechapiewski.github.io/stop-multiplayer-game-app/privacy/
 
-## Step 2. Signing (once per Mac)
+## Step 2. Signing
 
-Set the team in the git-ignored local file, **not** in Xcode's Signing & Capabilities pane:
-Xcode writes that choice into `project.pbxproj`, which is public.
-
-1. In Terminal, from the repository folder:
-   ```
-   cp Config/Local.example.xcconfig Config/Local.xcconfig
-   ```
-2. Open `Config/Local.xcconfig` and replace `YOUR_TEAM_ID` with your team ID
-   (developer.apple.com → **Account** → **Membership details** → Team ID).
-3. Open `Stop.xcodeproj` in Xcode → target **Stop** → **Signing & Capabilities**: it should show your
-   team, with **Automatically manage signing** on. If `git status` ever shows `project.pbxproj` changed with a
-   `DEVELOPMENT_TEAM` line, don't commit it (the `tools/check-signing.sh` build phase also stops the build).
+The team (`2JNHX2X73J`) is set on the targets in `Stop.xcodeproj`, like Airplane Games, so any Mac signed in to
+your Apple account builds with no setup. Open `Stop.xcodeproj` → target **Stop** → **Signing & Capabilities**:
+it should show your team, with **Automatically manage signing** on. (Xcode → **Settings** → **Accounts** must
+have your Apple account.)
 
 ## Step 3. Register the bundle ID and create the app record
 

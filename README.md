@@ -53,11 +53,10 @@ contribute improvements.
 2. Open `Stop.xcodeproj` and run the `Stop` scheme on a simulator. No signing setup is needed; use
    Practice with bots or mock mode (below) to play without a second device.
 
-To run it on your own iPhone, copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig` (git-ignored)
-and set your `DEVELOPMENT_TEAM` (and a bundle identifier of your own if you like). Do this instead of picking a
-team in Xcode's Signing & Capabilities, which writes the team into the public project file; the
-`tools/check-signing.sh` build phase stops the build if it finds one there. Shared build settings (bundle ID,
-version, deployment target, Swift settings) live in `Config/Project.xcconfig`.
+To run it on an iPhone, Xcode signs with the maintainer's team, which is set on the targets. Building under your
+own team? Pick it in **Signing & Capabilities** and use a bundle identifier of your own, but don't commit those
+changes. Shared build settings (bundle ID, version, deployment target, Swift settings) live in
+`Config/Project.xcconfig`.
 
 ## Testing
 

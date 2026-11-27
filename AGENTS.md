@@ -6,8 +6,8 @@ for the overview and `CONTRIBUTING.md` for the full ground rules; this file is t
 
 ## Hard rules
 
-- **This repository is public.** Never commit personal data, a Team ID, certificates or provisioning profiles.
-  Signing settings go in the git-ignored `Config/Local.xcconfig`.
+- **This repository is public.** Never commit personal data, certificates or provisioning profiles. The
+  maintainer's signing team is set on the targets in `Stop.xcodeproj` on purpose; leave it as is.
 - **Apple frameworks only.** No Swift packages, CocoaPods or SDKs; no analytics, ads, tracking or crash
   uploaders; no traffic beyond the local network.
 - **Swift 6, complete strict concurrency, no warnings.** No `@unchecked Sendable` without a comment proving it

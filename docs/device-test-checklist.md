@@ -9,7 +9,7 @@ names. In public notes, call the phones "host", "player 1", "player 2" and so on
 
 ## Setup
 
-- [ ] The same build installed on every phone (TestFlight, or Xcode with your `Config/Local.xcconfig`).
+- [ ] The same build installed on every phone (TestFlight, or run from Xcode).
 - [ ] Each phone has a different display name; two of them share a name at least once (for example "Ana" and
       "Ana") to check the "Ana 2" suffix.
 - [ ] Start clean on each phone the first time: delete the app and reinstall, so the Local Network prompt
