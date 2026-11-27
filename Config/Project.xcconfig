@@ -1,0 +1,21 @@
+// Project-wide settings shared by every target and configuration (both project-level configurations use
+// this file as their base configuration, so targets inherit it).
+//
+// Signing is owner-specific, so it lives in the git-ignored Config/Local.xcconfig (copy
+// Config/Local.example.xcconfig). Set the team there, not in Xcode's Signing & Capabilities
+// pane: Xcode writes that choice into project.pbxproj, which is public. A build phase
+// (tools/check-signing.sh) fails the build if that happens.
+
+PRODUCT_BUNDLE_IDENTIFIER = com.gchapiewski.stopapp
+MARKETING_VERSION = 1.0
+CURRENT_PROJECT_VERSION = 1
+
+IPHONEOS_DEPLOYMENT_TARGET = 27.0
+TARGETED_DEVICE_FAMILY = 1
+SWIFT_VERSION = 6
+SWIFT_STRICT_CONCURRENCY = complete
+
+CODE_SIGN_STYLE = Automatic
+DEVELOPMENT_TEAM =
+
+#include? "Local.xcconfig"

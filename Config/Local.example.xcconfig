@@ -1,0 +1,8 @@
+// Copy to Config/Local.xcconfig (git-ignored) and fill in your own values.
+// Needed only to run on a device or archive for the App Store; the simulator needs nothing.
+
+// Your Apple Developer team ID (developer.apple.com → Membership details).
+DEVELOPMENT_TEAM = YOUR_TEAM_ID
+
+// Building under your own team? Bundle identifiers are unique across Apple, so also change
+// PRODUCT_BUNDLE_IDENTIFIER in the target's build settings (don't commit that change).

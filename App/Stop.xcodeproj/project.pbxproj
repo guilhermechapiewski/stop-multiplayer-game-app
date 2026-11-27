@@ -1,0 +1,559 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5700000000000000000B0001 /* StopCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0001 /* StopCore */; };
+		5700000000000000000B0002 /* StopNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0002 /* StopNetworking */; };
+		5700000000000000000B0003 /* StopSession in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0003 /* StopSession */; };
+		5700000000000000000B0004 /* StopSimulation in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0004 /* StopSimulation */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5700000000000000000C0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5700000000000000000A0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5700000000000000000E0001;
+			remoteInfo = Stop;
+		};
+		5700000000000000000C0002 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5700000000000000000A0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5700000000000000000E0001;
+			remoteInfo = Stop;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5700000000000000000F0001 /* Stop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Stop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5700000000000000000F0002 /* StopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5700000000000000000F0003 /* StopUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StopUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5700000000000000000F0004 /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
+		5700000000000000000F0005 /* Local.example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.example.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		570000000000000000070001 /* Exceptions for "Stop" folder in "Stop" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5700000000000000000E0001 /* Stop */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		570000000000000000020001 /* Stop */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				570000000000000000070001 /* Exceptions for "Stop" folder in "Stop" target */,
+			);
+			path = Stop;
+			sourceTree = "<group>";
+		};
+		570000000000000000020002 /* StopTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StopTests;
+			sourceTree = "<group>";
+		};
+		570000000000000000020003 /* StopUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StopUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		570000000000000000010101 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5700000000000000000B0001 /* StopCore in Frameworks */,
+				5700000000000000000B0002 /* StopNetworking in Frameworks */,
+				5700000000000000000B0003 /* StopSession in Frameworks */,
+				5700000000000000000B0004 /* StopSimulation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010201 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010301 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		570000000000000000060001 = {
+			isa = PBXGroup;
+			children = (
+				570000000000000000060003 /* Config */,
+				570000000000000000020001 /* Stop */,
+				570000000000000000020002 /* StopTests */,
+				570000000000000000020003 /* StopUITests */,
+				570000000000000000060002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		570000000000000000060002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5700000000000000000F0001 /* Stop.app */,
+				5700000000000000000F0002 /* StopTests.xctest */,
+				5700000000000000000F0003 /* StopUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		570000000000000000060003 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				5700000000000000000F0004 /* Project.xcconfig */,
+				5700000000000000000F0005 /* Local.example.xcconfig */,
+			);
+			name = Config;
+			path = ../Config;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5700000000000000000E0001 /* Stop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 570000000000000000050002 /* Build configuration list for PBXNativeTarget "Stop" */;
+			buildPhases = (
+				570000000000000000010104 /* Check signing */,
+				570000000000000000010102 /* Sources */,
+				570000000000000000010101 /* Frameworks */,
+				570000000000000000010103 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				570000000000000000020001 /* Stop */,
+			);
+			name = Stop;
+			packageProductDependencies = (
+				5700000000000000000D0001 /* StopCore */,
+				5700000000000000000D0002 /* StopNetworking */,
+				5700000000000000000D0003 /* StopSession */,
+				5700000000000000000D0004 /* StopSimulation */,
+			);
+			productName = Stop;
+			productReference = 5700000000000000000F0001 /* Stop.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5700000000000000000E0002 /* StopTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 570000000000000000050003 /* Build configuration list for PBXNativeTarget "StopTests" */;
+			buildPhases = (
+				570000000000000000010202 /* Sources */,
+				570000000000000000010201 /* Frameworks */,
+				570000000000000000010203 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				570000000000000000030001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				570000000000000000020002 /* StopTests */,
+			);
+			name = StopTests;
+			productName = StopTests;
+			productReference = 5700000000000000000F0002 /* StopTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5700000000000000000E0003 /* StopUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 570000000000000000050004 /* Build configuration list for PBXNativeTarget "StopUITests" */;
+			buildPhases = (
+				570000000000000000010302 /* Sources */,
+				570000000000000000010301 /* Frameworks */,
+				570000000000000000010303 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				570000000000000000030002 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				570000000000000000020003 /* StopUITests */,
+			);
+			name = StopUITests;
+			productName = StopUITests;
+			productReference = 5700000000000000000F0003 /* StopUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5700000000000000000A0001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					5700000000000000000E0001 = {
+						CreatedOnToolsVersion = 27.2;
+					};
+					5700000000000000000E0002 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = 5700000000000000000E0001;
+					};
+					5700000000000000000E0003 = {
+						CreatedOnToolsVersion = 27.2;
+						TestTargetID = 5700000000000000000E0001;
+					};
+				};
+			};
+			buildConfigurationList = 570000000000000000050001 /* Build configuration list for PBXProject "Stop" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				"pt-BR",
+				Base,
+			);
+			mainGroup = 570000000000000000060001;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				570000000000000000040001 /* XCLocalSwiftPackageReference "../Packages/StopKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 570000000000000000060002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5700000000000000000E0001 /* Stop */,
+				5700000000000000000E0002 /* StopTests */,
+				5700000000000000000E0003 /* StopUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		570000000000000000010103 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010203 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010303 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		570000000000000000010104 /* Check signing */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/../tools/check-signing.sh",
+				"$(PROJECT_FILE_PATH)/project.pbxproj",
+			);
+			name = "Check signing";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "exec /bin/sh \"$SRCROOT/../tools/check-signing.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		570000000000000000010102 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010202 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		570000000000000000010302 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		570000000000000000030001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5700000000000000000E0001 /* Stop */;
+			targetProxy = 5700000000000000000C0001 /* PBXContainerItemProxy */;
+		};
+		570000000000000000030002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5700000000000000000E0001 /* Stop */;
+			targetProxy = 5700000000000000000C0002 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		570000000000000000080001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5700000000000000000F0004 /* Project.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		570000000000000000080002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5700000000000000000F0004 /* Project.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		570000000000000000080011 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stop/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		570000000000000000080012 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Stop/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
+		570000000000000000080021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Stop.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Stop";
+			};
+			name = Debug;
+		};
+		570000000000000000080022 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Stop.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Stop";
+			};
+			name = Release;
+		};
+		570000000000000000080031 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_TARGET_NAME = Stop;
+			};
+			name = Debug;
+		};
+		570000000000000000080032 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(inherited).uitests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				TEST_TARGET_NAME = Stop;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		570000000000000000050001 /* Build configuration list for PBXProject "Stop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				570000000000000000080001 /* Debug */,
+				570000000000000000080002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		570000000000000000050002 /* Build configuration list for PBXNativeTarget "Stop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				570000000000000000080011 /* Debug */,
+				570000000000000000080012 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		570000000000000000050003 /* Build configuration list for PBXNativeTarget "StopTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				570000000000000000080021 /* Debug */,
+				570000000000000000080022 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		570000000000000000050004 /* Build configuration list for PBXNativeTarget "StopUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				570000000000000000080031 /* Debug */,
+				570000000000000000080032 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		570000000000000000040001 /* XCLocalSwiftPackageReference "../Packages/StopKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/StopKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5700000000000000000D0001 /* StopCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StopCore;
+		};
+		5700000000000000000D0002 /* StopNetworking */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StopNetworking;
+		};
+		5700000000000000000D0003 /* StopSession */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StopSession;
+		};
+		5700000000000000000D0004 /* StopSimulation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StopSimulation;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 5700000000000000000A0001 /* Project object */;
+}

@@ -1,0 +1,336 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "About": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sobre"
+          }
+        }
+      }
+    },
+    "Back": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voltar"
+          }
+        }
+      }
+    },
+    "Coming soon.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Em breve."
+          }
+        }
+      }
+    },
+    "Continue": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Continuar"
+          }
+        }
+      }
+    },
+    "Done": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OK"
+          }
+        }
+      }
+    },
+    "Find games hosted by friends on the same network.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Encontre jogos criados por amigos na mesma rede."
+          }
+        }
+      }
+    },
+    "Free and open source. No ads, no accounts, no tracking.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gratuito e de código aberto. Sem anúncios, sem contas, sem rastreamento."
+          }
+        }
+      }
+    },
+    "Friends see this name when you play together.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seus amigos veem esse nome quando vocês jogam juntos."
+          }
+        }
+      }
+    },
+    "Game": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jogo"
+          }
+        }
+      }
+    },
+    "Hi, %@! Ready to play?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oi, %@! Bora jogar?"
+          }
+        }
+      }
+    },
+    "Host a game": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar um jogo"
+          }
+        }
+      }
+    },
+    "Join a game": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entrar em um jogo"
+          }
+        }
+      }
+    },
+    "Keep the app open. You'll be back in the game as soon as the host's phone is nearby.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mantenha o app aberto. Você volta para o jogo assim que o celular de quem criou o jogo estiver por perto."
+          }
+        }
+      }
+    },
+    "Leave game": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sair do jogo"
+          }
+        }
+      }
+    },
+    "Leave this game": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sair deste jogo"
+          }
+        }
+      }
+    },
+    "Opens a new issue on GitHub.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre um novo relato no GitHub."
+          }
+        }
+      }
+    },
+    "Opens the project on GitHub.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abre o projeto no GitHub."
+          }
+        }
+      }
+    },
+    "Play on your own against computer players.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jogue contra jogadores controlados pelo computador."
+          }
+        }
+      }
+    },
+    "Practice with bots": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Treinar com robôs"
+          }
+        }
+      }
+    },
+    "Privacy policy": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Política de privacidade"
+          }
+        }
+      }
+    },
+    "Reconnecting to %@'s game…": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconectando ao jogo de %@…"
+          }
+        }
+      }
+    },
+    "Report a problem": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Relatar um problema"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajustes"
+          }
+        }
+      }
+    },
+    "Sound effects never play while your phone is on silent.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Os efeitos sonoros nunca tocam quando o celular está no silencioso."
+          }
+        }
+      }
+    },
+    "Sounds": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sons"
+          }
+        }
+      }
+    },
+    "Source code": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Código-fonte"
+          }
+        }
+      }
+    },
+    "Start a game on this phone that friends nearby can join.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crie um jogo neste celular para os amigos por perto entrarem."
+          }
+        }
+      }
+    },
+    "Stops reconnecting and goes back to the start screen.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Para de reconectar e volta para a tela inicial."
+          }
+        }
+      }
+    },
+    "The classic word game, played with friends nearby.": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O clássico jogo de palavras, com os amigos por perto."
+          }
+        }
+      }
+    },
+    "Version %@": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versão %@"
+          }
+        }
+      }
+    },
+    "Welcome to Stop!": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Boas-vindas ao Stop!"
+          }
+        }
+      }
+    },
+    "What's your name?": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Qual é o seu nome?"
+          }
+        }
+      }
+    },
+    "Your name": {
+      "localizations": {
+        "pt-BR": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Seu nome"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}
