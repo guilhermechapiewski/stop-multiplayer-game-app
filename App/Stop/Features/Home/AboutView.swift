@@ -26,7 +26,7 @@ struct AboutView: View {
                 VStack(spacing: Theme.Spacing.m) {
                     StopSign(size: 96)
                     VStack(spacing: Theme.Spacing.xs) {
-                        Text(verbatim: "Stop!")
+                        Text(verbatim: AppInfo.name)
                             .font(Theme.Typography.title)
                             .accessibilityAddTraits(.isHeader)
                         Text("Version \(AppVersion.display)")

@@ -14,7 +14,7 @@ struct NameEntryView: View {
         VStack(spacing: Theme.Spacing.xl) {
             VStack(spacing: Theme.Spacing.m) {
                 StopSign(size: 112)
-                Text("Welcome to Stop!")
+                Text("Welcome to \(AppInfo.name)")
                     .font(Theme.Typography.display)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
@@ -25,7 +25,7 @@ struct NameEntryView: View {
             }
 
             VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-                Text("What's your name?")
+                Text("What’s your name?")
                     .font(Theme.Typography.headline)
                     .accessibilityHidden(true)
                 TextField("Your name", text: $name)

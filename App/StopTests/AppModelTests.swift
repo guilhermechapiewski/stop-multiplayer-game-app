@@ -98,14 +98,29 @@ struct AppModelTests {
         #expect(!model.soundsEnabled)
     }
 
-    @Test func soundsToggleIsPersisted() async {
+    @Test func soundsToggleAppliesAtOnceAndIsPersisted() async throws {
         _ = await saveProfile()
         let model = makeModel()
         await model.bootstrap()
         #expect(model.soundsEnabled)
-        await model.setSoundsEnabled(false)
+        model.setSoundsEnabled(false)
         #expect(!model.soundsEnabled)
-        #expect(await store.loadProfile()?.soundsEnabled == false)
+        try await waitUntil { await store.loadProfile()?.soundsEnabled == false }
+    }
+
+    @Test func overlappingSavesKeepOnePlayerIDInOrder() async throws {
+        let model = makeModel()
+        await model.bootstrap()
+        async let first: Void = model.saveName("Ana")
+        async let second: Void = model.saveName("Ana")
+        _ = await (first, second)
+        model.setSoundsEnabled(false)
+        await model.saveName("Bia")
+
+        let saved = try #require(await store.loadProfile())
+        #expect(saved == model.profile)
+        #expect(saved.name == "Bia")
+        #expect(!saved.soundsEnabled)
     }
 
     // MARK: Restoring games
@@ -183,20 +198,25 @@ struct AppModelTests {
         #expect(model.client == nil)
     }
 
-    @Test func cancelRejoinStopsSessionAndForgetsGame() async throws {
+    @Test func cancelRejoinAbandonsSessionAndForgetsGame() async throws {
         _ = await saveProfile()
         let ref = ActiveGameRef(gameID: UUID(), role: .client, hostName: "Ana")
         await store.saveActiveGame(ref)
+        await store.saveDraft(["Anta"], gameID: ref.gameID, round: 1)
         let model = makeModel()
         await model.bootstrap()
         let session = try #require(sessions.clients.first?.session)
 
         model.cancelRejoin()
 
-        #expect(session.stopped)
+        #expect(session.abandoned)
         #expect(model.route == .home)
         #expect(model.client == nil)
-        try await waitUntil { await store.loadActiveGame() == nil }
+        try await waitUntil {
+            let saved = await store.loadActiveGame()
+            let draft = await store.loadDraft(gameID: ref.gameID, round: 1)
+            return saved == nil && draft == nil
+        }
     }
 
     // MARK: Playing
@@ -278,6 +298,122 @@ struct AppModelTests {
         #expect(session.resumeCount == 1)
     }
 
+    @Test func returningFromInactiveDoesNotResume() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let session = try #require(sessions.clients.first?.session)
+
+        model.scenePhaseChanged(.inactive)
+        model.scenePhaseChanged(.active)
+
+        #expect(session.suspendCount == 0)
+        #expect(session.resumeCount == 0)
+    }
+
+    @Test func leavingKeepsSessionAliveUntilItEnds() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let made = try #require(sessions.clients.first)
+        let gameID = UUID()
+        made.session.state = try GameEngine.newGame(
+            gameID: gameID, hostID: UUID(), hostName: "Ana",
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
+        await store.saveActiveGame(ActiveGameRef(gameID: gameID, role: .client, hostName: "Ana"))
+        await store.saveDraft(["Anta"], gameID: gameID, round: 1)
+        weak let weakSession = made.session
+        sessions.forgetClients()
+
+        model.leaveGame()
+
+        #expect(model.route == .home)
+        let session = try #require(weakSession)
+        #expect(session.leftGame)
+        #expect(!session.abandoned)
+
+        session.hostStatus = .ended(.leftGame)  // the host acked; the session said goodbye
+
+        try await waitUntil { session.abandoned }
+        try await waitUntil {
+            let ref = await store.loadActiveGame()
+            let draft = await store.loadDraft(gameID: gameID, round: 1)
+            return ref == nil && draft == nil
+        }
+    }
+
+    @Test func sessionEndingMidGameRoutesHome() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let session = try #require(sessions.clients.first?.session)
+        session.state = try GameEngine.newGame(
+            gameID: UUID(), hostID: UUID(), hostName: "Ana",
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
+
+        session.hostStatus = .ended(.removed)
+
+        try await waitUntil { model.route == .home }
+        #expect(model.client == nil)
+        #expect(session.stopped)
+    }
+
+    @Test func gameOverStaysOnScreen() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let session = try #require(sessions.clients.first?.session)
+        var state = try GameEngine.newGame(
+            gameID: UUID(), hostID: UUID(), hostName: "Ana",
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
+        state.phase = .gameOver
+        session.state = state
+
+        session.hostStatus = .ended(.gameOver)
+        for _ in 0..<50 { await Task.yield() }  // give the watcher a chance to (wrongly) react
+
+        #expect(model.route == .game)
+        #expect(model.client === session)
+    }
+
+    @Test(arguments: [true, false])
+    func unusableSavedHostGameIsDiscarded(gameOver: Bool) async throws {
+        let profile = await saveProfile()
+        var game = try GameEngine.newGame(
+            gameID: UUID(), hostID: gameOver ? profile.playerID : UUID(), hostName: profile.name,
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
+        if gameOver { game.phase = .gameOver }
+        await store.saveHostGame(game)
+        await store.saveActiveGame(ActiveGameRef(gameID: game.gameID, role: .host, hostName: profile.name))
+
+        let model = makeModel()
+        await model.bootstrap()
+
+        #expect(model.route == .home)
+        #expect(model.client == nil)
+        #expect(await store.loadActiveGame() == nil)
+        #expect(await store.loadHostGame() == nil)
+    }
+
+    @Test func wipingTheStoreDeletesOnlyItsFolder() throws {
+        let root = URL.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: root) }
+        let folder = root.appending(path: "Stop", directoryHint: .isDirectory)
+        let sibling = root.appending(path: "Other.txt")
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        try Data("keep".utf8).write(to: sibling)
+        try Data("old".utf8).write(to: folder.appending(path: "profile.json"))
+
+        _ = StoreLocation.makeStore(wipe: true, directory: folder)
+
+        #expect(FileManager.default.fileExists(atPath: sibling.path))
+        #expect(!FileManager.default.fileExists(atPath: folder.appending(path: "profile.json").path))
+    }
+
     @Test func mockGameArgumentStartsHostWithThreeBots() async throws {
         let model = makeModel(arguments: ["-mockGame", "-playerName", "Gui"])
         await model.bootstrap()
@@ -306,18 +442,86 @@ struct AppModelTests {
         #expect(model.route == .home)
     }
 
+    // MARK: Live session wiring
+
+    @Test func gameLanguageFollowsLocale() {
+        #expect(AppModel.language(for: Locale(identifier: "pt_BR")) == .ptBR)
+        #expect(AppModel.language(for: Locale(identifier: "pt_PT")) == .ptBR)
+        #expect(AppModel.language(for: Locale(identifier: "en_US")) == .en)
+        #expect(AppModel.language(for: Locale(identifier: "fr_FR")) == .en)
+    }
+
+    @Test func clientTargetMapsToSessionTarget() async throws {
+        let id = UUID()
+        guard case .rejoin(let gameID) = ClientTarget.rejoin(gameID: id).sessionTarget else {
+            Issue.record("expected .rejoin")
+            return
+        }
+        #expect(gameID == id)
+        let game = try await discoverGame()
+        guard case .discovered(let mapped) = ClientTarget.discovered(game).sessionTarget else {
+            Issue.record("expected .discovered")
+            return
+        }
+        #expect(mapped == game)
+    }
+
+    @Test func liveFactoryMakesClientSession() {
+        let profile = Profile(playerID: UUID(), name: "Gui", soundsEnabled: true)
+        let session = SessionFactories.live.makeClient(profile, .rejoin(gameID: UUID()), network, store,
+                                                       ContinuousClock())
+        #expect(session is ClientSession)
+        #expect(session.localPlayerID == profile.playerID)
+    }
+
+    @Test func joiningRealHostThenLeaving() async throws {
+        _ = await saveProfile("Bia")
+        let hostID = UUID()
+        let state = try GameEngine.newGame(
+            gameID: UUID(), hostID: hostID, hostName: "Ana",
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: false), language: .en)
+        let host = HostSession(state: state, factory: network, store: InMemoryGameStore(), clock: ContinuousClock())
+        host.start()
+        defer { host.shutdown() }
+        let model = AppModel(store: store, factory: network, launchArguments: [], sessions: .live)
+        await model.bootstrap()
+
+        model.join(try await discoverGame(hostName: "Ana"))
+
+        try await waitUntil { model.client?.state?.players.map(\.name) == ["Ana", "Bia"] }
+        let playerID = try #require(model.profile?.playerID)
+
+        model.leaveGame()
+
+        #expect(model.route == .home)
+        try await waitUntil { host.localClient.state?.player(playerID)?.presence == .left }
+    }
+
     // MARK: Helpers
 
-    /// A real advertised game on the in-memory network, found by browsing.
-    private func discoverGame() async throws -> DiscoveredGame {
-        let listener = network.makeListener()
-        let ad = Advertisement(gameID: UUID(), hostName: "Ana", playerCount: 1, protocolVersion: 1, joinable: true)
-        _ = listener.start(advertising: ad)
+    /// A real advertised game on the in-memory network, found by browsing (failing after 3 s). With a
+    /// `hostName`, finds that host's game (already advertised) instead of advertising a new one.
+    private func discoverGame(hostName: String? = nil) async throws -> DiscoveredGame {
+        if hostName == nil {
+            let listener = network.makeListener()
+            let ad = Advertisement(gameID: UUID(), hostName: "Ana", playerCount: 1, protocolVersion: 1, joinable: true)
+            _ = listener.start(advertising: ad)
+        }
         let browser = network.makeBrowser()
         defer { browser.stop() }
-        for await event in browser.start() {
-            if case .results(let games) = event, let game = games.first { return game }
+        let events = browser.start()
+        let deadline = Task {
+            try? await Task.sleep(for: .seconds(3))
+            browser.stop()
         }
+        defer { deadline.cancel() }
+        for await event in events {
+            if case .results(let games) = event,
+               let game = games.first(where: { hostName == nil || $0.advertisement.hostName == hostName }) {
+                return game
+            }
+        }
+        Issue.record("no game discovered within 3 s")
         throw CancellationError()
     }
 }
@@ -350,6 +554,8 @@ final class FakeRemoteSession: RemoteGameSession {
 
     private(set) var started = false
     private(set) var stopped = false
+    private(set) var abandoned = false
+    /// `leave()` was called. Like `ClientSession`, the fake doesn't end at once; tests set `hostStatus`.
     private(set) var leftGame = false
     private(set) var suspendCount = 0
     private(set) var resumeCount = 0
@@ -364,6 +570,12 @@ final class FakeRemoteSession: RemoteGameSession {
     func suspend() { suspendCount += 1 }
     func resume() { resumeCount += 1 }
     func stop() { stopped = true }
+    func abandon() {
+        abandoned = true
+        stopped = true
+        if case .ended = hostStatus { return }
+        hostStatus = .ended(.leftGame)
+    }
 }
 
 @MainActor
@@ -380,6 +592,9 @@ final class SessionSpy {
     }
 
     private(set) var clients: [MadeClient] = []
+
+    /// Drops the spy's references, so a test can check who else keeps a session alive.
+    func forgetClients() { clients = [] }
     private(set) var mockLaunches: [MockLaunch] = []
 
     var factories: SessionFactories {

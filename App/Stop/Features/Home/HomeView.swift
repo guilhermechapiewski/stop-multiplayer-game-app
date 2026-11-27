@@ -31,7 +31,7 @@ struct HomeView: View {
     private var header: some View {
         VStack(spacing: Theme.Spacing.m) {
             StopSign(size: 132)
-            Text(verbatim: "Stop!")
+            Text(verbatim: AppInfo.name)
                 .font(Theme.Typography.display)
                 .accessibilityAddTraits(.isHeader)
             if let name = model.profile?.name {

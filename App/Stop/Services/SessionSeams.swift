@@ -4,14 +4,10 @@ import StopCore
 import StopNetworking
 import StopSession
 
-// App-side seams for the session types that land in StopKit separately: `ClientSession` (Task 11) and
-// `MockGameLauncher` / `BotPlayer` (Task 12). `AppModel` only talks to these, so tests can stub them, and
-// wiring the real types is a change to `SessionFactories.live` alone:
+// App-side seams for the session types: `ClientSession` and `MockGameLauncher` / `BotPlayer` (Task 12).
+// `AppModel` only talks to these, so tests can stub them. When `MockGameLauncher` lands, wire it in
+// `SessionFactories.live`:
 //
-//     extension ClientSession: RemoteGameSession {}
-//     makeClient: { profile, target, factory, store, clock in
-//         ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
-//     }
 //     launchMockGame: { profile, bots, settings, language, clock in
 //         let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
 //                                            language: language, clock: clock)
@@ -24,13 +20,24 @@ import StopSession
     func suspend()
     func resume()
     func stop()
+    /// Stops and forgets the game (active-game reference and drafts) without telling the host.
+    func abandon()
 }
 
-/// Mirrors `ClientSession.Target`.
+extension ClientSession: RemoteGameSession {}
+
+/// Mirrors `ClientSession.Target` (which isn't `Equatable`, so tests can't compare it).
 enum ClientTarget: Equatable, Sendable {
     case discovered(DiscoveredGame)
     /// Browse until a game with this ID appears.
     case rejoin(gameID: UUID)
+
+    var sessionTarget: ClientSession.Target {
+        switch self {
+        case .discovered(let game): .discovered(game)
+        case .rejoin(let gameID): .rejoin(gameID: gameID)
+        }
+    }
 }
 
 /// A running mock game (`-mockGame`): the host plus whatever must stay alive with it (bots, their network).
@@ -54,10 +61,11 @@ struct SessionFactories {
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
 
-    /// Production wiring. Until `ClientSession` and `MockGameLauncher` exist in StopKit, joining yields a
-    /// session that ends at once and mock mode starts a host without bots.
+    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode starts a host without bots.
     static let live = SessionFactories(
-        makeClient: { profile, _, _, _, _ in UnavailableClientSession(playerID: profile.playerID) },
+        makeClient: { profile, target, factory, store, clock in
+            ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
+        },
         launchMockGame: { profile, bots, settings, language, clock in
             hostOnlyMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
         })
@@ -79,31 +87,4 @@ struct SessionFactories {
         host.start()
         return MockGame(host: host, retained: [network])
     }
-}
-
-/// Placeholder until `ClientSession` lands: reports the game as closed immediately.
-@MainActor @Observable
-final class UnavailableClientSession: RemoteGameSession {
-    let localPlayerID: PlayerID
-    var isHost: Bool { false }
-    var state: GameState? { nil }
-    private(set) var hostStatus: HostStatus = .connecting
-    let presenceChanges = AsyncStream<PresenceChange> { $0.finish() }
-    var lastError: GameError? { nil }
-    var frozenAnswers: [String]? { nil }
-
-    init(playerID: PlayerID) { localPlayerID = playerID }
-
-    func start() { hostStatus = .ended(.gameClosed) }
-    func suspend() {}
-    func resume() {}
-    func stop() {}
-    func send(_ intent: Intent) {}
-    func saveDraft(_ answers: [String]) {}
-    func draft() async -> [String]? { nil }
-    func leave() { hostStatus = .ended(.leftGame) }
-}
-
-extension Logger {
-    static let app = Logger(subsystem: "com.gchapiewski.stopapp", category: "App")
 }

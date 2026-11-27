@@ -1,336 +1,369 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "About": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sobre"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "About" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre"
           }
         }
-      }
+      },
+      "comment" : "Settings row that opens the About screen; also its title."
     },
-    "Back": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voltar"
+    "Back" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar"
           }
         }
-      }
+      },
+      "comment" : "Button that returns to the previous screen."
     },
-    "Coming soon.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Em breve."
+    "Coming soon." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em breve."
           }
         }
-      }
+      },
+      "comment" : "Placeholder text on screens not built yet."
     },
-    "Continue": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuar"
+    "Continue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
           }
         }
-      }
+      },
+      "comment" : "Onboarding button that saves the player's name."
     },
-    "Done": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+    "Done" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
-      }
+      },
+      "comment" : "Button that closes the Settings sheet."
     },
-    "Find games hosted by friends on the same network.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Encontre jogos criados por amigos na mesma rede."
+    "Find games hosted by friends on the same network." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontre jogos criados por amigos na mesma rede."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for the Join a game button on Home."
     },
-    "Free and open source. No ads, no accounts, no tracking.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gratuito e de código aberto. Sem anúncios, sem contas, sem rastreamento."
+    "Free and open source. No ads, no accounts, no tracking." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratuito e de código aberto. Sem anúncios, sem contas, sem rastreamento."
           }
         }
-      }
+      },
+      "comment" : "About screen tagline."
     },
-    "Friends see this name when you play together.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seus amigos veem esse nome quando vocês jogam juntos."
+    "Friends see this name when you play together." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus amigos veem esse nome quando vocês jogam juntos."
           }
         }
-      }
+      },
+      "comment" : "Explains what the player's name is used for."
     },
-    "Game": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jogo"
+    "Game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogo"
           }
         }
-      }
+      },
+      "comment" : "Placeholder title for the game screen."
     },
-    "Hi, %@! Ready to play?": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Oi, %@! Bora jogar?"
+    "Hi, %@! Ready to play?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oi, %@! Bora jogar?"
           }
         }
-      }
+      },
+      "comment" : "Home greeting. %@ is the player's name."
     },
-    "Host a game": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Criar um jogo"
+    "Host a game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar um jogo"
           }
         }
-      }
+      },
+      "comment" : "Home button that starts setting up a game on this phone."
     },
-    "Join a game": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Entrar em um jogo"
+    "Join a game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar em um jogo"
           }
         }
-      }
+      },
+      "comment" : "Home button that opens the list of nearby games."
     },
-    "Keep the app open. You'll be back in the game as soon as the host's phone is nearby.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mantenha o app aberto. Você volta para o jogo assim que o celular de quem criou o jogo estiver por perto."
+    "Keep the app open. You’ll be back in the game as soon as the host’s phone is nearby." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha o app aberto. Você volta para o jogo assim que o celular de quem criou o jogo estiver por perto."
           }
         }
-      }
+      },
+      "comment" : "Shown while reconnecting to an interrupted game after a relaunch."
     },
-    "Leave game": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sair do jogo"
+    "Leave game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do jogo"
           }
         }
-      }
+      },
+      "comment" : "Action that leaves the current game for good."
     },
-    "Leave this game": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sair deste jogo"
+    "Leave this game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair deste jogo"
           }
         }
-      }
+      },
+      "comment" : "Button that stops reconnecting to an interrupted game."
     },
-    "Opens a new issue on GitHub.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abre um novo relato no GitHub."
+    "Opens a new issue on GitHub." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre um novo chamado no GitHub."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for Report a problem in About."
     },
-    "Opens the project on GitHub.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abre o projeto no GitHub."
+    "Opens the project on GitHub." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o projeto no GitHub."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for Source code in About."
     },
-    "Play on your own against computer players.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jogue contra jogadores controlados pelo computador."
+    "Play on your own against computer players." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogue contra jogadores controlados pelo computador."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for the Practice with bots button on Home."
     },
-    "Practice with bots": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Treinar com robôs"
+    "Practice with bots" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treinar com robôs"
           }
         }
-      }
+      },
+      "comment" : "Home button for a solo game against computer players."
     },
-    "Privacy policy": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Política de privacidade"
+    "Privacy policy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidade"
           }
         }
-      }
+      },
+      "comment" : "About link to the privacy policy web page."
     },
-    "Reconnecting to %@'s game…": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconectando ao jogo de %@…"
+    "Reconnecting to %@’s game…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconectando ao jogo de %@…"
           }
         }
-      }
+      },
+      "comment" : "Title while rejoining an interrupted game. %@ is the host's name."
     },
-    "Report a problem": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Relatar um problema"
+    "Report a problem" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar um problema"
           }
         }
-      }
+      },
+      "comment" : "About link to report an issue on GitHub."
     },
-    "Settings": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajustes"
+    "Settings" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes"
           }
         }
-      }
+      },
+      "comment" : "Title of the Settings sheet and the Home toolbar button that opens it."
     },
-    "Sound effects never play while your phone is on silent.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Os efeitos sonoros nunca tocam quando o celular está no silencioso."
+    "Sound effects never play while your phone is on silent." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os efeitos sonoros nunca tocam quando o celular está no silencioso."
           }
         }
-      }
+      },
+      "comment" : "Footer under the Sounds toggle in Settings."
     },
-    "Sounds": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sons"
+    "Sounds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sons"
           }
         }
-      }
+      },
+      "comment" : "Settings toggle for sound effects."
     },
-    "Source code": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Código-fonte"
+    "Source code" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código-fonte"
           }
         }
-      }
+      },
+      "comment" : "About link to the project's source code on GitHub."
     },
-    "Start a game on this phone that friends nearby can join.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Crie um jogo neste celular para os amigos por perto entrarem."
+    "Start a game on this phone that friends nearby can join." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie um jogo neste celular para os amigos por perto entrarem."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for the Host a game button on Home."
     },
-    "Stops reconnecting and goes back to the start screen.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Para de reconectar e volta para a tela inicial."
+    "Stops reconnecting and goes back to the start screen." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para de reconectar e volta para a tela inicial."
           }
         }
-      }
+      },
+      "comment" : "VoiceOver hint for Leave this game while reconnecting."
     },
-    "The classic word game, played with friends nearby.": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O clássico jogo de palavras, com os amigos por perto."
+    "The classic word game, played with friends nearby." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O clássico jogo de palavras, com os amigos por perto."
           }
         }
-      }
+      },
+      "comment" : "Onboarding subtitle."
     },
-    "Version %@": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Versão %@"
+    "Version %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %@"
           }
         }
-      }
+      },
+      "comment" : "About screen version line. %@ is like 1.0 (1)."
     },
-    "Welcome to Stop!": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Boas-vindas ao Stop!"
+    "Welcome to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boas-vindas ao %@"
           }
         }
-      }
+      },
+      "comment" : "Onboarding title. %@ is the app's name, which ends in an exclamation mark (\"Stop!\")."
     },
-    "What's your name?": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qual é o seu nome?"
+    "What’s your name?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qual é o seu nome?"
           }
         }
-      }
+      },
+      "comment" : "Onboarding question above the name field."
     },
-    "Your name": {
-      "localizations": {
-        "pt-BR": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Seu nome"
+    "Your name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu nome"
           }
         }
-      }
+      },
+      "comment" : "Placeholder and label of the player's name field."
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

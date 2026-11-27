@@ -4,5 +4,6 @@
 // Your Apple Developer team ID (developer.apple.com → Membership details).
 DEVELOPMENT_TEAM = YOUR_TEAM_ID
 
-// Building under your own team? Bundle identifiers are unique across Apple, so also change
-// PRODUCT_BUNDLE_IDENTIFIER in the target's build settings (don't commit that change).
+// Building under your own team? Bundle identifiers are unique across Apple, so also set
+// PRODUCT_BUNDLE_IDENTIFIER here, e.g.:
+// PRODUCT_BUNDLE_IDENTIFIER = com.example.stopapp

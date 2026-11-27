@@ -36,6 +36,10 @@ final class AppModel {
     @ObservationIgnored private var remoteSession: (any RemoteGameSession)?
     @ObservationIgnored private var retained: [AnyObject] = []
     @ObservationIgnored private var sessionWatch: Task<Void, Never>?
+    /// Remote sessions saying goodbye to their host; kept alive until they end.
+    @ObservationIgnored private var departing: [any RemoteGameSession] = []
+    @ObservationIgnored private var profileWrites: Task<Void, Never>?
+    @ObservationIgnored private var wasBackgrounded = false
 
     init(store: any GameStore, factory: any TransportFactory, clock: any Clock<Duration> = ContinuousClock(),
          launchArguments: [String] = ProcessInfo.processInfo.arguments, sessions: SessionFactories = .live) {
@@ -47,9 +51,11 @@ final class AppModel {
         isUITesting = launch.uiTesting
     }
 
-    /// The language new games use: the app's UI language.
-    var gameLanguage: GameLanguage {
-        Bundle.main.preferredLocalizations.first?.hasPrefix("pt") == true ? .ptBR : .en
+    /// The language new games use (it picks the default categories): the device's language.
+    var gameLanguage: GameLanguage { Self.language(for: .current) }
+
+    static func language(for locale: Locale) -> GameLanguage {
+        locale.language.languageCode == "pt" ? .ptBR : .en
     }
 
     // MARK: Launch
@@ -102,23 +108,43 @@ final class AppModel {
         }
     }
 
-    func setSoundsEnabled(_ enabled: Bool) async {
-        guard var updated = profile else { return }
+    /// Takes effect at once; the write to the store follows.
+    func setSoundsEnabled(_ enabled: Bool) {
+        guard var updated = profile, updated.soundsEnabled != enabled else { return }
         updated.soundsEnabled = enabled
         profile = updated
-        await store.saveProfile(updated)
+        enqueueProfileWrite { [weak self] in
+            guard let self, let profile = self.profile else { return }
+            await self.store.saveProfile(profile)
+        }
     }
 
     @discardableResult
     private func saveProfile(name: String) async -> Bool {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return false }
-        let existing = await store.loadProfile()
-        var updated = existing ?? Profile(playerID: UUID(), name: trimmed, soundsEnabled: true)
-        updated.name = trimmed
-        profile = updated
-        if updated != existing { await store.saveProfile(updated) }
+        await enqueueProfileWrite { [weak self] in
+            guard let self else { return }
+            let existing: Profile? = if let profile = self.profile { profile } else { await self.store.loadProfile() }
+            var updated = existing ?? Profile(playerID: UUID(), name: trimmed, soundsEnabled: true)
+            updated.name = trimmed
+            self.profile = updated
+            if updated != existing { await self.store.saveProfile(updated) }
+        }.value
         return true
+    }
+
+    /// Profile writes run one at a time, in order: two quick saves (a double tap, Settings' several commit
+    /// points) can't both create a profile or land out of order.
+    @discardableResult
+    private func enqueueProfileWrite(_ write: @escaping @MainActor () async -> Void) -> Task<Void, Never> {
+        let previous = profileWrites
+        let task = Task { @MainActor in
+            await previous?.value
+            await write()
+        }
+        profileWrites = task
+        return task
     }
 
     // MARK: Navigation
@@ -143,7 +169,7 @@ final class AppModel {
                                                settings: settings, language: gameLanguage)
             startHost(HostSession(state: state, factory: factory, store: store, clock: clock))
         } catch {
-            Logger.app.error("hostGame: invalid settings")
+            Logger.app.error("hostGame: \(String(describing: error), privacy: .public)")
         }
     }
 
@@ -154,30 +180,67 @@ final class AppModel {
 
     /// Gives up reconnecting to an interrupted game and forgets it.
     func cancelRejoin() {
-        guard case .rejoining(let ref) = route else { return }
-        remoteSession?.stop()
+        guard case .rejoining(let ref) = route, let session = remoteSession else { return }
+        // The session forgets the game and its drafts after any draft write it still has queued.
+        session.abandon()
+        forget(gameID: ref.gameID)
         endSession()
-        Task { [store] in
-            await store.saveActiveGame(nil)
-            await store.clearDrafts(gameID: ref.gameID)
-        }
     }
 
-    /// Leaves the game for good. As host this ends the game for everyone.
+    /// Leaves the game for good (or closes one that already ended). As host this ends the game for everyone.
     func leaveGame() {
         guard let client else { return }
         client.leave()
         // `leave()` ends the game through the engine; shutting down directly also covers a rejected end.
         hostSession?.shutdown()
+        if let remoteSession { finishLeaving(remoteSession) }
         endSession()
+    }
+
+    /// How long a leaving session gets to say goodbye before it's abandoned.
+    static let leaveTimeout: Duration = .seconds(3)
+
+    /// `leave()` waits for the host's ack and then says goodbye, so the session must stay alive until it
+    /// reports `.ended`, or for `leaveTimeout` at most. Then it's torn down and, as a backstop, the game is
+    /// forgotten so the next launch doesn't rejoin it.
+    private func finishLeaving(_ session: any RemoteGameSession) {
+        let gameID = session.state?.gameID
+        departing.append(session)
+        Task { [weak self] in
+            for await isEnded in Observations({ session.hostStatus.isEnded }) where isEnded { break }
+            self?.completeLeaving(session, gameID: gameID)
+        }
+        Task { [weak self, clock] in
+            try? await clock.sleep(for: Self.leaveTimeout)
+            self?.completeLeaving(session, gameID: gameID)
+        }
+    }
+
+    private func completeLeaving(_ session: any RemoteGameSession, gameID: UUID?) {
+        guard let index = departing.firstIndex(where: { $0 === session }) else { return }
+        departing.remove(at: index)
+        session.abandon()
+        if let gameID { forget(gameID: gameID) }
+    }
+
+    /// Clears the active-game reference (if it still points at `gameID`) and that game's drafts.
+    private func forget(gameID: UUID) {
+        Task { [store] in
+            if await store.loadActiveGame()?.gameID == gameID { await store.saveActiveGame(nil) }
+            await store.clearDrafts(gameID: gameID)
+        }
     }
 
     func scenePhaseChanged(_ phase: ScenePhase) {
         switch phase {
         case .background:
+            wasBackgrounded = true
             hostSession?.suspend()
             remoteSession?.suspend()
         case .active:
+            // Going inactive and back (Control Center, a system alert) never suspended anything.
+            guard wasBackgrounded else { return }
+            wasBackgrounded = false
             hostSession?.resume()
             remoteSession?.resume()
         default:
@@ -218,24 +281,28 @@ final class AppModel {
         watch(session)
     }
 
-    /// While rejoining, moves to the game once state arrives; an ended session returns to Home.
+    /// While rejoining, moves to the game once state arrives. A session that ends returns to Home, except at
+    /// game over, which stays on screen for the final standings.
     private func watch(_ session: any RemoteGameSession) {
         sessionWatch?.cancel()
         sessionWatch = Task { [weak self, weak session] in
-            let changes = Observations { () -> (hasState: Bool, ended: Bool)? in
+            let changes = Observations { () -> (hasState: Bool, ended: EndReason?)? in
                 guard let session else { return nil }
-                if case .ended = session.hostStatus { return (session.state != nil, true) }
-                return (session.state != nil, false)
+                if case .ended(let reason) = session.hostStatus { return (session.state != nil, reason) }
+                return (session.state != nil, nil)
             }
             for await change in changes {
                 guard let self, let change, self.remoteSession === session else { return }
-                if case .rejoining = self.route {
-                    if change.ended {
+                if let reason = change.ended {
+                    // Task 17 explains versionMismatch / removed / gameClosed with an alert on Home.
+                    let showsGameOver = reason == .gameOver && change.hasState && self.route == .game
+                    if !showsGameOver {
+                        session?.stop()
                         self.endSession()
-                        return
                     }
-                    if change.hasState { self.route = .game }
+                    return
                 }
+                if case .rejoining = self.route, change.hasState { self.route = .game }
             }
         }
     }
@@ -248,6 +315,12 @@ final class AppModel {
         retained = []
         client = nil
         route = .home
+    }
+}
+
+extension HostStatus {
+    var isEnded: Bool {
+        if case .ended = self { true } else { false }
     }
 }
 

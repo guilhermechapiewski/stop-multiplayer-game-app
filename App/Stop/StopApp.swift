@@ -12,13 +12,22 @@ struct StopApp: App {
         _model = State(initialValue: AppModel(store: store, factory: NWTransportFactory(), launchArguments: arguments))
     }
 
+    /// XCTest sets this for the app that hosts unit tests (not for an app launched by UI tests).
+    static var isHostingUnitTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView(model: model)
                 .fontDesign(.rounded)
                 .tint(Theme.accent)
                 .reduceMotion(forced: model.isUITesting)
-                .task { await model.bootstrap() }
+                .task {
+                    // As the unit tests' host app, stay idle: no store reads, no networking.
+                    guard !Self.isHostingUnitTests else { return }
+                    await model.bootstrap()
+                }
         }
         .onChange(of: scenePhase) { model.scenePhaseChanged($1) }
     }

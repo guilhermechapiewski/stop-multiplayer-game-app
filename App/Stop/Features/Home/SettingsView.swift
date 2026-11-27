@@ -6,6 +6,8 @@ struct SettingsView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
+    /// The name being saved, so the several commit points (submit, focus loss, Done, dismiss) save it once.
+    @State private var savingName: String?
     @FocusState private var nameFocused: Bool
 
     var body: some View {
@@ -67,7 +69,7 @@ struct SettingsView: View {
 
     private var soundsBinding: Binding<Bool> {
         Binding(get: { model.profile?.soundsEnabled ?? true },
-                set: { enabled in Task { await model.setSoundsEnabled(enabled) } })
+                set: { model.setSoundsEnabled($0) })
     }
 
     /// Saves a changed name; a blank one reverts to the saved name.
@@ -77,9 +79,13 @@ struct SettingsView: View {
             name = saved
             return
         }
-        guard name.trimmingCharacters(in: .whitespacesAndNewlines) != saved else { return }
-        let newName = name
-        Task { await model.saveName(newName) }
+        let newName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard newName != saved, newName != savingName else { return }
+        savingName = newName
+        Task {
+            await model.saveName(newName)
+            if savingName == newName { savingName = nil }
+        }
     }
 }
 

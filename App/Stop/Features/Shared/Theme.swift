@@ -41,10 +41,10 @@ struct PrimaryButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Theme.Typography.headline)
-            .foregroundStyle(.white)
+            .foregroundStyle(isEnabled ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
             .frame(maxWidth: .infinity, minHeight: minHeight)
             .padding(.horizontal, Theme.Spacing.m)
-            .background(isEnabled ? Theme.accent : Color(.systemGray3),
+            .background(isEnabled ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.fill),
                         in: .rect(cornerRadius: Theme.Radius.control))
             .pressEffect(configuration.isPressed, reduceMotion: reduceMotion)
     }

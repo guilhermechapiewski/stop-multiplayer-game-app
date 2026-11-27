@@ -1,5 +1,11 @@
 import Foundation
 
+/// The app's name as shown in the UI. A placeholder until the owner picks the App Store name; change it here
+/// (and `INFOPLIST_KEY_CFBundleDisplayName`, `InfoPlist.xcstrings`).
+enum AppInfo {
+    static let name = "Stop!"
+}
+
 /// The version shown in About, e.g. "1.0 (1)" (`MARKETING_VERSION (CURRENT_PROJECT_VERSION)`).
 enum AppVersion {
     static var display: String {
