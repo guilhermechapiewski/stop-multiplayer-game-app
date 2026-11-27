@@ -24,8 +24,8 @@ public final class HostSession {
     @ObservationIgnored var openConnections: [UUID: any Connection] = [:]
     @ObservationIgnored var connectionPlayer: [UUID: PlayerID] = [:]
     @ObservationIgnored var playerConnection: [PlayerID: any Connection] = [:]
-    /// Time since each connected player's last message, grown by the heartbeat loop.
-    @ObservationIgnored var silence: [PlayerID: Duration] = [:]
+    /// Started at each connected player's last message.
+    @ObservationIgnored var lastSeen: [PlayerID: Stopwatch] = [:]
     @ObservationIgnored var intentLogs: [PlayerID: IntentLog] = [:]
     @ObservationIgnored var isShutDown = false
 
@@ -81,7 +81,7 @@ public final class HostSession {
             listener?.stop()
             startListener()
         }
-        silence = silence.mapValues { _ in .zero }
+        lastSeen = lastSeen.mapValues { _ in Stopwatch(clock) }
         startLoops()
         broadcastSnapshots()
     }
@@ -100,7 +100,8 @@ public final class HostSession {
             await store.clearDrafts(gameID: gameID)
         }
         Task { [weak self, clock] in
-            try? await clock.sleep(for: .seconds(5))
+            do { try await clock.sleep(for: .seconds(5)) } catch { return }
+            guard !Task.isCancelled else { return }
             self?.closeTransport()
         }
     }
@@ -198,7 +199,7 @@ public final class HostSession {
         Task { [weak self, clock] in
             while true {
                 do { try await clock.sleep(for: interval) } catch { return }
-                guard let self else { return }
+                guard !Task.isCancelled, let self else { return }
                 body(self)
             }
         }
@@ -207,10 +208,8 @@ public final class HostSession {
     /// Sends `.heartbeat` to everyone and marks players away once silent for `awayAfter`.
     private func heartbeat() {
         broadcast(.heartbeat)
-        for player in Array(playerConnection.keys) {
-            let quiet = (silence[player] ?? .zero) + timing.heartbeat
-            silence[player] = quiet
-            if quiet >= timing.awayAfter { markAway(player) }
+        for player in Array(playerConnection.keys) where (lastSeen[player]?.elapsed ?? .zero) >= timing.awayAfter {
+            markAway(player)
         }
     }
 
