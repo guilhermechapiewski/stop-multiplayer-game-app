@@ -153,9 +153,12 @@ struct LobbyView: View {
                                       allowGiveUp: state.settings.allowGiveUp))
                     .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
-                Text(RulesText.scoring(silent: state.settings.silentScoring))
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
+                // The host has the switch and its ⓘ; the others get the mode explained here.
+                if !client.isHost {
+                    Text(RulesText.scoring(silent: state.settings.silentScoring))
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
             .font(Theme.Typography.body)
         }
