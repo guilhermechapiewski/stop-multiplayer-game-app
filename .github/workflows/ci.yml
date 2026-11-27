@@ -43,12 +43,12 @@ jobs:
       - name: Build for device (unsigned)
         if: matrix.suite == 'unit'
         run: >
-          xcodebuild build -project App/Stop.xcodeproj -scheme Stop
+          xcodebuild build -project Stop.xcodeproj -scheme Stop
           -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO
       - name: Build Release for device (unsigned)
         if: matrix.suite == 'unit'
         run: >
-          xcodebuild build -project App/Stop.xcodeproj -scheme Stop -configuration Release
+          xcodebuild build -project Stop.xcodeproj -scheme Stop -configuration Release
           -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO
       - name: Pick newest iPhone simulator
         run: |
@@ -73,7 +73,7 @@ jobs:
         env:
           CI: "1"
         run: >
-          xcodebuild test -project App/Stop.xcodeproj -scheme Stop
+          xcodebuild test -project Stop.xcodeproj -scheme Stop
           -destination "id=$SIM_UDID"
           -only-testing:${{ matrix.only }}
           -parallel-testing-enabled NO

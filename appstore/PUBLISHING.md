@@ -22,7 +22,7 @@ Xcode writes that choice into `project.pbxproj`, which is public.
    ```
 2. Open `Config/Local.xcconfig` and replace `YOUR_TEAM_ID` with your team ID
    (developer.apple.com → **Account** → **Membership details** → Team ID).
-3. Open `App/Stop.xcodeproj` in Xcode → target **Stop** → **Signing & Capabilities**: it should show your
+3. Open `Stop.xcodeproj` in Xcode → target **Stop** → **Signing & Capabilities**: it should show your
    team, with **Automatically manage signing** on. If `git status` ever shows `project.pbxproj` changed with a
    `DEVELOPMENT_TEAM` line, don't commit it (the `tools/check-signing.sh` build phase also stops the build).
 

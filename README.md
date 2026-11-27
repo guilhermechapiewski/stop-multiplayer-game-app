@@ -50,7 +50,7 @@ contribute improvements.
 ## Building
 
 1. Clone the repository.
-2. Open `App/Stop.xcodeproj` and run the `Stop` scheme on a simulator. No signing setup is needed; use
+2. Open `Stop.xcodeproj` and run the `Stop` scheme on a simulator. No signing setup is needed; use
    Practice with bots or mock mode (below) to play without a second device.
 
 To run it on your own iPhone, copy `Config/Local.example.xcconfig` to `Config/Local.xcconfig` (git-ignored)

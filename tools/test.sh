@@ -20,7 +20,7 @@ run_app() {
     echo "error: no available iPhone simulator" >&2
     exit 1
   fi
-  xcodebuild test -project App/Stop.xcodeproj -scheme Stop \
+  xcodebuild test -project Stop.xcodeproj -scheme Stop \
     -destination "platform=iOS Simulator,name=$sim" \
     -derivedDataPath "$dd" -parallel-testing-enabled NO
   local manifest="$dd/Build/Products/Debug-iphonesimulator/Stop.app/PrivacyInfo.xcprivacy"
@@ -36,10 +36,10 @@ case "${1:-all}" in
   app) run_app ;;
   all)
     run_package
-    if [ -d App/Stop.xcodeproj ]; then
+    if [ -d Stop.xcodeproj ]; then
       run_app
     else
-      echo "Notice: App/Stop.xcodeproj does not exist yet; skipping app tests."
+      echo "Notice: Stop.xcodeproj does not exist yet; skipping app tests."
     fi
     ;;
   *) echo "Usage: $0 [package|app|all]" >&2; exit 2 ;;

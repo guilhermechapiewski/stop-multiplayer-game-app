@@ -20,7 +20,7 @@ else
 fi
 
 DD="${DERIVED_DATA:-$ROOT/build/DerivedData-$UDID}"
-xcodebuild -project "$ROOT/App/Stop.xcodeproj" -scheme Stop \
+xcodebuild -project "$ROOT/Stop.xcodeproj" -scheme Stop \
   -destination "platform=iOS Simulator,id=$UDID" -derivedDataPath "$DD" build -quiet
 xcrun simctl boot "$UDID" 2>/dev/null || true
 APP="$DD/Build/Products/Debug-iphonesimulator/Stop.app"

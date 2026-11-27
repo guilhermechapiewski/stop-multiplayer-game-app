@@ -53,7 +53,7 @@ xcrun simctl list runtimes | grep -q "$RUNTIME_ID" \
   || fail "the iOS 27.0 simulator runtime is not installed (install it in Xcode > Settings > Components)."
 
 echo "== Building"
-xcodebuild build-for-testing -project App/Stop.xcodeproj -scheme Stop \
+xcodebuild build-for-testing -project Stop.xcodeproj -scheme Stop \
   -destination "generic/platform=iOS Simulator" -derivedDataPath "$DD" >"$WORK/build.log" 2>&1 \
   || { tail -30 "$WORK/build.log" >&2; fail "the build failed."; }
 
@@ -75,7 +75,7 @@ for entry in "${DEVICES[@]}"; do
     bundle="$WORK/$key-$locale.xcresult"
     # TEST_RUNNER_-prefixed variables reach the tests without the prefix; ScreenshotTests skip without it.
     TEST_RUNNER_STOP_SCREENSHOTS=1 TEST_RUNNER_STOP_SCREENSHOTS_LANG="$locale" \
-      xcodebuild test-without-building -project App/Stop.xcodeproj -scheme Stop \
+      xcodebuild test-without-building -project Stop.xcodeproj -scheme Stop \
       -destination "platform=iOS Simulator,id=$udid" -derivedDataPath "$DD" -parallel-testing-enabled NO \
       -only-testing:StopUITests/ScreenshotTests -resultBundlePath "$bundle" >"$WORK/$key-$locale.log" 2>&1 \
       || { grep -E "error|failed" "$WORK/$key-$locale.log" | tail -20 >&2; fail "ScreenshotTests failed ($key, $locale)."; }

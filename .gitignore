@@ -7,7 +7,7 @@ xcuserdata/
 *.xcresult
 *.xcscmblueprint
 *.xccheckout
-App/Stop.xcodeproj/xcshareddata/xcodecloud/
+Stop.xcodeproj/xcshareddata/xcodecloud/
 # SwiftPM
 .build/
 .swiftpm/

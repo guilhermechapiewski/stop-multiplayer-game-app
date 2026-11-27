@@ -55,17 +55,20 @@
 			exceptions = (
 				570000000000000000070001 /* Exceptions for "Stop" folder in "Stop" target */,
 			);
-			path = Stop;
+			name = Stop;
+			path = App/Stop;
 			sourceTree = "<group>";
 		};
 		570000000000000000020002 /* StopTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = StopTests;
+			name = StopTests;
+			path = App/StopTests;
 			sourceTree = "<group>";
 		};
 		570000000000000000020003 /* StopUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = StopUITests;
+			name = StopUITests;
+			path = App/StopUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -128,7 +131,7 @@
 				5700000000000000000F0005 /* Local.example.xcconfig */,
 			);
 			name = Config;
-			path = ../Config;
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -240,7 +243,7 @@
 			mainGroup = 570000000000000000060001;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				570000000000000000040001 /* XCLocalSwiftPackageReference "../Packages/StopKit" */,
+				570000000000000000040001 /* XCLocalSwiftPackageReference "Packages/StopKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 570000000000000000060002 /* Products */;
@@ -288,7 +291,7 @@
 			inputFileListPaths = (
 			);
 			inputPaths = (
-				"$(SRCROOT)/../tools/check-signing.sh",
+				"$(SRCROOT)/tools/check-signing.sh",
 				"$(PROJECT_FILE_PATH)/project.pbxproj",
 			);
 			name = "Check signing";
@@ -298,7 +301,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "exec /bin/sh \"$SRCROOT/../tools/check-signing.sh\"\n";
+			shellScript = "exec /bin/sh \"$SRCROOT/tools/check-signing.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -404,7 +407,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Stop/Info.plist;
+				INFOPLIST_FILE = App/Stop/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";
@@ -431,7 +434,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Stop/Info.plist;
+				INFOPLIST_FILE = App/Stop/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stop!";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.word-games";
@@ -539,9 +542,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		570000000000000000040001 /* XCLocalSwiftPackageReference "../Packages/StopKit" */ = {
+		570000000000000000040001 /* XCLocalSwiftPackageReference "Packages/StopKit" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../Packages/StopKit;
+			relativePath = Packages/StopKit;
 		};
 /* End XCLocalSwiftPackageReference section */
 
