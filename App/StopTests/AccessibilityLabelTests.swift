@@ -1,11 +1,26 @@
+import Foundation
 import StopCore
 import Testing
 @testable import Stop
 
 struct AccessibilityLabelTests {
-    @Test(arguments: [(10, "10 points"), (5, "5 points"), (0, "0 points")])
+    private static let en = Locale(identifier: "en")
+    private static let ptBR = Locale(identifier: "pt-BR")
+
+    @Test(arguments: [(10, "10 points"), (5, "5 points"), (0, "0 points"), (1, "1 point")])
     func scoreButtonLabels(points: Int, expected: String) {
-        #expect(AccessibilityText.score(points) == expected)
+        #expect(AccessibilityText.score(points, locale: Self.en) == expected)
+    }
+
+    @Test(arguments: [(10, "10 pontos"), (5, "5 pontos"), (0, "0 pontos"), (1, "1 ponto")])
+    func scoreButtonLabelsInPortuguese(points: Int, expected: String) {
+        #expect(AccessibilityText.score(points, locale: Self.ptBR) == expected)
+    }
+
+    @Test func portugueseLetterAndChipLabels() {
+        #expect(AccessibilityText.letter("B", locale: Self.ptBR) == "Letra B")
+        #expect(AccessibilityText.playerDetails(presence: .away, isHost: true, isYou: true, isBot: false,
+                                                locale: Self.ptBR) == "Quem criou o jogo, Você, Reconectando")
     }
 
     @Test func presenceChipLabels() {

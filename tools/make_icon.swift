@@ -226,8 +226,8 @@ case "a-dark":
     stopSign(SignLook(background: [0x2B201C, 0x120D0B], glow: 0x6A3A28, face: face, rim: 0xF4EFEA, bevel: 0xCFC6BE,
                       letters: 0xFFFFFF, shadow: c(0x000000, 0.6)))
 case "a-tinted":
-    stopSign(SignLook(background: [0x000000, 0x000000], glow: nil, face: [0xE6E6E6, 0xC4C4C4, 0xA8A8A8], rim: 0x5C5C5C, bevel: 0x4A4A4A,
-                      letters: 0x1A1A1A, shadow: c(0x000000, 0.0)))
+    stopSign(SignLook(background: [0x000000, 0x000000], glow: nil, face: [0x6A6A6A, 0x505050, 0x3C3C3C], rim: 0xFFFFFF, bevel: 0xCFCFCF,
+                      letters: 0xFFFFFF, shadow: c(0x000000, 0.0)))
 case "b":
     letterTile()
 case "c":

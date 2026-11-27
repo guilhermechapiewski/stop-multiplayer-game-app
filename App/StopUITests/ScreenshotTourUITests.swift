@@ -7,6 +7,8 @@ import XCTest
 ///   TEST_RUNNER_TOUR_DIR=$PWD/build/tour TEST_RUNNER_TOUR_LANG=pt-BR xcodebuild test-without-building …
 ///     -only-testing:StopUITests/ScreenshotTourUITests
 final class ScreenshotTourUITests: XCTestCase {
+    /// One generous timeout for every wait: under load, accessibility snapshots can stall for seconds.
+    private let timeout: TimeInterval = 30
     private var directory: URL!
     private var auditLog: [String] = []
     private var audits = false
@@ -31,7 +33,7 @@ final class ScreenshotTourUITests: XCTestCase {
         app.launch()
 
         let startPractice = app.buttons["startPracticeButton"]
-        XCTAssertTrue(startPractice.waitForExistence(timeout: 10))
+        XCTAssertTrue(startPractice.waitForExistence(timeout: timeout))
         // Fast bots, so a bot's stop ends the round soon after mine.
         // (At accessibility text sizes the picker isn't segmented; the default speed does too.)
         let speed = app.segmentedControls["botSpeedPicker"]
@@ -40,25 +42,25 @@ final class ScreenshotTourUITests: XCTestCase {
         startPractice.tap()
 
         let start = app.buttons["startGameButton"]
-        XCTAssertTrue(start.waitForExistence(timeout: 10))
+        XCTAssertTrue(start.waitForExistence(timeout: timeout))
         waitUntilEnabled(start)
         capture(app, "2-lobby")
         start.tap()
 
-        XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: timeout))
         capture(app, "3-countdown", audit: false)
 
         let stop = app.buttons["stopButton"]
-        XCTAssertTrue(stop.waitForExistence(timeout: 30))
+        XCTAssertTrue(stop.waitForExistence(timeout: timeout))
         let fields = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'answerField-'"))
-        XCTAssertTrue(fields.firstMatch.waitForExistence(timeout: 5))
+        XCTAssertTrue(fields.firstMatch.waitForExistence(timeout: timeout))
         capture(app, "4-writing-empty")
         let count = fields.count
         for index in 0..<count {
             app.typeText(index == count - 1 ? "Bento" : "Bento\n")
         }
         capture(app, "5-writing-filled", audit: false)
-        // Scroll back to the top with the keyboard down, where the menu button meets the first field.
+        // Scroll back to the top (the keyboard stays up), where the menu button meets the first field.
         app.swipeDown()
         app.swipeDown()
         capture(app, "6-writing-top", audit: false)
@@ -69,11 +71,11 @@ final class ScreenshotTourUITests: XCTestCase {
 
         for category in 0..<count {
             let header = app.descendants(matching: .any)["scoringCategory-\(category)"]
-            XCTAssertTrue(header.waitForExistence(timeout: 60), "category \(category)")
+            // The first category waits for a bot to stop too.
+            XCTAssertTrue(header.waitForExistence(timeout: 2 * timeout), "category \(category)")
             if category == 0 {
-                let stamp = app.descendants(matching: .any)["stopStamp"]
-                let stampGone = expectation(for: NSPredicate(format: "exists == false"), evaluatedWith: stamp)
-                wait(for: [stampGone], timeout: 10)
+                // The STOP! stamp covers scoring for a moment; a tap then would be lost.
+                XCTAssertTrue(app.otherElements["stopStamp"].waitForNonExistence(timeout: timeout))
             }
             let ten = app.buttons["score-10"]
             waitUntilEnabled(ten)
@@ -81,18 +83,22 @@ final class ScreenshotTourUITests: XCTestCase {
             ten.tap()
         }
 
-        XCTAssertTrue(app.buttons["nextRoundButton"].waitForExistence(timeout: 20))
+        XCTAssertTrue(app.buttons["nextRoundButton"].waitForExistence(timeout: timeout))
         capture(app, "9-round-results")
+        app.swipeUp()
+        capture(app, "9b-round-results-scrolled", audit: false)
         app.buttons["endGameButton"].tap()
         let confirm = app.alerts.buttons["confirmEndGameButton"].firstMatch
-        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
+        XCTAssertTrue(confirm.waitForExistence(timeout: timeout))
         capture(app, "10-end-practice-alert", audit: false)
         confirm.tap()
 
-        XCTAssertTrue(app.descendants(matching: .any)["winnerTitle"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.descendants(matching: .any)["winnerTitle"].waitForExistence(timeout: timeout))
         capture(app, "11-game-over")
+        app.swipeUp()
+        capture(app, "11b-game-over-scrolled", audit: false)
         app.buttons["backHomeButton"].tap()
-        XCTAssertTrue(app.buttons["practiceButton"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["practiceButton"].waitForExistence(timeout: timeout))
         capture(app, "12-home")
 
         if audits {
@@ -106,16 +112,20 @@ final class ScreenshotTourUITests: XCTestCase {
         let png = app.screenshot().pngRepresentation
         try? png.write(to: directory.appendingPathComponent("\(name).png"))
         guard audits, audit else { return }
-        try? app.performAccessibilityAudit { [weak self] issue in
-            let element = issue.element.map { "\($0.elementType.rawValue) '\($0.identifier)' '\($0.label)'" } ?? "-"
-            self?.auditLog.append("\(name): \(issue.auditType) — \(issue.compactDescription) — \(element)")
-            return true
+        do {
+            try app.performAccessibilityAudit { [weak self] issue in
+                let element = issue.element.map { "\($0.elementType.rawValue) '\($0.identifier)' '\($0.label)'" } ?? "-"
+                self?.auditLog.append("\(name): \(issue.auditType) — \(issue.compactDescription) — \(element)")
+                return true
+            }
+        } catch {
+            auditLog.append("\(name): audit failed — \(error)")
         }
     }
 
     @MainActor
     private func waitUntilEnabled(_ element: XCUIElement) {
         let enabled = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: element)
-        wait(for: [enabled], timeout: 15)
+        wait(for: [enabled], timeout: timeout)
     }
 }

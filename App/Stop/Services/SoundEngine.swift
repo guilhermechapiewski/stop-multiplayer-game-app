@@ -91,53 +91,113 @@ struct ToneSpec: Equatable, Sendable {
     }
 }
 
-/// Plays `Sound`s through `AVAudioEngine`. Uses the `.ambient` session, so it mixes with other audio and
-/// the silent switch mutes it. Off unless `enabled` (the Settings toggle; always off under `-uiTesting`).
+/// The audio graph `SoundEngine` drives: a seam so tests can check the engine's bookkeeping (build once,
+/// start without side effects) without real audio.
+@MainActor
+protocol SoundGraph: AnyObject {
+    /// One-time setup: session category, nodes and a buffer per sound. False if it couldn't be built.
+    func build(samples: [Sound: [Float]], sampleRate: Double) -> Bool
+    var isRunning: Bool { get }
+    /// Starts the engine. Leaves the graph as it was if it throws.
+    func start() throws
+    func pause()
+    func schedule(_ sound: Sound)
+    /// Called when an interruption ends or the audio configuration changes, which stop the engine.
+    var onNeedsRestart: (() -> Void)? { get set }
+}
+
+/// Plays `Sound`s. Off unless `enabled` (the Settings toggle; always off under `-uiTesting`). The graph is
+/// built once, on the first warm-up or sound; the engine runs only while sounds play, pausing after a few
+/// idle seconds, when disabled and in the background.
 @MainActor
 final class SoundEngine {
-    static let shared = SoundEngine()
+    static let shared = SoundEngine(graph: AVSoundGraph())
 
     /// Mirrors the player's Sounds setting (set by `RootView`).
     var enabled = false {
-        didSet { if enabled, !oldValue { warmUp() } }
+        didSet { if !enabled { pause() } }
     }
 
+    static let sampleRate = 44_100.0
+    private static let idleDelay: Duration = .seconds(8)
+
+    private let graph: any SoundGraph
+    private(set) var isGraphBuilt = false
+    private var idleTask: Task<Void, Never>?
+
+    init(graph: any SoundGraph) {
+        self.graph = graph
+        graph.onNeedsRestart = { [weak self] in self?.restartIfActive() }
+    }
+
+    func play(_ sound: Sound) {
+        guard enabled, buildGraphIfNeeded(), startIfNeeded() else { return }
+        graph.schedule(sound)
+        scheduleIdlePause()
+    }
+
+    /// Builds and starts the engine ahead of the first sound (on entering a game), so that one isn't late.
+    func warmUp() {
+        guard enabled, buildGraphIfNeeded(), startIfNeeded() else { return }
+        scheduleIdlePause()
+    }
+
+    /// Stops the engine's IO (backgrounded, disabled or idle). The next sound starts it again.
+    func pause() {
+        idleTask?.cancel()
+        idleTask = nil
+        if isGraphBuilt, graph.isRunning { graph.pause() }
+    }
+
+    private func buildGraphIfNeeded() -> Bool {
+        guard !isGraphBuilt else { return true }
+        var samples: [Sound: [Float]] = [:]
+        for sound in Sound.allCases { samples[sound] = sound.spec.render(sampleRate: Self.sampleRate) }
+        isGraphBuilt = graph.build(samples: samples, sampleRate: Self.sampleRate)
+        return isGraphBuilt
+    }
+
+    private func startIfNeeded() -> Bool {
+        if graph.isRunning { return true }
+        do { try graph.start() } catch { return false }
+        return true
+    }
+
+    /// After an interruption or a configuration change, resume only if sounds were playing recently.
+    private func restartIfActive() {
+        guard enabled, isGraphBuilt, idleTask != nil else { return }
+        _ = startIfNeeded()
+    }
+
+    private func scheduleIdlePause() {
+        idleTask?.cancel()
+        idleTask = Task { [weak self] in
+            do { try await Task.sleep(for: Self.idleDelay) } catch { return }
+            self?.pause()
+        }
+    }
+}
+
+/// The real graph: `AVAudioEngine` with a few player nodes into the main mixer, on the `.ambient` session so
+/// it mixes with other audio and the silent switch mutes it.
+@MainActor
+final class AVSoundGraph: SoundGraph {
+    var onNeedsRestart: (() -> Void)?
+
     private let engine = AVAudioEngine()
-    private let format = AVAudioFormat(standardFormatWithSampleRate: 44_100, channels: 1)
     private var players: [AVAudioPlayerNode] = []
     private var nextPlayer = 0
     private var buffers: [Sound: AVAudioPCMBuffer] = [:]
-    private var isConfigured = false
+    private var observers: [any NSObjectProtocol] = []
 
-    private init() {}
+    var isRunning: Bool { engine.isRunning }
 
-    func play(_ sound: Sound) {
-        guard enabled else { return }
-        configureIfNeeded()
-        guard isConfigured, let buffer = buffers[sound], !players.isEmpty else { return }
-        if !engine.isRunning {
-            // The engine stops after an interruption (a call, Siri); start it again on the next sound.
-            do { try engine.start() } catch { return }
-        }
-        let player = players[nextPlayer]
-        nextPlayer = (nextPlayer + 1) % players.count
-        // `.interrupts` replaces whatever this node was playing without a blocking `stop()`.
-        player.scheduleBuffer(buffer, at: nil, options: .interrupts)
-        if !player.isPlaying { try? player.playAudio() }
-    }
-
-    /// Sets up the engine ahead of the first sound, so the first one isn't late.
-    private func warmUp() {
-        configureIfNeeded()
-        if isConfigured, !engine.isRunning { try? engine.start() }
-    }
-
-    private func configureIfNeeded() {
-        guard !isConfigured, let format else { return }
+    func build(samples: [Sound: [Float]], sampleRate: Double) -> Bool {
+        guard let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 1) else { return false }
         let session = AVAudioSession.sharedInstance()
         try? session.setCategory(.ambient, options: [.mixWithOthers])
-        // A ~5 ms buffer instead of the default ~20 ms keeps sounds in step with what's on screen.
-        try? session.setPreferredIOBufferDuration(0.005)
+        // ~10 ms instead of the default ~20 ms keeps sounds in step with the screen without extra wakeups.
+        try? session.setPreferredIOBufferDuration(0.01)
         for _ in 0..<4 {
             let player = AVAudioPlayerNode()
             engine.attach(player)
@@ -145,15 +205,35 @@ final class SoundEngine {
             players.append(player)
         }
         engine.mainMixerNode.outputVolume = 0.8
-        for sound in Sound.allCases {
-            buffers[sound] = Self.buffer(sound.spec.render(sampleRate: format.sampleRate), format: format)
-        }
-        do {
-            try engine.start()
-            isConfigured = true
-        } catch {
-            isConfigured = false
-        }
+        for (sound, data) in samples { buffers[sound] = Self.buffer(data, format: format) }
+        observeInterruptions()
+        return true
+    }
+
+    func start() throws { try engine.start() }
+
+    func pause() { engine.pause() }
+
+    func schedule(_ sound: Sound) {
+        guard let buffer = buffers[sound], !players.isEmpty else { return }
+        let player = players[nextPlayer]
+        nextPlayer = (nextPlayer + 1) % players.count
+        // `.interrupts` replaces whatever this node was playing without a blocking `stop()`.
+        player.scheduleBuffer(buffer, at: nil, options: .interrupts)
+        if !player.isPlaying { try? player.playAudio() }
+    }
+
+    /// The end of an interruption (a call, Siri) or a route/format change leaves the engine stopped.
+    private func observeInterruptions() {
+        let center = NotificationCenter.default
+        observers.append(center.addObserver(forName: AVAudioSession.resumptionRecommendationNotification,
+                                            object: AVAudioSession.sharedInstance(), queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.onNeedsRestart?() }
+        })
+        observers.append(center.addObserver(forName: .AVAudioEngineConfigurationChange, object: engine,
+                                            queue: .main) { [weak self] _ in
+            Task { @MainActor in self?.onNeedsRestart?() }
+        })
     }
 
     private static func buffer(_ samples: [Float], format: AVAudioFormat) -> AVAudioPCMBuffer? {
