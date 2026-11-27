@@ -196,17 +196,6 @@
         }
       }
     },
-    "Back" : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Voltar"
-          }
-        }
-      },
-      "comment" : "Button that returns to the previous screen."
-    },
     "Back to Home" : {
       "comment" : "Button that leaves an ended game and returns to the start screen.",
       "localizations" : {
@@ -214,6 +203,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voltar ao início"
+          }
+        }
+      }
+    },
+    "Bot" : {
+      "comment" : "VoiceOver detail on a player chip: a computer player in a practice game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Robô"
           }
         }
       }
@@ -316,17 +316,6 @@
           }
         }
       }
-    },
-    "Coming soon." : {
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Em breve."
-          }
-        }
-      },
-      "comment" : "Placeholder text on screens not built yet."
     },
     "Continue" : {
       "localizations" : {
@@ -967,7 +956,7 @@
       }
     },
     "Practice" : {
-      "comment" : "Title of the practice setup screen (a solo game against bots).",
+      "comment" : "Title of the practice setup screen and of the lobby in a practice game (a solo game against bots).",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1479,6 +1468,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você não está mais no jogo"
+          }
+        }
+      }
+    },
+    "Your bots are ready. Start when you are." : {
+      "comment" : "Lobby subtitle in a practice game (solo against bots).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus robôs estão prontos. Comece quando quiser."
           }
         }
       }

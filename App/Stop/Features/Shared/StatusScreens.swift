@@ -71,23 +71,6 @@ struct RejoiningView: View {
     }
 }
 
-/// Placeholder for screens built in later tasks.
-struct ComingSoonView: View {
-    let title: LocalizedStringKey
-    let systemImage: String
-    var backTitle: LocalizedStringKey = "Back"
-    let onBack: () -> Void
-
-    var body: some View {
-        StatusMessageView(icon: .symbol(systemImage), title: Text(title), message: Text("Coming soon.")) {
-            Button(backTitle, action: onBack)
-                .buttonStyle(.secondary)
-                .accessibilityIdentifier("backButton")
-        }
-        .background(Theme.background)
-    }
-}
-
 #Preview("Rejoining") {
     RejoiningView(hostName: "Ana") {}
 }

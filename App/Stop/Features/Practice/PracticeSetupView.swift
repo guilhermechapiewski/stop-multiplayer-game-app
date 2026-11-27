@@ -62,7 +62,7 @@ struct PracticeSetupView: View {
             .accessibilityIdentifier("botsStepper")
             FlowLayout(spacing: Theme.Spacing.s) {
                 ForEach(practice.botNames, id: \.self) { name in
-                    PlayerChip(name: name, presence: .present)
+                    PlayerChip(name: name, presence: .present, isBot: true)
                         .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }

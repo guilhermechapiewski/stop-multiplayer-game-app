@@ -8,6 +8,7 @@ struct LobbyView: View {
     let state: GameState
 
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.isPracticeGame) private var isPractice
 
     private var names: [PlayerID: String] { state.displayNames }
     private var hostName: String { names[state.hostID] ?? "" }
@@ -38,16 +39,34 @@ struct LobbyView: View {
 
     private var header: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
-            (client.isHost ? Text("Your game") : Text("\(hostName)’s game"))
+            title
                 .font(Theme.Typography.display)
                 .accessibilityAddTraits(.isHeader)
-            Text(client.isHost
-                 ? "Friends nearby can join now from “Join a game”."
-                 : "You’re in! The game starts when \(hostName) is ready.")
+            subtitle
                 .font(Theme.Typography.body)
                 .foregroundStyle(.secondary)
         }
         .padding(.top, Theme.Spacing.s)
+    }
+
+    private var title: Text {
+        if isPractice {
+            Text("Practice")
+        } else if client.isHost {
+            Text("Your game")
+        } else {
+            Text("\(hostName)’s game")
+        }
+    }
+
+    private var subtitle: Text {
+        if isPractice {
+            Text("Your bots are ready. Start when you are.")
+        } else if client.isHost {
+            Text("Friends nearby can join now from “Join a game”.")
+        } else {
+            Text("You’re in! The game starts when \(hostName) is ready.")
+        }
     }
 
     // MARK: Players
@@ -57,7 +76,8 @@ struct LobbyView: View {
             FlowLayout(spacing: Theme.Spacing.s) {
                 ForEach(players, id: \.id) { player in
                     PlayerChip(name: names[player.id] ?? player.name, presence: player.presence,
-                               isHost: player.id == state.hostID, isYou: player.id == client.localPlayerID)
+                               isHost: player.id == state.hostID, isYou: player.id == client.localPlayerID,
+                               isBot: isPractice && player.id != client.localPlayerID)
                         .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
             }

@@ -7,12 +7,14 @@ struct PlayerChip: View {
     let presence: Presence
     var isHost = false
     var isYou = false
+    /// A practice bot: its initial comes from its own name ("Robo Ana" → A).
+    var isBot = false
 
     private var isAway: Bool { presence == .away }
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
-            PlayerInitial(name: name, dimmed: isAway, size: 32)
+            PlayerInitial(name: name, dimmed: isAway, size: 32, isBot: isBot)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: Theme.Spacing.xs) {
                     Text(verbatim: name)
@@ -51,6 +53,7 @@ struct PlayerChip: View {
 
     private var accessibilityDetails: Text {
         var parts: [String] = []
+        if isBot { parts.append(String(localized: "Bot")) }
         if isHost { parts.append(String(localized: "Host")) }
         if isYou { parts.append(String(localized: "You")) }
         if isAway { parts.append(String(localized: "Reconnecting")) }
@@ -63,6 +66,7 @@ struct PlayerChip: View {
         PlayerChip(name: "Gui", presence: .present, isHost: true, isYou: true)
         PlayerChip(name: "Ana", presence: .present)
         PlayerChip(name: "Ana 2", presence: .away)
+        PlayerChip(name: "Robo Ben", presence: .present, isBot: true)
     }
     .padding()
 }
