@@ -22,9 +22,6 @@ public enum GameEngine {
         state = copy
     }
 
-    /// Advances time-based phases. Implemented in a later task.
-    public static func tick(_ state: inout GameState) -> Bool { false }
-
     /// Minimal present/away toggle; Task 6 owns the full behavior.
     public static func setPresence(_ presence: Presence, for player: PlayerID, in state: inout GameState) -> Bool {
         guard let index = state.players.firstIndex(where: { $0.id == player }),
@@ -54,7 +51,17 @@ public enum GameEngine {
                                            sender: sender, state: &state)
         case .startGame:
             return try startGame(sender: sender, state: &state, using: &rng)
-        case .nextRound, .endGame, .forceEndRound, .continueToScoring, .stop, .giveUp, .submitAnswers, .setScore:
+        case .stop(let answers):
+            return try stop(answers, kind: .stop, sender: sender, state: &state)
+        case .giveUp(let answers):
+            return try stop(answers, kind: .giveUp, sender: sender, state: &state)
+        case .forceEndRound:
+            return try forceEndRound(sender: sender, state: &state)
+        case .submitAnswers(let round, let answers):
+            return try submitAnswers(round: round, answers: answers, sender: sender, state: &state)
+        case .continueToScoring:
+            return try continueToScoring(sender: sender, state: &state)
+        case .nextRound, .endGame, .setScore:
             throw .wrongPhase
         }
     }
