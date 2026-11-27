@@ -15,8 +15,7 @@ contains no third-party code that does. It never sends anything to the developer
 
 Stop uses your local network only, to find and play with other iPhones nearby: on the same Wi-Fi network, or
 directly over peer-to-peer Wi-Fi when there's no router. This is why iOS asks for **Local Network** permission
-the first time you host or join a game. Practice with bots plays on your iPhone alone and doesn't use the
-network.
+the first time you host or join a game.
 
 During a game, your display name, your answers and your scores are sent only to the other phones in that
 game, so everyone can play and score together. This game data never leaves your local network and is never
@@ -31,10 +30,11 @@ To work, the app keeps a small amount of information in its private storage on y
 
 - **Your display name**, and a random identifier the app creates so other phones recognize you when you
   rejoin a game.
-- **Your custom categories**, so you can use them again in future games.
+- **Your custom categories**, and the categories of the last game you hosted, so you can use them again in
+  future games.
 - **A game in progress**, and the answers you're typing (drafts), so a game can continue if the app is closed
   or you lose the connection. If you're the host, the saved game includes the other players' names,
-  answers and scores. These are removed when the game ends. Practice with bots games aren't kept.
+  answers and scores. These are removed when the game ends.
 - **Your settings**, such as sounds.
 
 Deleting the app removes all of it.

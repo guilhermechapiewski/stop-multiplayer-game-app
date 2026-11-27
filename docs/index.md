@@ -35,13 +35,11 @@ No internet, no accounts, no ads. Free, with no in-app purchases and no tracking
 2. **A letter appears**, then a 3-2-1 countdown.
 3. **Everyone writes at once**, one word per category starting with that letter.
 4. **STOP!** When enough players have stopped, every phone locks at the same moment.
-5. **Score together.** Everyone sees all the answers and gives their own 10, 5 or 0. The app never judges:
+5. **Score together.** Everyone sees all the answers and gives their own 10, 5 or 0, and everyone's points
+   show on every phone. When all have scored, the host moves on to the next category. The app never judges:
    that's up to the table.
 
 After each round you see the ranking and the totals. Play as many rounds as you like.
-
-**No one to play with right now?** Tap **Practice with bots** to play a solo game against 1 to 5 computer
-players. It's a good way to learn the game, and it works anywhere, even in Airplane Mode.
 
 ## Play anywhere
 

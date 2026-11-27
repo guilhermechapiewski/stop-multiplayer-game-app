@@ -36,13 +36,11 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 2. **Aparece uma letra**, e depois uma contagem 3-2-1.
 3. **Todo mundo escreve junto**, uma palavra por categoria começando com essa letra.
 4. **STOP!** Quando jogadores suficientes dão STOP, todos os celulares travam no mesmo instante.
-5. **Pontuem juntos.** Todo mundo vê todas as respostas e dá a própria nota: 10, 5 ou 0. O app nunca julga:
-   quem decide é a turma.
+5. **Pontuem juntos.** Todo mundo vê todas as respostas e dá a própria nota: 10, 5 ou 0, e os pontos de
+   todos aparecem em todos os celulares. Quando todo mundo pontuou, quem criou o jogo passa para a próxima
+   categoria. O app nunca julga: quem decide é a turma.
 
 Depois de cada rodada aparecem a classificação e o placar geral. Joguem quantas rodadas quiserem.
-
-**Ninguém para jogar agora?** Toque em **Treinar com robôs** para jogar sozinho contra 1 a 5 jogadores do
-computador. É um bom jeito de aprender o jogo, e funciona em qualquer lugar, até no Modo Avião.
 
 ## Jogue em qualquer lugar
 

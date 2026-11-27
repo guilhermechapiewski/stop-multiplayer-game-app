@@ -36,7 +36,10 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
       unlock together.
 - [ ] One player taps **STOP**: everyone sees the stop count ("Stops 1/2 — name"). When the required number is
       reached every phone shows **STOP!** and locks at the same moment.
-- [ ] Scoring shows the same answers on every phone; results and totals match on every phone.
+- [ ] Scoring shows the same answers and the same points on every phone, and a player's pick shows on the
+      other phones as soon as it's made. A player can change their pick after everyone has scored. Only the
+      host has **Next category** (**See results** on the last); the others see "Waiting for (host) to
+      continue…". Results and totals match on every phone.
 
 ### Lock and unlock a player mid-writing
 
@@ -78,7 +81,7 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 ### Local Network permission denied, then granted
 
 - [ ] On a fresh install, answer **Don't Allow** to the Local Network prompt: Host and Join show a clear
-      explanation with a button that opens Settings. Practice with bots still works.
+      explanation with a button that opens Settings.
 - [ ] Turn Local Network on for the app in Settings > Privacy & Security > Local Network and return: hosting
       and joining work without reinstalling.
 
@@ -93,6 +96,7 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 
 - [ ] One phone in English and one in Portuguese in the same game: each shows its own language; categories
       show exactly as the host set them.
-- [ ] Practice with bots on one phone in Airplane Mode: a full round plays, with no Local Network prompt.
+- [ ] A Release build (TestFlight) has no **Practice with bots** on Home. A build run from Xcode (Debug) has
+      it, and in Airplane Mode a full practice round plays with no Local Network prompt.
 - [ ] VoiceOver reads a label for every control; the largest Dynamic Type size has nothing important clipped.
 - [ ] Light and dark mode both look right.

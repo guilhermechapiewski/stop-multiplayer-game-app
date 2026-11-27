@@ -56,14 +56,16 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 ### 5.2 Home
 - Two primary actions: **Host a game** and **Join a game**. Join shows nearby games live (host name + player count), tap to join.
 
-### 5.2b Practice with bots (owner decision, 2026-11-26)
-- Home has a third action, **Practice with bots**: a solo game on one phone against 1–5 computer players. It lets App Review exercise every screen with a single device, and lets people learn the game.
+### 5.2b Practice with bots (owner decision, 2026-11-26; Debug-only per owner decision 2026-11-27)
+- **Debug builds only** (owner decision, 2026-11-27): the Home action, the practice setup screen and the practice launch exist only in Debug builds (run from Xcode), for development and testing. Release builds (TestFlight, App Store) leave them out, and App Review reviews the app with two iPhones.
+- In Debug builds, Home has a third action, **Practice with bots**: a solo game on one phone against 1–5 computer players.
 - It uses the same setup screen (categories, stops required, allow giving up) plus the number of bots and their speed (Relaxed / Normal / Fast). It runs the real host and client code over an in-memory connection, with no network or Bonjour, so it never shows the Local Network prompt.
 - Bots answer from bundled per-language word lists for the built-in categories. They sometimes leave an answer blank; for custom categories they guess a word and honestly score it 0, stop at plausible times, and score themselves honestly (10 if no one else gave the same answer ignoring case and accents, 5 if someone did, 0 if blank).
 - Practice games aren't restored after the app is killed.
 
 ### 5.3 Game setup (host)
 - Pick from built-in categories (localized defaults) and/or add custom ones; custom categories are remembered on the host device for future games. Any number of categories, minimum 1. Reorderable.
+- The categories of the last game this device hosted (or practiced), in their order, are remembered and preselected the next time (owner decision, 2026-11-27); ones no longer on offer (a deleted custom category, another language's defaults) are dropped, and with none left the defaults are used. Stops required and giving up always start at their defaults.
 - **Categories are fixed for the whole game** once it starts (owner decision).
 - **Stops required to end a round:** integer, minimum 1, maximum = number of players who haven't left (clamped automatically if players leave). Editable between rounds.
 - **Allow giving up:** toggle (default off), editable between rounds. See §5.4.
@@ -81,8 +83,9 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 
 ### 5.5 Scoring (manual)
 - One category at a time, in setup order. Everyone sees all players' answers for that category read-only.
-- Each player scores **only their own** answer: 10 / 5 / 0. A blank answer is fixed at 0. A player can change their pick until the category completes.
-- Category completes when all present players have scored; then auto-advance (brief beat so people see it).
+- Each player scores **only their own** answer: 10 / 5 / 0. A blank answer is fixed at 0.
+- **Everyone sees everyone's points** as they are picked: each row shows a 10 / 5 / 0 badge, or "…" while that player hasn't scored.
+- Category completes when all present and away players have scored (left/removed players count 0). Nothing advances on its own (owner decision, 2026-11-27): the **host** taps **Next category** (**See results** after the last), enabled only once the category is complete; the others see "Waiting for (host) to continue…". Until the host moves on, players can still change their pick, so a wrong tap can be fixed. A stale or repeated Next is ignored, so a category is never skipped. In practice the local player is the host.
 - If a player is away during scoring, the host can score on their behalf after they've been away a few seconds (host sees an "Away — score for Ana" control).
 - The app never judges answers.
 
@@ -137,7 +140,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - A UI performance test guards against regressions.
 
 ### 6.7 Persistence
-- Small on-device store (Codable files in Application Support, or SwiftData — builder's call): profile (UUID, name), custom categories, host game state, client in-progress answers keyed by game+round, last game reference for reconnection.
+- Small on-device store (Codable files in Application Support, or SwiftData — builder's call): profile (UUID, name), custom categories, the last hosted game's categories, host game state, client in-progress answers keyed by game+round, last game reference for reconnection.
 
 ### 6.8 Localization
 - String Catalog with pt-BR and en. Each device's UI follows its own language. Default categories follow the host's language; category names are shown exactly as the host configured them.
@@ -175,7 +178,9 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - All 26 letters in both languages.
 - New players join only in the lobby; mid-game additions require a new game.
 - Bundle ID `com.gchapiewski.stopapp`; app name decided later.
-- Practice with bots ships in the app (solo mode, also for App Review).
+- Practice with bots ships in the app (solo mode, also for App Review). Revised 2026-11-27: Debug builds only; App Review uses two iPhones.
+- Scoring never auto-advances: everyone sees all the points, and the host moves on to the next category (2026-11-27).
+- The last hosted game's categories are preselected in setup (2026-11-27).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.
 - STOP requires all categories filled; "give up" counts as a stop when the host allows it (configurable).

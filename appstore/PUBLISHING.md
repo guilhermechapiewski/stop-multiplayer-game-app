@@ -52,8 +52,8 @@ App Store Connect → your app → **General** → **App Information**.
 1. **Subtitle**: from [Listing — English (U.S.)](#listing--english-us).
 2. **Category**: Primary **Games**, with subcategories **Word** and **Family**. Secondary:
    **Entertainment** (optional).
-3. **Content Rights**: "No, it does not contain, show, or access third-party content." (The categories and
-   the bots' word lists are written for the app.)
+3. **Content Rights**: "No, it does not contain, show, or access third-party content." (The categories, and
+   the word lists of the Debug-only practice bots, are written for the app.)
 4. **Age Ratings** → **Set Up Age Ratings**. Answer every question **No** or **None**:
    - In-App Controls, Capabilities (web access, user-generated content, messaging, advertising...): all
      **No**. Answers are typed for the game and shown only to the other phones in the same room; nothing is
@@ -103,7 +103,7 @@ Your app → **General** → **App Privacy**.
    `Config/Project.xcconfig`. Every upload needs a higher build number: bump `CURRENT_PROJECT_VERSION` in that
    file before each upload, and commit the change (it holds nothing private). The Version must match the
    version page in App Store Connect.
-3. **Product → Archive** (Release configuration: no debug launch arguments).
+3. **Product → Archive** (Release configuration: no debug launch arguments, and no Practice with bots).
 4. The **Organizer** opens → the archive → **Distribute App** → **App Store Connect** →
    **Distribute**.
 5. After 5–30 minutes, **TestFlight** shows the build and you get an email.
@@ -116,7 +116,6 @@ You need at least 2 iPhones (more is better).
    **Invite Testers** → add yourself and whoever owns the other phones.
 2. Install **TestFlight** from the App Store on each iPhone, accept the invite, install.
 3. Check (details in [`docs/device-test-checklist.md`](../docs/device-test-checklist.md)):
-   - [ ] **Practice with bots** on one phone plays a full round, with no Local Network prompt.
    - [ ] Host on one phone and join from the other, both on the same Wi-Fi: play a round to the results.
    - [ ] Join with no router: Wi-Fi on but not joined to a network, on both phones.
    - [ ] Lock a player's phone mid-round: the host shows the "left the app" banner; unlock: it rejoins.
@@ -174,21 +173,19 @@ running the TestFlight build you're submitting.
 1. On each iPhone: **Settings → Control Center**: make sure **Screen Recording** is in Control Center.
 2. Close the app on both phones if it's open (swipe it away in the app switcher), so the recording shows a
    real launch.
-3. **One phone first.** Start a screen recording on phone A, launch the app, tap **Practice with bots**, start
-   a game with 2 bots, play one short round: write the answers, tap **STOP**, score your answers, and show the
-   results. End the game.
-4. **Two phones.** Start screen recordings on both phones (or record phone A's screen and film phone B with a
+3. **Two phones.** Start screen recordings on both phones (or record phone A's screen and film phone B with a
    third device). In about 3 minutes:
    - Phone A: **Host a game** → keep the default categories → wait in the lobby.
    - Phone B: **Join a game** → tap phone A's game (allow Local Network if asked: show the prompt).
    - Phone A: **Start**. Both phones show the letter and the 3-2-1 countdown.
    - Both: write an answer in every category; tap **STOP** on both (or on one, if one stop is required).
-   - Both: score each category; show the round results.
+   - Both: score each category (each phone shows everyone's points); phone A taps **Next category** after
+     each one, then **See results**.
    - Lock phone B for a few seconds: phone A shows the "left the app" banner. Unlock phone B: it rejoins and
      phone A shows that it's back.
    - Phone A: **End game**; both show the final standings.
-5. Stop the recordings (the red indicator at the top → **Stop**). They're saved to Photos.
-6. Trim them in Photos if needed and put them together or side by side (iMovie or QuickTime), AirDrop the
+4. Stop the recordings (the red indicator at the top → **Stop**). They're saved to Photos.
+5. Trim them in Photos if needed and put them together or side by side (iMovie or QuickTime), AirDrop the
    file to your Mac, and add it under **App Review Information → Attachment**. (If the file is too large,
    export it at a lower resolution.)
 
@@ -239,9 +236,8 @@ HOW TO PLAY
 • Everyone nearby taps Join a game and picks the game. No codes to type.
 • A letter appears, then a 3-2-1 countdown, and everyone writes at the same time.
 • Fill in every category and tap STOP. When enough players stop, every phone locks instantly.
-• Score together: everyone sees all the answers and gives their own 10 (unique), 5 (repeated) or 0. The app never judges; the table decides.
+• Score together: everyone sees all the answers and gives their own 10 (unique), 5 (repeated) or 0, with everyone's points on every phone. When all have scored, the host moves on to the next category. The app never judges; the table decides.
 • See the round ranking and running totals, and play as many rounds as you like.
-• No one around? Practice with bots: play a solo game against 1 to 5 computer players.
 
 MADE FOR GAME NIGHT
 • Works on the same Wi-Fi, or with just Wi-Fi turned on and no network at all. No internet needed.
@@ -249,7 +245,7 @@ MADE FOR GAME NIGHT
 • The host decides how many stops end a round, and can let players give up on a hard letter.
 • All 26 letters, with no repeats until every letter has come up.
 • In English and Portuguese: each phone shows its own language in the same game.
-• Built-in and custom categories, haptics, optional sounds, VoiceOver, larger text and dark mode.
+• Built-in and custom categories (your last game's categories are ready for the next one), haptics, optional sounds, VoiceOver, larger text and dark mode.
 
 PRIVATE BY DESIGN
 No ads, no in-app purchases, no accounts, no analytics and no tracking. The app talks only to the other phones in your game on your local network; names, answers and scores never leave it. While you host, your display name is shown to nearby phones that open Join a game, so friends can find your game.
@@ -265,22 +261,23 @@ word game,party,family,categories,stop,offline,friends,multiplayer,local,game ni
 
 **Review Notes** (4000):
 ```
-TRY IT ON ONE DEVICE: on the home screen, tap Practice with bots and start a game. The whole game (letter, countdown, writing, STOP, scoring, results, final standings) can be played on a single iPhone against computer players, with no network and no Local Network prompt.
+THIS APP NEEDS TWO IPHONES. Stop is a multiplayer game for people in the same room: each player uses their own iPhone, and the phones connect directly to each other over the local network. To review it, use two iPhones on the same Wi-Fi network, or near each other with Wi-Fi turned on (they don't need to be joined to a network). No internet connection, account or server is needed.
 
 1. SCREEN RECORDING
-Attached. Recorded on [iPhone models] running iOS [version]. It starts with a short Practice with bots round on one iPhone, then shows two iPhones playing together: hosting, joining, one round, STOP, scoring and results, and one phone being locked to show the "left the app" banner and rejoining. The app has no account registration or login, no user-generated content shared beyond the room and no paid content, so there are no such flows to show.
+Attached. Recorded on [iPhone models] running iOS [version]. It shows two iPhones playing a full round together: hosting, joining (with the Local Network prompt), the letter and countdown, writing, STOP, scoring each category and the round results, then one phone being locked to show the "left the app" banner and rejoining, and the final standings. The app has no account registration or login, no user-generated content shared beyond the room and no paid content, so there are no such flows to show.
 
 2. PURPOSE AND AUDIENCE
 Stop: Multiplayer Party Game is a free version of Stop (also called Adedanha), the classic category word game, for family and friends sitting in the same room. Each person plays on their own iPhone: a letter is drawn, everyone writes a word for each category, the first to finish calls STOP, and the players score their own answers together. It needs no internet connection, no accounts and no server; the phones talk directly to each other.
 
 3. HOW TO USE THE APP
-No login, setup or sample files are needed. On first launch, enter any display name.
-- Single device: tap Practice with bots, choose the number of bots, tap Start, then tap Start again in the lobby.
-- Multiplayer needs two or more iPhones on the same Wi-Fi network, or near each other with Wi-Fi turned on (they don't need to be joined to a network).
-- Host (iPhone A): tap Host a game, keep the default categories (or edit them), and wait in the lobby. Tap Start once the other player appears.
-- Joiner (iPhone B): tap Join a game and tap iPhone A's game in the list.
-- Both: after the letter and the 3-2-1 countdown, type a word in each field and tap STOP. Then each player taps 10, 5 or 0 for their own answer in each category. The host then chooses Next round or End game.
-The first time you host or join, iOS asks for Local Network permission: tap Allow. The app uses it only to find and connect to the other iPhones in the game (Bonjour on the local network). If it's denied, the app explains how to turn it on in Settings; Practice with bots works without it.
+No login, setup or sample files are needed. On first launch, enter any display name on each iPhone.
+1) iPhone A (host): tap Host a game, keep the default categories (or edit them) and tap Create game. The lobby opens.
+2) iPhone B: tap Join a game and tap iPhone A's game in the list. It appears in iPhone A's lobby.
+3) iPhone A: tap Start. Both phones show the letter, then a 3-2-1 countdown.
+4) Both: type a word starting with that letter in every field, then tap STOP (by default one STOP ends the round). Every phone locks at once.
+5) Scoring, one category at a time: both phones show everyone's answers and points. Each player taps 10, 5 or 0 for their own answer. When both have scored, iPhone A taps Next category (See results after the last one).
+6) Round results: iPhone A taps Next round to play again, or End game to show the final standings on both phones.
+The first time you host or join, iOS asks for Local Network permission: tap Allow on both phones. The app uses it only to find and connect to the other iPhones in the game (Bonjour on the local network). If it's denied, the app explains how to turn it on in Settings.
 
 4. EXTERNAL SERVICES
 None. The app contains no third-party SDKs and makes no internet requests: no analytics, advertising, authentication, payment, cloud or AI services. Its only network traffic is between the iPhones in a game, on the local network.
@@ -289,7 +286,7 @@ None. The app contains no third-party SDKs and makes no internet requests: no an
 None. The app works the same in every region. Its interface is in English and Brazilian Portuguese.
 
 6. REGULATED INDUSTRY OR THIRD-PARTY MATERIAL
-Not applicable. The app is not in a regulated industry and contains no protected third-party material. Stop is a traditional game implemented from scratch; the categories and word lists are written for the app. The source code is public under the MIT license: https://github.com/guilhermechapiewski/stop-multiplayer-game-app
+Not applicable. The app is not in a regulated industry and contains no protected third-party material. Stop is a traditional game implemented from scratch; the categories are written for the app. The source code is public under the MIT license: https://github.com/guilhermechapiewski/stop-multiplayer-game-app
 ```
 
 ## Listing — Portuguese (Brazil)
@@ -318,9 +315,8 @@ COMO JOGAR
 • Quem está por perto toca em Entrar em uma partida e escolhe a partida. Sem códigos para digitar.
 • Aparece uma letra, depois uma contagem 3-2-1, e todo mundo escreve ao mesmo tempo.
 • Preencha todas as categorias e toque em STOP. Quando jogadores suficientes dão STOP, todos os celulares travam na hora.
-• Pontuem juntos: todo mundo vê todas as respostas e dá a própria nota: 10 (única), 5 (repetida) ou 0. O app nunca julga; quem decide é a turma.
+• Pontuem juntos: todo mundo vê todas as respostas e dá a própria nota: 10 (única), 5 (repetida) ou 0, com os pontos de todos em todos os celulares. Quando todo mundo pontuou, quem criou o jogo passa para a próxima categoria. O app nunca julga; quem decide é a turma.
 • Vejam a classificação da rodada e o placar geral, e joguem quantas rodadas quiserem.
-• Ninguém por perto? Treine com robôs: jogue sozinho contra 1 a 5 jogadores do computador.
 
 FEITO PARA REUNIR A TURMA
 • Funciona no mesmo Wi-Fi, ou só com o Wi-Fi ligado e sem rede nenhuma. Não precisa de internet.
@@ -328,7 +324,7 @@ FEITO PARA REUNIR A TURMA
 • Quem cria o jogo decide quantos STOPs encerram a rodada, e pode deixar os jogadores desistirem de uma letra difícil.
 • Todas as 26 letras, sem repetir até que todas tenham saído.
 • Em português e inglês: cada celular mostra o próprio idioma na mesma partida.
-• Categorias prontas e personalizadas, vibração, sons opcionais, VoiceOver, texto maior e modo escuro.
+• Categorias prontas e personalizadas (as da última partida já ficam prontas para a próxima), vibração, sons opcionais, VoiceOver, texto maior e modo escuro.
 
 PRIVACIDADE DE VERDADE
 Sem anúncios, sem compras no app, sem contas, sem análises de uso e sem rastreamento. O app só conversa com os outros celulares da sua partida, na sua rede local; nomes, respostas e pontos nunca saem dela. Enquanto você hospeda uma partida, o seu nome aparece para os celulares por perto que abrem Entrar em um jogo, para que os amigos encontrem a sua partida.

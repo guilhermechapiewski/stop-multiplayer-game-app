@@ -20,8 +20,7 @@ qualquer serviço na internet.
 
 O Stop usa apenas a sua rede local, para encontrar outros iPhones por perto e jogar com eles: na mesma rede
 Wi-Fi, ou diretamente por Wi-Fi ponto a ponto quando não há roteador. É por isso que o iOS pede permissão de
-**Rede Local** na primeira vez que você cria ou entra em uma partida. O modo Treinar com robôs funciona só no
-seu iPhone e não usa a rede.
+**Rede Local** na primeira vez que você cria ou entra em uma partida.
 
 Durante uma partida, o seu nome, as suas respostas e os seus pontos são enviados apenas aos outros celulares
 dessa partida, para que todos possam jogar e pontuar juntos. Esses dados do jogo nunca saem da sua rede local
@@ -37,11 +36,11 @@ Para funcionar, o app guarda algumas poucas informações no armazenamento priva
 
 - **O seu nome**, e um identificador aleatório que o app cria para que os outros celulares reconheçam você
   quando você volta para uma partida.
-- **As suas categorias personalizadas**, para você usá-las de novo em próximas partidas.
+- **As suas categorias personalizadas**, e as categorias da última partida que você criou, para você usá-las
+  de novo em próximas partidas.
 - **Uma partida em andamento** e as respostas que você está escrevendo (rascunhos), para que a partida possa
   continuar se o app for fechado ou a conexão cair. Se você criou o jogo, a partida salva inclui os nomes,
-  as respostas e os pontos dos outros jogadores. Tudo isso é apagado quando a partida termina. Partidas de
-  Treinar com robôs não são guardadas.
+  as respostas e os pontos dos outros jogadores. Tudo isso é apagado quando a partida termina.
 - **As suas configurações**, como os sons.
 
 Apagar o app remove tudo isso.
