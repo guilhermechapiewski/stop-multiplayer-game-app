@@ -141,11 +141,11 @@ struct GameScreen: View {
         case .collecting:
             if let state, let round { CollectingView(client: client, state: state, round: round) }
         case .scoring:
-            ScoringPhaseView(client: client)
+            if let state, let round { ScoringView(client: client, state: state, round: round) }
         case .roundResults:
-            RoundResultsPhaseView(client: client)
+            if let state, let round { RoundResultsView(client: client, state: state, round: round) }
         case .gameOver:
-            GameOverPhaseView(client: client, onClose: onLeave)
+            if let state { GameOverView(client: client, state: state, onClose: onLeave) }
         }
     }
 }

@@ -12,6 +12,28 @@
         }
       }
     },
+    "%@ tie!" : {
+      "comment" : "Game over title when several other players share first place. %@ is a list of names, e.g. \"Ana and Bia\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empate: %@!"
+          }
+        }
+      }
+    },
+    "%@ wins!" : {
+      "comment" : "Game over title. %@ is the winner's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ venceu!"
+          }
+        }
+      }
+    },
     "%@ · In progress" : {
       "comment" : "Join list detail for a game that already started. %@ is the player count, e.g. \"5 players\".",
       "localizations" : {
@@ -23,6 +45,39 @@
         }
       }
     },
+    "%@, %lld points" : {
+      "comment" : "VoiceOver value of a scoring row once the category is complete. %@ is the answer, %lld the points.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$lld pontos"
+          }
+        }
+      }
+    },
+    "%@, not scored yet" : {
+      "comment" : "VoiceOver value of a scoring row. %@ is the answer.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, ainda sem pontuação"
+          }
+        }
+      }
+    },
+    "%@, scored" : {
+      "comment" : "VoiceOver value of a scoring row once that player has scored. %@ is the answer.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, pontuada"
+          }
+        }
+      }
+    },
     "%@’s game" : {
       "comment" : "Name of a game in the Join list and the lobby title for guests. %@ is the host's name.",
       "localizations" : {
@@ -30,6 +85,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jogo de %@"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "comment" : "Scoring progress next to the category name, e.g. \"2 of 8\": the category being scored and how many there are.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld"
           }
         }
       }
@@ -68,6 +134,112 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "%lld jogadores"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld points" : {
+      "comment" : "A number of points (score buttons' VoiceOver label, standings, winner's total).",
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ponto"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pontos"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pontos"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld point"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld points"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld points"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld pts" : {
+      "comment" : "Points in the standings, abbreviated.",
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pt"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pts"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pts"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pt"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pts"
+                }
+              },
+              "zero" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pts"
                 }
               }
             }
@@ -123,6 +295,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld. %@"
+          }
+        }
+      }
+    },
+    "(you)" : {
+      "comment" : "Next to the local player's name in scoring and standings.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "(você)"
           }
         }
       }
@@ -233,6 +416,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pede confirmação para remover este jogador."
+          }
+        }
+      }
+    },
+    "Away — score for %@" : {
+      "comment" : "Host-only control in scoring for a player who is away. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausente — pontue por %@"
           }
         }
       }
@@ -425,7 +619,7 @@
       }
     },
     "End the game?" : {
-      "comment" : "Confirmation title for the host's End game.",
+      "comment" : "Confirmation title for the host's End game (game menu and round results).",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -479,6 +673,17 @@
         }
       }
     },
+    "Everyone has scored!" : {
+      "comment" : "Scoring: the category is complete and the game moves on in a moment.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo mundo pontuou!"
+          }
+        }
+      }
+    },
     "Everyone needs the same app version" : {
       "comment" : "Title when the host runs a different app version.",
       "localizations" : {
@@ -486,6 +691,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todos precisam da mesma versão do app"
+          }
+        }
+      }
+    },
+    "Everyone sees the final standings." : {
+      "comment" : "Message of the host's end-game confirmation on round results.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo mundo vê a classificação final."
           }
         }
       }
@@ -508,6 +724,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Preencha todas as categorias para dar STOP."
+          }
+        }
+      }
+    },
+    "Final standings" : {
+      "comment" : "Game over: heading of the final ranking.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classificação final"
           }
         }
       }
@@ -633,13 +860,13 @@
         }
       }
     },
-    "Get ready…" : {
-      "comment" : "Placeholder title during the 3-2-1 countdown.",
+    "Give %@ %lld points" : {
+      "comment" : "VoiceOver label of the host's score-for-someone buttons. %@ is the player's name, %lld the points.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Prepare-se…"
+            "value" : "Dar %2$lld pontos para %1$@"
           }
         }
       }
@@ -820,6 +1047,17 @@
       },
       "comment" : "Button that stops reconnecting to an interrupted game."
     },
+    "Left — score for %@" : {
+      "comment" : "Host-only control in scoring for a player who left. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saiu — pontue por %@"
+          }
+        }
+      }
+    },
     "Letter %@" : {
       "comment" : "The round's letter. %@ is a single letter.",
       "localizations" : {
@@ -882,6 +1120,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novo jogo"
+          }
+        }
+      }
+    },
+    "Next round" : {
+      "comment" : "Host button on round results that starts the next round; also the heading of the next round's rules.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próxima rodada"
+          }
+        }
+      }
+    },
+    "Nobody scored this time" : {
+      "comment" : "Game over title when every total is 0.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguém pontuou desta vez"
           }
         }
       }
@@ -1028,6 +1288,17 @@
         }
       },
       "comment" : "About link to the privacy policy web page."
+    },
+    "Rank %lld, %@" : {
+      "comment" : "VoiceOver label of a standings row. %lld is the rank, %@ the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lldº lugar, %2$@"
+          }
+        }
+      }
     },
     "Reconnecting" : {
       "comment" : "VoiceOver: this player's connection dropped.",
@@ -1194,13 +1465,13 @@
         }
       }
     },
-    "Scoring" : {
-      "comment" : "Placeholder title for the scoring screen.",
+    "Score your answer" : {
+      "comment" : "Title above the 10 / 5 / 0 score picker.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pontuação"
+            "value" : "Pontue sua resposta"
           }
         }
       }
@@ -1535,6 +1806,17 @@
         }
       }
     },
+    "This round" : {
+      "comment" : "Round results section: ranking for the round just played.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nesta rodada"
+          }
+        }
+      }
+    },
     "This round started before you joined. You’ll play from the next one." : {
       "comment" : "Writing screen note for a player who joined mid-round.",
       "localizations" : {
@@ -1553,6 +1835,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Essas configurações não funcionam. Confira as categorias e os STOPs."
+          }
+        }
+      }
+    },
+    "Total" : {
+      "comment" : "Round results section: overall ranking so far.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
           }
         }
       }
@@ -1590,6 +1883,17 @@
       },
       "comment" : "About screen version line. %@ is like 1.0 (1)."
     },
+    "Waiting for %@" : {
+      "comment" : "Scoring: who still has to score. %@ is a list of names, e.g. \"Ana and Bia\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando %@"
+          }
+        }
+      }
+    },
     "Waiting for %@ to start…" : {
       "comment" : "Lobby bottom bar for guests. %@ is the host's name.",
       "localizations" : {
@@ -1597,6 +1901,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esperando %@ começar…"
+          }
+        }
+      }
+    },
+    "Waiting for %@…" : {
+      "comment" : "Round results for players: waiting for the host. %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando %@…"
           }
         }
       }
@@ -1633,17 +1948,6 @@
         }
       },
       "comment" : "Onboarding question above the name field."
-    },
-    "Write your answers" : {
-      "comment" : "Placeholder title for the writing screen.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Escreva suas respostas"
-          }
-        }
-      }
     },
     "You" : {
       "comment" : "VoiceOver: this chip is the local player.",
@@ -1722,6 +2026,17 @@
         }
       }
     },
+    "You tie with %@!" : {
+      "comment" : "Game over title when the local player shares first place. %@ is the other winners' names.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você empatou com %@!"
+          }
+        }
+      }
+    },
     "You were removed from the game" : {
       "comment" : "Title when the host removed this player.",
       "localizations" : {
@@ -1729,6 +2044,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você foi removido do jogo"
+          }
+        }
+      }
+    },
+    "You won!" : {
+      "comment" : "Game over title when the local player is the only winner.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você venceu!"
           }
         }
       }
@@ -1789,7 +2115,7 @@
       }
     },
     "You’ll play from the next round." : {
-      "comment" : "Error toast when a player who isn't in the current round tries to play it.",
+      "comment" : "Shown to a player who joined mid-round, instead of the score picker; also an error message.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1817,6 +2143,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você criou o jogo, então sair encerra o jogo em todos os celulares."
+          }
+        }
+      }
+    },
+    "· away" : {
+      "comment" : "Next to a player's name in scoring when they are temporarily disconnected.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· ausente"
+          }
+        }
+      }
+    },
+    "· left" : {
+      "comment" : "Next to a player's name when they left the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "· saiu"
           }
         }
       }

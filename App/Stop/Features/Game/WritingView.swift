@@ -93,7 +93,7 @@ struct WritingView: View {
         let frozen = frozen
         return VStack(spacing: Theme.Spacing.m) {
             ForEach(Array(categories.enumerated()), id: \.offset) { index, category in
-                AnswerField(model: model, index: index, category: category, isLast: index == categories.count - 1,
+                AnswerField(model: model, index: index, category: category, letter: round.letter, isLast: index == categories.count - 1,
                             frozenText: frozen.map { $0.indices.contains(index) ? $0[index] : "" },
                             focus: $focus)
                     .id(index)

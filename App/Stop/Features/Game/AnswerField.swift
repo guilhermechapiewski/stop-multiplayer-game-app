@@ -7,6 +7,8 @@ struct AnswerField: View {
     let model: WritingModel
     let index: Int
     let category: String
+    /// The round's letter, as the empty field's placeholder.
+    let letter: String
     let isLast: Bool
     /// Shown, read-only, instead of the typed text once the answers are frozen (STOP, give up or the lock).
     let frozenText: String?
@@ -14,11 +16,12 @@ struct AnswerField: View {
 
     @State private var text: String
 
-    init(model: WritingModel, index: Int, category: String, isLast: Bool, frozenText: String?,
+    init(model: WritingModel, index: Int, category: String, letter: String, isLast: Bool, frozenText: String?,
          focus: FocusState<Int?>.Binding) {
         self.model = model
         self.index = index
         self.category = category
+        self.letter = letter
         self.isLast = isLast
         self.frozenText = frozenText
         self.focus = focus
@@ -52,7 +55,7 @@ struct AnswerField: View {
                         .accessibilityLabel(Text(verbatim: category))
                         .accessibilityValue(frozenText.isEmpty ? Text("Blank") : Text(verbatim: frozenText))
                 } else {
-                    TextField(text: $text) { Text(verbatim: category) }
+                    TextField(text: $text) { Text(verbatim: "\(letter)…") }
                         .focused(focus, equals: index)
                         .autocorrectionDisabled()
                         .textInputAutocapitalization(.words)
@@ -83,9 +86,9 @@ struct AnswerField: View {
     let model = WritingModel(categoryCount: 3, client: PreviewData.client(isHost: true, phase: .writing),
                              initial: ["Bear", "", ""])
     VStack(spacing: Theme.Spacing.m) {
-        AnswerField(model: model, index: 0, category: "Animal", isLast: false, frozenText: nil, focus: $focus)
-        AnswerField(model: model, index: 1, category: "Country", isLast: false, frozenText: nil, focus: $focus)
-        AnswerField(model: model, index: 2, category: "Fruit", isLast: true, frozenText: "", focus: $focus)
+        AnswerField(model: model, index: 0, category: "Animal", letter: "B", isLast: false, frozenText: nil, focus: $focus)
+        AnswerField(model: model, index: 1, category: "Country", letter: "B", isLast: false, frozenText: nil, focus: $focus)
+        AnswerField(model: model, index: 2, category: "Fruit", letter: "B", isLast: true, frozenText: "", focus: $focus)
     }
     .padding()
     .background(Theme.background)
