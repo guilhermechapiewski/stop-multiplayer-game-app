@@ -10,7 +10,9 @@ public struct WireMessage: Codable, Sendable, Equatable {
     public var body: Body
 
     public enum Body: Codable, Sendable, Equatable {
-        case hello(playerID: PlayerID, name: String, gameID: UUID?, lastVersion: Int?)
+        /// `explicitRejoin`: the player chose this game in the Join list (not an automatic reconnect or a
+        /// rejoin after relaunch). Only then does the host take back a player it removed.
+        case hello(playerID: PlayerID, name: String, gameID: UUID?, lastVersion: Int?, explicitRejoin: Bool)
         case welcome(GameState)
         case rejected(RejectReason)
         case intent(id: UUID, Intent)

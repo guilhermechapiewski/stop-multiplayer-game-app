@@ -27,6 +27,10 @@ Durante uma partida, o seu nome, as suas respostas e os seus pontos são enviado
 dessa partida, para que todos possam jogar e pontuar juntos. Esses dados do jogo nunca saem da sua rede local
 e nunca são enviados ao desenvolvedor nem a mais ninguém.
 
+Enquanto você hospeda uma partida, o seu nome aparece para os celulares por perto que abrem **Entrar em um
+jogo**, para que os amigos encontrem a sua partida. Ele é anunciado só na sua rede local (via Bonjour), e só
+até a partida terminar.
+
 ## Dados guardados no seu iPhone
 
 Para funcionar, o app guarda algumas poucas informações no armazenamento privado dele, apenas no seu iPhone:

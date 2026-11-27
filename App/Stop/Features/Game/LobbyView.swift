@@ -6,6 +6,8 @@ import SwiftUI
 struct LobbyView: View {
     let client: any GameClient
     let state: GameState
+    /// Local network access is off: as the host, nearby phones can't find this game.
+    var networkDenied = false
 
     @Environment(\.reduceMotion) private var reduceMotion
     @Environment(\.isPracticeGame) private var isPractice
@@ -23,6 +25,7 @@ struct LobbyView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.l) {
                 header
+                if showsNetworkDenied { networkDeniedCard }
                 playersCard
                 rulesCard
                 categoriesCard
@@ -67,6 +70,32 @@ struct LobbyView: View {
         } else {
             Text("You’re in! The game starts when \(hostName) is ready.")
         }
+    }
+
+    // MARK: Local network
+
+    private var showsNetworkDenied: Bool { networkDenied && client.isHost && !isPractice }
+
+    /// Nobody can find the game until Local Network access is back on.
+    private var networkDeniedCard: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.m) {
+            Label {
+                Text("Allow Local Network access")
+            } icon: {
+                Image(systemName: "wifi.exclamationmark")
+                    .foregroundStyle(Theme.accent)
+            }
+            .font(Theme.Typography.headline)
+            .accessibilityAddTraits(.isHeader)
+            Text("Local Network access is off, so friends nearby can’t find your game. Turn it on in Settings.")
+                .font(Theme.Typography.body)
+                .foregroundStyle(.secondary)
+            OpenSettingsButton()
+        }
+        .padding(Theme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .accessibilityIdentifier("lobbyNetworkDenied")
     }
 
     // MARK: Players
@@ -228,6 +257,13 @@ private struct LobbyCard<Content: View>: View {
     let client = PreviewData.client(isHost: false)
     NavigationStack {
         LobbyView(client: client, state: client.state!)
+    }
+}
+
+#Preview("Lobby – host, no local network") {
+    let client = PreviewData.client(isHost: true)
+    NavigationStack {
+        LobbyView(client: client, state: client.state!, networkDenied: true)
     }
 }
 

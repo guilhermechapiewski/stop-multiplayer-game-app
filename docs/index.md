@@ -54,7 +54,8 @@ The app is in English and Brazilian Portuguese, and each phone uses its own lang
 ## Private by design
 
 Stop collects no data. It shows no ads and has no accounts. It only talks to the other phones in your game,
-on your local network, and names, answers and scores never leave it. [Privacy policy](privacy/).
+on your local network, and names, answers and scores never leave it. While you host, your display name is
+shown to nearby phones that open Join a game, so friends can find your game. [Privacy policy](privacy/).
 
 ## Help and feedback
 

@@ -11,6 +11,11 @@ public final class HostSession {
     public private(set) var state: GameState
     /// The `GameClient` for the host's own UI.
     public let localClient: LocalGameClient
+    /// Local network access is denied, so nearby phones can't find or reach this game (the UI points to
+    /// Settings). Cleared once browsing works again.
+    public internal(set) var isLocalNetworkDenied = false
+    /// How long the listener and connections stay up after `shutdown()`, so clients get the final snapshot.
+    public static let shutdownGrace: Duration = .seconds(5)
 
     let factory: any TransportFactory
     let store: any GameStore
@@ -20,6 +25,13 @@ public final class HostSession {
 
     @ObservationIgnored var listener: (any Listener)?
     @ObservationIgnored var listenerFailed = false
+    /// Started when the listener last failed; with `listenerRestarts`, picks when to restart it.
+    @ObservationIgnored var listenerFailedAt: Stopwatch?
+    /// Automatic restarts since the last foreground; picks the backoff delay.
+    @ObservationIgnored var listenerRestarts = 0
+    /// Browses for our own service type only to learn whether local network access is denied: a listener
+    /// doesn't reliably report it.
+    @ObservationIgnored var permissionBrowser: (any Browser)?
     @ObservationIgnored var advertised: Advertisement?
     @ObservationIgnored var openConnections: [UUID: any Connection] = [:]
     @ObservationIgnored var connectionPlayer: [UUID: PlayerID] = [:]
@@ -60,6 +72,7 @@ public final class HostSession {
     public func start() {
         guard !isShutDown, listener == nil else { return }
         startListener()
+        startPermissionBrowser()
         startLoops()
         let ref = ActiveGameRef(gameID: state.gameID, role: .host, hostName: hostName)
         enqueueStore { await $0.saveActiveGame(ref) }
@@ -72,28 +85,34 @@ public final class HostSession {
         guard !isShutDown else { return }
         broadcast(.goingAway)
         stopLoops()
+        stopPermissionBrowser()
         localClient.flushDraft()
         persist()
     }
 
-    /// Scene foreground: restart a failed listener and the loops, then resync everyone.
+    /// Scene foreground: restart a failed listener (or any listener while access was denied: the player may have
+    /// just allowed it in Settings), check access again, restart the loops, then resync everyone.
     public func resume() {
         guard !isShutDown else { return }
-        if listener == nil || listenerFailed {
-            listener?.stop()
-            startListener()
+        listenerRestarts = 0
+        if listener == nil || listenerFailed || isLocalNetworkDenied {
+            restartListener()
         }
+        stopPermissionBrowser()
+        startPermissionBrowser()
         lastSeen = lastSeen.mapValues { _ in Stopwatch(clock) }
         startLoops()
         broadcastSnapshots()
     }
 
     /// Stops everything and clears the persisted game, its reference and drafts. The listener and connections
-    /// stay up 5 s more so clients receive the final snapshot.
+    /// stay up for `shutdownGrace` so clients receive the final snapshot (whoever owns the session must keep it
+    /// alive that long).
     public func shutdown() {
         guard !isShutDown else { return }
         isShutDown = true
         stopLoops()
+        stopPermissionBrowser()
         localClient.discardPendingDraft()
         let gameID = state.gameID
         enqueueStore { store in
@@ -102,7 +121,7 @@ public final class HostSession {
             await store.clearDrafts(gameID: gameID)
         }
         Task { [weak self, clock] in
-            do { try await clock.sleep(for: .seconds(5)) } catch { return }
+            do { try await clock.sleep(for: Self.shutdownGrace) } catch { return }
             guard !Task.isCancelled else { return }
             self?.closeTransport()
         }
@@ -221,8 +240,11 @@ public final class HostSession {
         }
     }
 
-    /// Sends `.heartbeat` to everyone and marks players away once silent for `awayAfter`.
+    /// Sends `.heartbeat` to everyone and marks players away once silent for `awayAfter`. Also restarts a
+    /// failed listener (after a backoff) and a permission browser that ended.
     private func heartbeat() {
+        restartListenerIfDue()
+        if permissionBrowser == nil { startPermissionBrowser() }
         broadcast(.heartbeat)
         for player in Array(playerConnection.keys) where (lastSeen[player]?.elapsed ?? .zero) >= timing.awayAfter {
             markAway(player)

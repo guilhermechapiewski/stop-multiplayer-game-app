@@ -11,8 +11,8 @@ struct WireMessageTests {
 
     @Test func wireMessagesRoundTrip() throws {
         let bodies: [WireMessage.Body] = [
-            .hello(playerID: UUID(), name: "Ana", gameID: UUID(), lastVersion: 4),
-            .hello(playerID: UUID(), name: "Bo", gameID: nil, lastVersion: nil),
+            .hello(playerID: UUID(), name: "Ana", gameID: UUID(), lastVersion: 4, explicitRejoin: true),
+            .hello(playerID: UUID(), name: "Bo", gameID: nil, lastVersion: nil, explicitRejoin: false),
             .welcome(Self.state), .rejected(.versionMismatch), .rejected(.gameClosed), .rejected(.wrongGame),
             .intent(id: UUID(), .stop(answers: ["a", "b"])), .ack(id: UUID(), error: .wrongPhase),
             .ack(id: UUID(), error: nil), .snapshot(Self.state), .heartbeat, .goingAway, .bye,

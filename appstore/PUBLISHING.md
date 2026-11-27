@@ -103,8 +103,8 @@ Your app → **General** → **App Privacy**.
 2. **Data Collection** → **Get Started** → "**No, we do not collect data from this app**" →
    **Save** → **Publish**. The label then reads **Data Not Collected**. That's true: Apple counts data as
    collected when it's sent off the device to the developer or to third parties. The game's names, answers
-   and scores go only to the other phones in the game over the local network, and nothing reaches the
-   developer or any service.
+   and scores go only to the other phones in the game over the local network (the host's name is also
+   shown to nearby phones browsing for games), and nothing reaches the developer or any service.
 
 ## Step 7. Build and upload
 
@@ -262,7 +262,7 @@ MADE FOR GAME NIGHT
 • Built-in and custom categories, haptics, optional sounds, VoiceOver, larger text and dark mode.
 
 PRIVATE BY DESIGN
-No ads, no in-app purchases, no accounts, no analytics and no tracking. The app talks only to the other phones in your game on your local network; names, answers and scores never leave it.
+No ads, no in-app purchases, no accounts, no analytics and no tracking. The app talks only to the other phones in your game on your local network; names, answers and scores never leave it. While you host, your display name is shown to nearby phones that open Join a game, so friends can find your game.
 
 FREE AND OPEN SOURCE
 {{APP_NAME}} is completely free, with nothing to unlock. Its source code is published on GitHub under the MIT license.
@@ -341,7 +341,7 @@ FEITO PARA REUNIR A TURMA
 • Categorias prontas e personalizadas, vibração, sons opcionais, VoiceOver, texto maior e modo escuro.
 
 PRIVACIDADE DE VERDADE
-Sem anúncios, sem compras no app, sem contas, sem análises de uso e sem rastreamento. O app só conversa com os outros celulares da sua partida, na sua rede local; nomes, respostas e pontos nunca saem dela.
+Sem anúncios, sem compras no app, sem contas, sem análises de uso e sem rastreamento. O app só conversa com os outros celulares da sua partida, na sua rede local; nomes, respostas e pontos nunca saem dela. Enquanto você hospeda uma partida, o seu nome aparece para os celulares por perto que abrem Entrar em um jogo, para que os amigos encontrem a sua partida.
 
 GRÁTIS E DE CÓDIGO ABERTO
 {{APP_NAME}} é totalmente grátis, sem nada para desbloquear. O código-fonte está publicado no GitHub sob a licença MIT.

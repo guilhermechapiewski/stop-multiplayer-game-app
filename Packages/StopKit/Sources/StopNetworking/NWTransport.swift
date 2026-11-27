@@ -77,17 +77,27 @@ final class NWTransportListener: Listener {
             return stream
         }
         if advertises { listener.service = service(ad) }
-        // The handlers capture only the continuation (and the listener weakly), so there is no retain cycle.
+        // The handlers capture the continuation, and self and the listener weakly, so there is no retain cycle.
         // `stop()` finishes the continuation before cancelling, so a requested stop emits no `.failed`.
-        listener.stateUpdateHandler = { [weak listener] newState in
+        listener.stateUpdateHandler = { [weak self, weak listener] newState in
             switch newState {
             case .ready:
                 continuation.yield(.ready)
-            case .failed, .cancelled:
+            case .waiting(let error):
+                // Waiting for local network permission (or for a network): only the former is actionable.
+                if NWTransportBrowser.isPolicyDenied(error) { continuation.yield(.permissionDenied) }
+            case .failed(let error):
+                if NWTransportBrowser.isPolicyDenied(error) { continuation.yield(.permissionDenied) }
+                fallthrough
+            case .cancelled:
                 continuation.yield(.failed)
                 continuation.finish()
-                listener?.cancel()
-            case .setup, .waiting:
+                if let listener {
+                    // Forget it, so `port` and `update(_:)` don't act on a dead listener.
+                    self?.clear(listener)
+                    listener.cancel()
+                }
+            case .setup:
                 break
             @unknown default:
                 break
@@ -115,6 +125,13 @@ final class NWTransportListener: Listener {
         }
         running?.events.finish()
         running?.listener.cancel()
+    }
+
+    /// Drops the running state if it still belongs to `listener` (which failed on its own).
+    private func clear(_ listener: NWListener) {
+        state.withLock { state in
+            if state?.listener === listener { state = nil }
+        }
     }
 
     private func service(_ ad: Advertisement) -> NWListener.Service {

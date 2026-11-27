@@ -56,8 +56,9 @@ O app está em português do Brasil e em inglês, e cada celular usa o próprio 
 ## Privacidade de verdade
 
 O Stop não coleta nenhum dado. Não mostra anúncios e não tem contas. Ele só conversa com os outros celulares
-da sua partida, na sua rede local, e nomes, respostas e pontos nunca saem dela.
-[Política de privacidade](privacidade/).
+da sua partida, na sua rede local, e nomes, respostas e pontos nunca saem dela. Enquanto você hospeda uma
+partida, o seu nome aparece para os celulares por perto que abrem Entrar em um jogo, para que os amigos
+encontrem a sua partida. [Política de privacidade](privacidade/).
 
 ## Ajuda e sugestões
 

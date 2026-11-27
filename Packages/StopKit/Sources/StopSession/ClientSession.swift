@@ -9,6 +9,8 @@ import StopNetworking
 @MainActor @Observable
 public final class ClientSession: GameClient {
     public enum Target: Sendable {
+        /// Chosen in the Join list: the first hello asks to (re)join explicitly, so the host takes back a player
+        /// it removed.
         case discovered(DiscoveredGame)
         /// Browses until a game with this ID appears.
         case rejoin(gameID: UUID)
@@ -41,6 +43,9 @@ public final class ClientSession: GameClient {
     @ObservationIgnored var browsedEndpoint: EndpointRef?
     @ObservationIgnored var connection: (any Connection)?
     @ObservationIgnored var isWelcomed = false
+    /// Hellos say `explicitRejoin` until the first welcome: only the player's own choice in the Join list, never
+    /// an automatic reconnect or a rejoin after relaunch.
+    @ObservationIgnored private var asksExplicitRejoin: Bool
     /// Connection attempts since the last welcome; picks the backoff delay.
     @ObservationIgnored var reconnectAttempts = 0
     @ObservationIgnored var reconnectTask: Task<Void, Never>?
@@ -78,8 +83,10 @@ public final class ClientSession: GameClient {
         case .discovered(let game):
             gameID = game.advertisement.gameID
             lastEndpoint = game.endpoint
+            asksExplicitRejoin = true
         case .rejoin(let id):
             gameID = id
+            asksExplicitRejoin = false
         }
         drafts.onSubmit = { [weak self] round, answers in
             self?.enqueue(.submitAnswers(round: round, answers: answers))
@@ -161,6 +168,10 @@ public final class ClientSession: GameClient {
     public func draft() async -> [String]? { await drafts.draft() }
 
     /// Sends `.leave`, waits up to 1 s for its ack, then says `.bye` and ends.
+    ///
+    /// A leave made while disconnected is not kept for later: delivering it would need a persisted outbox and a
+    /// connection running outside any game, just to turn an "away" chip into "left" (the host can remove the
+    /// player instead).
     public func leave() {
         guard !isEnded, leaveID == nil else { return }
         leaveID = enqueue(.leave)
@@ -217,7 +228,8 @@ public final class ClientSession: GameClient {
     }
 
     func connectionReady() {
-        transmit(.hello(playerID: profile.playerID, name: profile.name, gameID: gameID, lastVersion: state?.version))
+        transmit(.hello(playerID: profile.playerID, name: profile.name, gameID: gameID, lastVersion: state?.version,
+                        explicitRejoin: asksExplicitRejoin))
     }
 
     func receive(_ data: Data) {
@@ -230,6 +242,7 @@ public final class ClientSession: GameClient {
         switch message.body {
         case .welcome(let welcome):
             isWelcomed = true
+            asksExplicitRejoin = false
             reconnectAttempts = 0
             cancelReconnect()
             stopBrowsing()
@@ -340,6 +353,9 @@ public final class ClientSession: GameClient {
         closeConnection()
         pending = []
         drafts.close(clearing: gameID)
-        storeQueue.enqueue { await $0.saveActiveGame(nil) }
+        // Only if it still points at this game: another game may have been joined since.
+        storeQueue.enqueue { [gameID] store in
+            if await store.loadActiveGame()?.gameID == gameID { await store.saveActiveGame(nil) }
+        }
     }
 }

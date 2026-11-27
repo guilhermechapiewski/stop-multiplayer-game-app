@@ -85,7 +85,8 @@ Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand
 
 ### Mock mode and launch arguments
 
-Set these in the scheme (Product > Scheme > Edit Scheme > Run > Arguments) or pass them to `tools/run-sim.sh`:
+Set these in the scheme (Product > Scheme > Edit Scheme > Run > Arguments) or pass them to `tools/run-sim.sh`.
+They work in Debug builds only (development, UI tests, screenshots); a Release build ignores them:
 
 | Argument | Effect |
 |---|---|
@@ -103,7 +104,7 @@ For example: `tools/run-sim.sh "iPhone 17" build/shot.png -mockGame -playerName 
 | Path | Contents |
 |---|---|
 | `Packages/StopKit/` | Swift package with all game logic, networking and sessions; no UI code |
-| `  StopCore` | Pure models and rules: players, settings, letter picker, stop rule, scoring and ranking, and the host's game engine as a reducer `(state, intent) -> (state, effects)` |
+| `  StopCore` | Pure models and rules: players, settings, letter picker, stop rule, scoring and ranking, and the host's game engine: a mutating reducer, `GameEngine.apply(_:from:to:using:)`, that changes the `GameState` in place or throws a `GameError` (no effects; the session layer does the I/O) |
 | `  StopNetworking` | `Transport` protocol; `NWTransport` (Network.framework, Bonjour `_stopgame._tcp`, peer-to-peer Wi-Fi, length-prefixed JSON frames) and an in-memory transport with fault injection |
 | `  StopSession` | Host and client sessions: wire protocol, heartbeat and presence, acknowledgements and retries, reconnection, snapshot resync, persistence |
 | `  StopSimulation` | Bot players and in-memory games, used by Practice with bots, mock mode and tests |
@@ -150,7 +151,8 @@ network and never shows the Local Network prompt.
 
 The app collects no data. There is no analytics, advertising, tracking or crash reporting, and no third-party
 code. It only talks to other iPhones in the game on your local network; names, answers and scores never leave
-it. See the [privacy policy](docs/privacy/index.md).
+it. While you host, your display name is shown to nearby phones that open Join a game (it's in the game's
+Bonjour advertisement), so friends can find your game. See the [privacy policy](docs/privacy/index.md).
 
 ## Contributing and feedback
 

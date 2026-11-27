@@ -52,6 +52,9 @@ final class AppModel {
     @ObservationIgnored private var sessionWatch: Task<Void, Never>?
     /// Remote sessions saying goodbye to their host; kept alive until they end.
     @ObservationIgnored private var departing: [any RemoteGameSession] = []
+    /// Hosts that shut down, kept alive through `HostSession.shutdownGrace` so their listener and connections
+    /// stay up until clients have the final snapshot.
+    @ObservationIgnored private(set) var departingHosts: [HostSession] = []
     @ObservationIgnored private var profileWrites: Task<Void, Never>?
     @ObservationIgnored private var wasBackgrounded = false
 
@@ -232,9 +235,24 @@ final class AppModel {
         guard let client else { return }
         client.leave()
         // `leave()` ends the game through the engine; shutting down directly also covers a rejected end.
-        hostSession?.shutdown()
+        if let hostSession {
+            hostSession.shutdown()
+            keepAliveThroughShutdown(hostSession)
+        }
         if let remoteSession { finishLeaving(remoteSession) }
         endSession()
+    }
+
+    /// Holds a shut-down host until its shutdown grace is over (it only holds itself weakly meanwhile).
+    private func keepAliveThroughShutdown(_ host: HostSession) {
+        guard !departingHosts.contains(where: { $0 === host }) else { return }
+        departingHosts.append(host)
+        Task { [weak self, clock] in
+            try? await clock.sleep(for: HostSession.shutdownGrace)
+            // Let the host's own grace timer (armed first, same deadline) close its transport first.
+            await Task.yield()
+            self?.departingHosts.removeAll { $0 === host }
+        }
     }
 
     /// How long a leaving session gets to say goodbye before it's abandoned.
@@ -279,8 +297,11 @@ final class AppModel {
         route == .game && client?.state?.phase != .gameOver
     }
 
-    /// The local network is off for this app, so the host can't be found (the UI points to Settings).
-    var isLocalNetworkDenied: Bool { remoteSession?.isLocalNetworkDenied ?? false }
+    /// The local network is off for this app (the UI points to Settings): as a player the host can't be
+    /// reached; as the host nearby phones can't find the game.
+    var isLocalNetworkDenied: Bool {
+        remoteSession?.isLocalNetworkDenied ?? hostSession?.isLocalNetworkDenied ?? false
+    }
 
     func dismissEndNotice() { endNotice = nil }
 
@@ -445,7 +466,9 @@ struct LaunchOptions: Equatable {
     /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests).
     var openRoute: AppModel.Route?
 
+    /// Only Debug builds (development, UI tests, screenshots) honor these; a Release build ignores them all.
     init(arguments: [String]) {
+        #if DEBUG
         uiTesting = arguments.contains("-uiTesting")
         resetState = arguments.contains("-resetState")
         keepState = arguments.contains("-keepState")
@@ -458,6 +481,7 @@ struct LaunchOptions: Equatable {
         case "practiceSetup": .practiceSetup
         default: nil
         }
+        #endif
     }
 
     static func value(after flag: String, in arguments: [String]) -> String? {

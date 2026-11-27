@@ -193,7 +193,7 @@ struct GameScreen: View {
         case .ended(let reason):
             GameEndedView(reason: reason, onClose: onLeave)
         case .lobby:
-            if let state { LobbyView(client: client, state: state) }
+            if let state { LobbyView(client: client, state: state, networkDenied: networkDenied) }
         case .revealing:
             if let state, let round { LetterRevealView(round: round, gameID: state.gameID) }
         case .countdown:
@@ -237,7 +237,7 @@ struct ErrorToast: View {
         switch error {
         case .notHost: "Only the host can do that."
         case .gameClosed: "This game is closed."
-        case .unknownPlayer: "This game doesn’t know you anymore. Leave and join again."
+        case .unknownPlayer: "That player isn’t in this game."
         case .notParticipant: "You’ll play from the next round."
         case .invalidSettings: "Those settings don’t work. Check the categories and stops."
         case .answersIncomplete: "Fill in every category to stop."
