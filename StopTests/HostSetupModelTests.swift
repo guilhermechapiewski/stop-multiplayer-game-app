@@ -55,6 +55,19 @@ struct HostSetupModelTests {
         #expect(model.selected == Array(DefaultCategories.list(for: .en).prefix(6)))
     }
 
+    @Test func fewerThanHalfOfTheLastCategoriesStillOfferedFallsBackToDefaults() async {
+        // Only "Animal" of four remembered categories is still on offer: a lone leftover isn't the last game.
+        await store.saveLastCategories(["Dinosaur", "Bands", "Fruta", "Animal"])
+        let model = await makeModel()
+        #expect(model.selected == Array(DefaultCategories.list(for: .en).prefix(6)))
+    }
+
+    @Test func halfOfTheLastCategoriesStillOfferedAreKeptInOrder() async {
+        await store.saveLastCategories(["Dinosaur", "Fruit", "Bands", "City"])
+        let model = await makeModel()
+        #expect(model.selected == ["Fruit", "City"])
+    }
+
     @Test func choicesMadeBeforeLoadingAreKept() async {
         await store.saveLastCategories(["Fruit"])
         let model = HostSetupModel(store: store, language: .en)

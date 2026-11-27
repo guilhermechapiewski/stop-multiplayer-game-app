@@ -10,7 +10,7 @@ xcodebuild build -project Stop.xcodeproj -scheme Stop -configuration Release \
   CODE_SIGNING_ALLOWED=NO -quiet
 BINARY="$DD/Build/Products/Release-iphonesimulator/Stop.app/Stop"
 status=0
-for symbol in practiceButton startPracticeButton PracticeSetupView PracticeSetupModel; do
+for symbol in practiceButton startPracticeButton PracticeSetupView PracticeSetupModel launchPractice isBotName; do
   if strings -a "$BINARY" | grep -q "$symbol"; then
     echo "error: '$symbol' is in the Release binary (Practice with bots is Debug-only)" >&2
     status=1

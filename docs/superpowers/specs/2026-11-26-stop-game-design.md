@@ -180,6 +180,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Bundle ID `com.gchapiewski.stopapp`; app name decided later.
 - Practice with bots ships in the app (solo mode, also for App Review). Revised 2026-11-27: Debug builds only; App Review uses two iPhones.
 - Scoring never auto-advances: everyone sees all the points, and the host moves on to the next category (2026-11-27).
+  The `.nextCategory` intent replaced the tick auto-advance within protocolVersion 1 on 2026-11-27 (version not bumped): builds before build 2 still auto-advance, so every phone in a game needs build 2 or later.
 - The last hosted game's categories are preselected in setup (2026-11-27).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.
