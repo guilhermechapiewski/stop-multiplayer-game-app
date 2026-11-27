@@ -92,6 +92,13 @@ show changes: the PNGs are large, and every run adds them to the repository's hi
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).
 
+### App icon
+
+The icon (a comic speech bubble shouting "STOP!") is drawn in code by `tools/make_icon.swift`, which writes the
+light, dark and tinted appearances into `Stop/Assets.xcassets/AppIcon.appiconset`. After changing the design,
+regenerate them with `swift tools/make_icon.swift`. The in-app logo (`StopSign` in
+`Stop/Features/Shared/StopLogo.swift`) draws the same bubble in SwiftUI; keep the two in step.
+
 ### Mock mode and launch arguments
 
 Set these in the scheme (Product > Scheme > Edit Scheme > Run > Arguments) or pass them to `tools/run-sim.sh`.
@@ -122,7 +129,7 @@ For example: `tools/run-sim.sh "iPhone 17" build/shot.png -mockGame -playerName 
 | `Config/` | Shared build settings; your local signing settings |
 | `docs/` | Website and privacy policy (GitHub Pages), device test checklist, design spec |
 | `appstore/` | App Store publishing guide and screenshots |
-| `tools/` | Test, simulator, screenshot and listing-check scripts |
+| `tools/` | Test, simulator, screenshot and listing-check scripts; the app icon renderer |
 
 **Host-authoritative snapshots.** The host phone runs the game engine and is also a player: its own client
 talks to the engine in-process through the same interface as everyone else. Clients send intents (join, stop,

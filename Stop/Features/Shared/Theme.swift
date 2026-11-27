@@ -88,55 +88,6 @@ private extension View {
     }
 }
 
-// MARK: Stop sign
-
-/// A regular octagon, flat sides on top and bottom, like a stop sign.
-struct Octagon: InsettableShape {
-    var insetAmount: CGFloat = 0
-
-    func path(in rect: CGRect) -> Path {
-        let center = CGPoint(x: rect.midX, y: rect.midY)
-        // The apothem (centre to a flat side) is half the shorter side.
-        let radius = (min(rect.width, rect.height) / 2 - insetAmount) / cos(.pi / 8)
-        var path = Path()
-        for index in 0..<8 {
-            let angle = Double.pi / 8 + Double(index) * .pi / 4
-            let point = CGPoint(x: center.x + radius * cos(angle), y: center.y + radius * sin(angle))
-            if index == 0 { path.move(to: point) } else { path.addLine(to: point) }
-        }
-        path.closeSubpath()
-        return path
-    }
-
-    func inset(by amount: CGFloat) -> Octagon { Octagon(insetAmount: insetAmount + amount) }
-}
-
-/// The app's mark, drawn like the app icon: a white-rimmed stop sign reading "STOP!". Decorative, so hidden
-/// from VoiceOver.
-struct StopSign: View {
-    var size: CGFloat = 120
-
-    var body: some View {
-        ZStack {
-            Octagon().fill(.white)
-            Octagon()
-                .inset(by: size * 0.045)
-                .fill(Theme.accent.gradient)
-            Text(verbatim: "STOP!")
-                .font(.system(size: size * 0.24, weight: .black, design: .rounded))
-                .foregroundStyle(.white)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
-                .padding(.horizontal, size * 0.12)
-        }
-        .frame(width: size, height: size)
-        // A crisp contact shadow outlines the white rim on light backgrounds; the glow gives depth.
-        .shadow(color: .black.opacity(0.18), radius: size * 0.015, y: size * 0.008)
-        .shadow(color: Theme.accent.opacity(0.35), radius: size * 0.08, y: size * 0.04)
-        .accessibilityHidden(true)
-    }
-}
-
 // MARK: Players
 
 /// A player's initial in a tinted circle. Decorative: the name is always shown beside it.
