@@ -33,7 +33,7 @@ public final class LocalGameClient: GameClient {
         drafts.willSend(intent)
         lastError = host.apply(intent, from: localPlayerID)
         switch intent {
-        case .stop, .giveUp: if lastError != nil { drafts.stopRejected() }
+        case .stop, .giveUp: if lastError != nil { drafts.stopRejected() } else { drafts.stopAccepted() }
         default: break
         }
     }

@@ -20,6 +20,8 @@ public final class ClientSession: GameClient {
     public internal(set) var hostStatus: HostStatus = .connecting
     public let presenceChanges: AsyncStream<PresenceChange>
     public private(set) var lastError: GameError?
+    /// The browser reported that local network access is denied (the UI can point to Settings).
+    public internal(set) var isLocalNetworkDenied = false
     /// Set at STOP / give up (optimistic) or on receiving the lock.
     public var frozenAnswers: [String]? { drafts.frozenAnswers }
 
@@ -56,6 +58,7 @@ public final class ClientSession: GameClient {
     @ObservationIgnored private var lastHeard: Stopwatch
     /// Started when the current connection was dialed.
     @ObservationIgnored var dialed: Stopwatch
+    /// Started when the host was last lost (or at start, before any welcome).
     @ObservationIgnored private var awaySince: Stopwatch?
 
     public init(profile: Profile, target: Target, factory: any TransportFactory, store: any GameStore,
@@ -96,6 +99,7 @@ public final class ClientSession: GameClient {
         guard !isEnded else { return }
         isStopped = false
         isStarted = true
+        if !isWelcomed, awaySince == nil { awaySince = Stopwatch(clock) }
         startWatchdog()
         guard connection == nil else { return }
         if let lastEndpoint {
@@ -132,6 +136,7 @@ public final class ClientSession: GameClient {
         stopBrowsing()
         drafts.flush()
         closeConnection()
+        if !isEnded { hostStatus = .connecting }
     }
 
     // MARK: GameClient
@@ -176,12 +181,14 @@ public final class ClientSession: GameClient {
     private func acked(_ id: UUID, error: GameError?) {
         guard let index = pending.firstIndex(where: { $0.id == id }) else { return }
         let item = pending.remove(at: index)
-        if let error {
+        switch item.intent {
+        case .stop, .giveUp:
+            // `.alreadyStopped` for my own stop: a resend the host already applied (a restart lost its intent log).
+            let error = error == .alreadyStopped ? nil : error
             lastError = error
-            switch item.intent {
-            case .stop, .giveUp: drafts.stopRejected()
-            default: break
-            }
+            if error == nil { drafts.stopAccepted() } else { drafts.stopRejected() }
+        default:
+            lastError = error
         }
         if id == leaveID { finishLeaving() }
     }
@@ -298,7 +305,7 @@ public final class ClientSession: GameClient {
         } else if connection != nil, dialed.elapsed >= timing.reconnectAfterSilence {
             recycleConnection()
         }
-        if hostStatus == .away, let awaySince, awaySince.elapsed >= timing.hostGoneAfter {
+        if hostStatus == .away || hostStatus == .connecting, let awaySince, awaySince.elapsed >= timing.hostGoneAfter {
             hostStatus = .mayBeGone
         }
     }

@@ -67,11 +67,11 @@ private final class Harness {
 
     /// A started client; waits until it is connected and the host sees it present.
     func join(_ name: String, id: PlayerID = UUID(), store: InMemoryGameStore = InMemoryGameStore(),
-              target: ClientSession.Target? = nil) async throws -> ClientSession {
+              target: ClientSession.Target? = nil, factory: (any TransportFactory)? = nil) async throws -> ClientSession {
         let resolved: ClientSession.Target
         if let target { resolved = target } else { resolved = .discovered(try await discovered()) }
         let client = ClientSession(profile: Profile(playerID: id, name: name, soundsEnabled: false),
-                                   target: resolved, factory: net, store: store, clock: clock)
+                                   target: resolved, factory: factory ?? net, store: store, clock: clock)
         client.start()
         await waitUntil("\(name) connected") { client.hostStatus == .connected }
         await waitUntil("\(name) present") { host.state.player(id)?.presence == .present }
@@ -118,6 +118,28 @@ private final class Harness {
             await poll { client.hostStatus == .connected }
         }
         await waitUntil("reconnected") { client.hostStatus == .connected }
+    }
+}
+
+/// The in-memory network, except that its first browser reports permission denied and then fails.
+private final class FailingFirstBrowser: TransportFactory, @unchecked Sendable {
+    let net: InMemoryNetwork
+    private var made = 0
+
+    init(_ net: InMemoryNetwork) { self.net = net }
+
+    func makeListener() -> any Listener { net.makeListener() }
+    func connect(to endpoint: EndpointRef) -> any Connection { net.connect(to: endpoint) }
+    func makeBrowser() -> any Browser {
+        made += 1
+        return made == 1 ? Failing() : net.makeBrowser()
+    }
+
+    private final class Failing: Browser {
+        func start() -> AsyncStream<BrowserEvent> {
+            AsyncStream { $0.yield(.permissionDenied); $0.yield(.failed); $0.finish() }
+        }
+        func stop() {}
     }
 }
 
@@ -398,6 +420,92 @@ struct ClientSessionTests {
         await waitUntil("present on restored host") {
             restored.state.player(ana.localPlayerID)?.presence == .present
         }
+    }
+
+    @Test func failedBrowserIsRestartedAndFindsRestartedHost() async throws {
+        let h = try Harness()
+        let factory = FailingFirstBrowser(h.net)
+        let ana = try await h.join("Ana", factory: factory)
+        h.host.suspend()
+        h.host.listener?.stop()
+        h.net.dropAllConnections()
+        await waitUntil("denied surfaced") { ana.isLocalNetworkDenied }
+        let restored = HostSession(state: h.host.state, factory: h.net, store: h.hostStore, clock: h.clock)
+        restored.start()
+        h.host = restored
+        await h.reconnect(ana)
+        #expect(ana.isLocalNetworkDenied == false)
+        await waitUntil("present on restored host") {
+            restored.state.player(ana.localPlayerID)?.presence == .present
+        }
+    }
+
+    @Test func rejoinWithNoHostReachesMayBeGone() async throws {
+        let net = InMemoryNetwork(), clock = TestClock()
+        let ana = ClientSession(profile: Profile(playerID: UUID(), name: "Ana", soundsEnabled: false),
+                                target: .rejoin(gameID: UUID()), factory: net, store: InMemoryGameStore(),
+                                clock: clock)
+        ana.start()
+        await stepUntil(clock, seconds: 119) { false }
+        #expect(ana.hostStatus == .connecting)
+        await stepUntil(clock, seconds: 5) { ana.hostStatus == .mayBeGone }
+        await waitUntil("may be gone") { ana.hostStatus == .mayBeGone }
+        ana.stop()
+    }
+
+    @Test func resentStopAlreadyAppliedByRestartedHostCountsAsSuccess() async throws {
+        let h = try Harness(stopsRequired: 2)
+        let ana = try await h.join("Ana")
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing }
+        try await h.disconnect(ana)
+        let answers = ["Ana", "Anta"]
+        ana.send(.stop(answers: answers))
+        // The host applied it earlier, but its intent log (and the ack) were lost.
+        #expect(h.host.apply(.stop(answers: answers), from: ana.localPlayerID) == nil)
+        await h.reconnect(ana)
+        await waitUntil("acked") { ana.pendingIntentCount == 0 }
+        #expect(ana.lastError == nil)
+        #expect(ana.frozenAnswers == answers)
+        #expect(h.host.state.currentRound?.stops.count == 1)
+    }
+
+    @Test func welcomeFromBeforeTheLockUnfreezes() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing }
+        let beforeLock = h.host.state
+        ana.saveDraft(["Ana", "Anta"])
+        h.host.localClient.send(.stop(answers: ["Gui", "Gato"]))
+        await waitUntil("frozen at lock") { ana.frozenAnswers == ["Ana", "Anta"] }
+        // The host restarts from a save taken before the lock.
+        h.host.suspend()
+        h.host.listener?.stop()
+        h.net.dropAllConnections()
+        await waitUntil("away") { ana.hostStatus == .away }
+        let restored = HostSession(state: beforeLock, factory: h.net, store: h.hostStore, clock: h.clock)
+        restored.start()
+        h.host = restored
+        await h.reconnect(ana)
+        await waitUntil("writing again") { ana.state?.phase == .writing }
+        #expect(ana.frozenAnswers == nil)
+        // The next lock submits again.
+        restored.localClient.send(.stop(answers: ["Gui", "Gato"]))
+        await waitUntil("submitted to restored host") {
+            restored.state.currentRound?.answers[ana.localPlayerID] == ["Ana", "Anta"]
+        }
+    }
+
+    @Test func successfulAckClearsLastErrorAndStopDisconnects() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        ana.send(.nextRound)
+        await waitUntil("rejected") { ana.lastError == .notHost }
+        ana.send(.leave)
+        await waitUntil("cleared") { ana.lastError == nil }
+        ana.stop()
+        #expect(ana.hostStatus == .connecting)
     }
 
     @Test func lockFreezesDraftAndSubmits() async throws {

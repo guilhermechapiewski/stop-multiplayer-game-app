@@ -28,6 +28,8 @@ final class RoundDraftCoordinator {
     @ObservationIgnored private var frozenKey: RoundKey?
     /// The round whose lock was already handled (answers frozen and submitted).
     @ObservationIgnored private var lockedKey: RoundKey?
+    /// A STOP / give up was sent and not yet acked.
+    @ObservationIgnored private var stopPending = false
     @ObservationIgnored private var latest: (key: RoundKey, answers: [String])?
     @ObservationIgnored private var pendingSave: Task<Void, Never>?
     @ObservationIgnored private var isClosed = false
@@ -51,15 +53,24 @@ final class RoundDraftCoordinator {
         switch intent {
         case .stop(let answers), .giveUp(let answers):
             guard let key = currentKey else { return }
+            stopPending = true
             freeze(answers, key)
         default:
             break
         }
     }
 
-    /// A STOP or give up was rejected: unfreeze, unless the lock already froze the fields for this round.
+    /// The host accepted the STOP / give up.
+    func stopAccepted() {
+        stopPending = false
+    }
+
+    /// A STOP or give up was rejected: unfreeze, unless the lock already froze the fields for this round or
+    /// the host already holds my answers for it.
     func stopRejected() {
-        guard let key = currentKey, lockedKey != key else { return }
+        stopPending = false
+        guard let key = currentKey, lockedKey != key,
+              state?.currentRound?.answers[localPlayerID] == nil else { return }
         frozenAnswers = nil
         frozenKey = nil
     }
@@ -124,7 +135,13 @@ final class RoundDraftCoordinator {
         let mine = round.answers[localPlayerID]
         switch state.phase {
         case .writing:
-            if let mine, frozenAnswers == nil { freeze(mine, key) }
+            if let mine {
+                if frozenAnswers == nil { freeze(mine, key) }
+            } else if !stopPending {
+                // Writing with no answers of mine (e.g. a host restored from before the lock): editable again.
+                if lockedKey == key { lockedKey = nil }
+                unfreeze()
+            }
         case .collecting, .scoring:
             if let mine {
                 if frozenAnswers == nil { freeze(mine, key) }

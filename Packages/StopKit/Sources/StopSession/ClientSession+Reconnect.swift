@@ -96,6 +96,11 @@ extension ClientSession {
         Task { [weak self] in
             for await event in events {
                 guard let self, self.browser === browser else { return }
+                switch event {
+                case .results: isLocalNetworkDenied = false
+                case .permissionDenied: isLocalNetworkDenied = true; continue
+                case .failed: stopBrowsing(); return
+                }
                 guard case .results(let games) = event else { continue }
                 let endpoint = games.first { $0.advertisement.gameID == self.gameID }?.endpoint
                 browsedEndpoint = endpoint
@@ -103,6 +108,8 @@ extension ClientSession {
                     connect(to: endpoint)
                 }
             }
+            // The stream ended (or failed): forget this browser so the next attempt starts a new one.
+            if let self, self.browser === browser { stopBrowsing() }
         }
     }
 
