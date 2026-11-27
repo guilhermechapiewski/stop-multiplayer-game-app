@@ -2,42 +2,7 @@ import StopCore
 import StopSession
 import SwiftUI
 
-// Stand-ins for the round screens. Task 15 replaces the reveal, countdown, writing and collecting views;
-// Task 16 the scoring, round results and game over views. Each keeps its name and `client` input.
-
-struct RevealPhaseView: View {
-    let client: any GameClient
-
-    var body: some View {
-        PhasePlaceholder(title: "Picking a letter…", systemImage: "character.magnify",
-                         detail: client.state?.currentRound.map { Text("Round \($0.number)") })
-    }
-}
-
-struct CountdownPhaseView: View {
-    let client: any GameClient
-
-    var body: some View {
-        PhasePlaceholder(title: "Get ready…", systemImage: "timer", detail: letter(client.state))
-    }
-}
-
-struct WritingPhaseView: View {
-    let client: any GameClient
-
-    var body: some View {
-        PhasePlaceholder(title: "Write your answers", systemImage: "pencil.and.list.clipboard",
-                         detail: letter(client.state))
-    }
-}
-
-struct CollectingPhaseView: View {
-    let client: any GameClient
-
-    var body: some View {
-        PhasePlaceholder(title: "Collecting answers…", systemImage: "tray.and.arrow.down.fill", detail: nil)
-    }
-}
+// Stand-ins for the scoring, round results and game over screens (Task 16 replaces them).
 
 struct ScoringPhaseView: View {
     let client: any GameClient
@@ -109,8 +74,4 @@ extension PhasePlaceholder where Actions == EmptyView {
     init(title: LocalizedStringKey, systemImage: String, detail: Text?) {
         self.init(title: title, systemImage: systemImage, detail: detail) { EmptyView() }
     }
-}
-
-#Preview("Writing placeholder") {
-    WritingPhaseView(client: PreviewData.client(isHost: true, phase: .writing))
 }

@@ -50,6 +50,12 @@ struct GameScreen: View {
     let onLeave: () -> Void
 
     @Environment(\.reduceMotion) private var reduceMotion
+    /// The round whose lock is being stamped "STOP!" over the screen.
+    @State private var stampedRound: Round?
+    @State private var toast: GameError?
+
+    private static let stampDuration: Duration = .seconds(1.6)
+    private static let toastDuration: Duration = .seconds(3)
 
     private var stage: GameStage { GameStage(state: client.state, hostStatus: client.hostStatus) }
 
@@ -71,6 +77,40 @@ struct GameScreen: View {
                 }
             }
         }
+        .overlay {
+            if let stampedRound, let state = client.state {
+                StopStampOverlay(state: state, round: stampedRound, viewer: client.localPlayerID)
+                    .transition(.opacity)
+            }
+        }
+        .overlay(alignment: .top) {
+            if let toast {
+                ErrorToast(error: toast)
+                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                    .onTapGesture { self.toast = nil }
+            }
+        }
+        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.3), value: stampedRound?.number)
+        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.35), value: toast)
+        .onChange(of: stage) { old, new in
+            // The round just locked: stamp it, whether the host is still collecting or already scoring.
+            if old == .writing, new == .collecting || new == .scoring {
+                stampedRound = client.state?.currentRound
+            }
+        }
+        .task(id: stampedRound?.number) {
+            guard stampedRound != nil else { return }
+            do { try await Task.sleep(for: Self.stampDuration) } catch { return }
+            stampedRound = nil
+        }
+        .onChange(of: client.lastError) { _, error in
+            if let error, ErrorToast.shows(error) { toast = error }
+        }
+        .task(id: toast) {
+            guard toast != nil else { return }
+            do { try await Task.sleep(for: Self.toastDuration) } catch { return }
+            toast = nil
+        }
     }
 
     private var showsMenu: Bool {
@@ -81,21 +121,25 @@ struct GameScreen: View {
     }
 
     @ViewBuilder private var content: some View {
+        let state = client.state
+        let round = state?.currentRound
         switch stage {
         case .connecting:
             ConnectingView()
         case .ended(let reason):
             GameEndedView(reason: reason, onClose: onLeave)
         case .lobby:
-            if let state = client.state { LobbyView(client: client, state: state) }
+            if let state { LobbyView(client: client, state: state) }
         case .revealing:
-            RevealPhaseView(client: client)
+            if let round { LetterRevealView(round: round) }
         case .countdown:
-            CountdownPhaseView(client: client)
+            if let round, case .countdown(let seconds)? = state?.phase {
+                CountdownView(round: round, secondsRemaining: seconds)
+            }
         case .writing:
-            WritingPhaseView(client: client)
+            if let state, let round { WritingView(client: client, state: state, round: round) }
         case .collecting:
-            CollectingPhaseView(client: client)
+            if let state, let round { CollectingView(client: client, state: state, round: round) }
         case .scoring:
             ScoringPhaseView(client: client)
         case .roundResults:
@@ -103,6 +147,54 @@ struct GameScreen: View {
         case .gameOver:
             GameOverPhaseView(client: client, onClose: onLeave)
         }
+    }
+}
+
+/// A short-lived message for an action the host turned down.
+struct ErrorToast: View {
+    let error: GameError
+
+    /// Races that sort themselves out (a STOP that arrived just after the lock, a score for a category that
+    /// already moved on) aren't worth interrupting anyone for.
+    static func shows(_ error: GameError) -> Bool {
+        switch error {
+        case .wrongPhase, .alreadyStopped, .staleRound: false
+        default: true
+        }
+    }
+
+    private var message: LocalizedStringResource {
+        switch error {
+        case .notHost: "Only the host can do that."
+        case .gameClosed: "This game is closed."
+        case .unknownPlayer, .notParticipant: "You’ll play from the next round."
+        case .invalidSettings: "Those settings don’t work. Check the categories and stops."
+        case .answersIncomplete: "Fill in every category to stop."
+        case .giveUpNotAllowed: "Giving up isn’t allowed in this game."
+        case .invalidScore: "Blank answers score 0."
+        case .cannotScoreForOthers: "You can only score your own answers."
+        case .notEnoughPlayers: "You need at least 2 players."
+        case .wrongPhase, .alreadyStopped, .staleRound: "The game already moved on."
+        }
+    }
+
+    var body: some View {
+        Label {
+            Text(message)
+        } icon: {
+            Image(systemName: "exclamationmark.circle.fill")
+                .foregroundStyle(Theme.accent)
+        }
+        .font(Theme.Typography.caption)
+        .padding(.horizontal, Theme.Spacing.m)
+        .padding(.vertical, Theme.Spacing.s + 2)
+        .background(.regularMaterial, in: .capsule)
+        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+        .padding(.horizontal, Theme.Spacing.m)
+        .padding(.top, Theme.Spacing.s)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("errorToast")
+        .onAppear { AccessibilityNotification.Announcement(String(localized: message)).post() }
     }
 }
 

@@ -75,6 +75,47 @@
         }
       }
     },
+    "%lld seconds" : {
+      "comment" : "VoiceOver label for the countdown number.",
+      "localizations" : {
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld segundo"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld segundos"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld second"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld seconds"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "%lld. %@" : {
       "comment" : "VoiceOver label for a selected category: its position and name.",
       "localizations" : {
@@ -163,6 +204,17 @@
         }
       }
     },
+    "Anyone who hasn’t sent answers yet scores 0 this round." : {
+      "comment" : "Caption under the host's Continue anyway button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem ainda não enviou as respostas fica com 0 nesta rodada."
+          }
+        }
+      }
+    },
     "Ask a friend to host a game. It shows up here as soon as their phone is on the same Wi-Fi network as yours." : {
       "comment" : "Join screen while no games have been found.",
       "localizations" : {
@@ -207,6 +259,39 @@
         }
       }
     },
+    "Blank" : {
+      "comment" : "VoiceOver value of an answer left blank.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em branco"
+          }
+        }
+      }
+    },
+    "Blank answers score 0." : {
+      "comment" : "Error toast; also the caption under the score picker for a blank answer.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respostas em branco valem 0."
+          }
+        }
+      }
+    },
+    "Called by %@" : {
+      "comment" : "Caption under the full-screen STOP! stamp. %@ is a list of player names, e.g. \"Ana and Bia\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOP de %@"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "comment" : "Cancels the current screen or confirmation.",
       "localizations" : {
@@ -230,7 +315,7 @@
       }
     },
     "Collecting answers…" : {
-      "comment" : "Placeholder title while the host collects everyone's answers.",
+      "comment" : "Title of the screen between the end of a round and scoring.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -261,6 +346,17 @@
         }
       },
       "comment" : "Onboarding button that saves the player's name."
+    },
+    "Continue anyway" : {
+      "comment" : "Host-only button: start scoring without the answers still missing.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar mesmo assim"
+          }
+        }
+      }
     },
     "Create game" : {
       "comment" : "Game setup button that creates the game and opens the lobby.",
@@ -350,6 +446,28 @@
         }
       }
     },
+    "Ends the round for you and sends your answers." : {
+      "comment" : "VoiceOver hint for the STOP button when it's enabled.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerra a rodada para você e envia suas respostas."
+          }
+        }
+      }
+    },
+    "Ends your round with the answers you have." : {
+      "comment" : "VoiceOver hint for the Give up button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerra sua rodada com as respostas que você tem."
+          }
+        }
+      }
+    },
     "Everyone goes to the final standings." : {
       "comment" : "Confirmation message for End game.",
       "localizations" : {
@@ -379,6 +497,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As respostas de todos ficam travadas como estão, mesmo de quem ainda não deu STOP."
+          }
+        }
+      }
+    },
+    "Fill in every category to stop." : {
+      "comment" : "Hint when STOP is disabled because a category is still blank; also an error message.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preencha todas as categorias para dar STOP."
           }
         }
       }
@@ -493,6 +622,17 @@
         }
       }
     },
+    "Get ready to write!" : {
+      "comment" : "Under the 3-2-1 countdown before writing starts.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepare-se para escrever!"
+          }
+        }
+      }
+    },
     "Get ready…" : {
       "comment" : "Placeholder title during the 3-2-1 countdown.",
       "localizations" : {
@@ -504,6 +644,28 @@
         }
       }
     },
+    "Give up" : {
+      "comment" : "Button: give up the round (counts as a stop, blank answers allowed).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desistir"
+          }
+        }
+      }
+    },
+    "Give up this round?" : {
+      "comment" : "Title of the confirmation shown when a player taps Give up.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desistir desta rodada?"
+          }
+        }
+      }
+    },
     "Giving up" : {
       "comment" : "Lobby rules (guest view): label for whether giving up is allowed.",
       "localizations" : {
@@ -511,6 +673,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Desistir"
+          }
+        }
+      }
+    },
+    "Giving up isn’t allowed in this game." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neste jogo não é permitido desistir."
           }
         }
       }
@@ -591,6 +764,17 @@
         }
       },
       "comment" : "Shown while reconnecting to an interrupted game after a relaunch."
+    },
+    "Keep writing" : {
+      "comment" : "Cancel button of the give-up confirmation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar escrevendo"
+          }
+        }
+      }
     },
     "Leave" : {
       "comment" : "Confirm button for a guest leaving the game.",
@@ -709,6 +893,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não permitido"
+          }
+        }
+      }
+    },
+    "Only the host can do that." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Só quem criou o jogo pode fazer isso."
           }
         }
       }
@@ -867,6 +1062,17 @@
         }
       }
     },
+    "Reconnecting…" : {
+      "comment" : "Collecting screen: this player is away and reconnecting.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconectando…"
+          }
+        }
+      }
+    },
     "Remove" : {
       "comment" : "Confirm button for removing a player.",
       "localizations" : {
@@ -944,6 +1150,28 @@
         }
       }
     },
+    "Round %lld is over. Scoring starts in a moment." : {
+      "comment" : "Collecting screen subtitle. %lld is the round number.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rodada %lld acabou. A pontuação começa em instantes."
+          }
+        }
+      }
+    },
+    "Round %lld · Letter %@" : {
+      "comment" : "Writing screen header. %lld is the round number, %@ the round's letter.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rodada %1$lld · Letra %2$@"
+          }
+        }
+      }
+    },
     "Round results" : {
       "comment" : "Placeholder title for the round results screen.",
       "localizations" : {
@@ -984,6 +1212,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Selecionada"
+          }
+        }
+      }
+    },
+    "Sending…" : {
+      "comment" : "Collecting screen: this player's answers are on their way.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviando…"
+          }
+        }
+      }
+    },
+    "Sent" : {
+      "comment" : "Collecting screen: this player's answers have arrived.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviado"
           }
         }
       }
@@ -1065,6 +1315,61 @@
         }
       }
     },
+    "Stop" : {
+      "comment" : "VoiceOver label for the STOP button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOP"
+          }
+        }
+      }
+    },
+    "STOP!" : {
+      "comment" : "The big button that ends the round once every category is filled.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOP!"
+          }
+        }
+      }
+    },
+    "Stop!" : {
+      "comment" : "VoiceOver label and announcement for the full-screen stamp when a round locks.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOP!"
+          }
+        }
+      }
+    },
+    "Stops %lld of %lld" : {
+      "comment" : "VoiceOver label for the live stop count: stops so far, stops needed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld de %2$lld STOPs"
+          }
+        }
+      }
+    },
+    "Stops %lld/%lld" : {
+      "comment" : "Live stop count on the writing screen, e.g. \"Stops 1/2\": stops so far / stops needed to end the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOPs %1$lld/%2$lld"
+          }
+        }
+      }
+    },
     "Stops reconnecting and goes back to the start screen." : {
       "localizations" : {
         "pt-BR" : {
@@ -1098,6 +1403,17 @@
       },
       "comment" : "Onboarding subtitle."
     },
+    "The game already moved on." : {
+      "comment" : "Error toast for a request that arrived too late.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O jogo já seguiu em frente."
+          }
+        }
+      }
+    },
     "The game is no longer available. Start or join another one." : {
       "comment" : "Message when the game closed.",
       "localizations" : {
@@ -1109,6 +1425,28 @@
         }
       }
     },
+    "The host ended the round" : {
+      "comment" : "Caption under the full-screen STOP! stamp when the host force-ended the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem criou o jogo encerrou a rodada"
+          }
+        }
+      }
+    },
+    "The host ended the round." : {
+      "comment" : "Collecting screen subtitle when the host force-ended the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem criou o jogo encerrou a rodada."
+          }
+        }
+      }
+    },
     "The host removed you. Ask them to let you back in if it was a mistake." : {
       "comment" : "Message when this player was removed by the host.",
       "localizations" : {
@@ -1116,6 +1454,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quem criou o jogo removeu você. Se foi engano, peça para deixar você voltar."
+          }
+        }
+      }
+    },
+    "The letter is…" : {
+      "comment" : "Letter reveal title once the spinning letters land on the round's letter.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A letra é…"
           }
         }
       }
@@ -1171,6 +1520,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este jogo terminou"
+          }
+        }
+      }
+    },
+    "This game is closed." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este jogo foi encerrado."
+          }
+        }
+      }
+    },
+    "This round started before you joined. You’ll play from the next one." : {
+      "comment" : "Writing screen note for a player who joined mid-round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta rodada começou antes de você entrar. Você joga a partir da próxima."
+          }
+        }
+      }
+    },
+    "Those settings don’t work. Check the categories and stops." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essas configurações não funcionam. Confira as categorias e os STOPs."
           }
         }
       }
@@ -1285,6 +1667,61 @@
         }
       }
     },
+    "You called it!" : {
+      "comment" : "Caption under the full-screen STOP! stamp when the local player's STOP ended the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foi você que deu STOP!"
+          }
+        }
+      }
+    },
+    "You can only score your own answers." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você só pode pontuar as suas respostas."
+          }
+        }
+      }
+    },
+    "You gave up — waiting for others" : {
+      "comment" : "Banner after the local player gave up, while the round goes on.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você desistiu — esperando os outros"
+          }
+        }
+      }
+    },
+    "You need at least 2 players." : {
+      "comment" : "Error toast.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "São necessários pelo menos 2 jogadores."
+          }
+        }
+      }
+    },
+    "You stopped — waiting for others" : {
+      "comment" : "Banner after the local player tapped STOP, while the round goes on.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você deu STOP — esperando os outros"
+          }
+        }
+      }
+    },
     "You were removed from the game" : {
       "comment" : "Title when the host removed this player.",
       "localizations" : {
@@ -1292,6 +1729,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você foi removido do jogo"
+          }
+        }
+      }
+    },
+    "Your answers so far are sent as they are. It counts as a stop." : {
+      "comment" : "Message of the give-up confirmation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas respostas até agora são enviadas como estão. Conta como um STOP."
           }
         }
       }
@@ -1336,6 +1784,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seus pontos até agora continuam na classificação. Você pode voltar enquanto o jogo estiver rolando."
+          }
+        }
+      }
+    },
+    "You’ll play from the next round." : {
+      "comment" : "Error toast when a player who isn't in the current round tries to play it.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você joga a partir da próxima rodada."
           }
         }
       }
