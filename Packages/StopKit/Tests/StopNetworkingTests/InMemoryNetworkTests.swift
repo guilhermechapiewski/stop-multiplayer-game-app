@@ -211,3 +211,24 @@ extension ListenerEvent {
     #expect(await serverEvents.next() == .message(Data("a".utf8)))
     #expect(await serverEvents.next() == .message(Data("b".utf8)))
 }
+
+/// Polls until `condition` holds or `timeout` elapses.
+private func eventually(within timeout: Duration = .seconds(1), _ condition: () -> Bool) async -> Bool {
+    let deadline = ContinuousClock.now + timeout
+    while !condition() {
+        guard ContinuousClock.now < deadline else { return false }
+        try? await Task.sleep(for: .milliseconds(10))
+    }
+    return true
+}
+
+@Test(.timeLimit(.minutes(1))) func unclosedLinksDoNotKeepTheNetworkAlive() async throws {
+    weak var weakNet: InMemoryNetwork?
+    do {
+        let net = InMemoryNetwork()
+        weakNet = net
+        let (client, server, _) = try await connectedPair(on: net)
+        _ = (client, server)
+    }
+    #expect(await eventually { weakNet == nil })
+}

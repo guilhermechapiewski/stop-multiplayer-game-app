@@ -99,8 +99,11 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
             return inbox
         }
         guard let inbox else { return }
-        Task { [self] in
+        // Weak: an end nobody closes must not keep the network alive. When the network goes away its state
+        // (and so the inbox continuation) is released, which finishes the inbox and ends this task.
+        Task { [weak self] in
             for await delivery in inbox {
+                guard let self else { return }
                 if delivery.deadline > .now {
                     try? await Task.sleep(until: delivery.deadline, clock: .continuous)
                 }
