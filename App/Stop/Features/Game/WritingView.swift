@@ -11,6 +11,7 @@ struct WritingView: View {
     let round: Round
 
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @State private var model: WritingModel?
     @FocusState private var focus: Int?
     @State private var confirmingGiveUp = false
@@ -26,7 +27,6 @@ struct WritingView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: Theme.Spacing.l) {
-                    header
                     if !isParticipant {
                         spectatorNote
                     } else if let model {
@@ -38,14 +38,19 @@ struct WritingView: View {
                     }
                 }
                 .padding(.horizontal, Theme.Spacing.m)
+                .padding(.top, Theme.Spacing.m)
                 .padding(.bottom, Theme.Spacing.l)
             }
             .scrollDismissesKeyboard(.never)
+            .scrollEdgeEffectHidden(true, for: .top)
             .onChange(of: focus) { _, field in
                 guard let field else { return }
                 withAnimation(reduceMotion ? nil : .smooth) { proxy.scrollTo(field, anchor: .center) }
             }
         }
+        // The letter and the stop count stay pinned while the fields scroll. Its opaque background reaches up
+        // under the status bar and the game menu, so fields never slide beneath either.
+        .safeAreaInset(edge: .top, spacing: 0) { pinnedHeader }
         .safeAreaInset(edge: .bottom) {
             if isParticipant { bottomBar }
         }
@@ -61,20 +66,41 @@ struct WritingView: View {
 
     // MARK: Header
 
+    private var pinnedHeader: some View {
+        header
+            .padding(.horizontal, Theme.Spacing.m)
+            .padding(.bottom, Theme.Spacing.s)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background {
+                Theme.background
+                    .ignoresSafeArea(edges: .top)
+                    .overlay(alignment: .bottom) { Divider() }
+            }
+    }
+
     private var header: some View {
         HStack(spacing: Theme.Spacing.m) {
-            LetterTile(letter: round.letter, size: 64)
-                .accessibilityHidden(true)
+            // At accessibility sizes the tile alone shows the letter, and carries the round line for VoiceOver.
+            let compact = dynamicTypeSize.isAccessibilitySize
+            LetterTile(letter: round.letter, size: compact ? 48 : 64)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("Round \(round.number) · Letter \(round.letter)"))
+                .accessibilityAddTraits(.isHeader)
+                .accessibilityHidden(!compact)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Round \(round.number) · Letter \(round.letter)")
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
-                    .accessibilityAddTraits(.isHeader)
+                if !compact {
+                    Text("Round \(round.number) · Letter \(round.letter)")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                        .accessibilityAddTraits(.isHeader)
+                }
                 StopsCounter(state: state, round: round)
             }
             Spacer(minLength: 0)
         }
         .padding(.top, Theme.Spacing.s)
+        // Pinned, so it must stay compact: the fields need the room at the largest text sizes.
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 
     private var spectatorNote: some View {

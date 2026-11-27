@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// A full-width call to action pinned above the home indicator, on a material bar.
+/// A full-width call to action pinned above the home indicator, on a material bar. Its text stops growing at
+/// the second accessibility size, so the pinned bar never crowds out the screen it sits on.
 struct BottomActionBar<Content: View>: View {
     @ViewBuilder let content: Content
 
@@ -13,5 +14,6 @@ struct BottomActionBar<Content: View>: View {
         .padding(.bottom, Theme.Spacing.s)
         .frame(maxWidth: .infinity)
         .background(.bar)
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
     }
 }
