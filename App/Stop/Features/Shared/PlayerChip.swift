@@ -14,7 +14,7 @@ struct PlayerChip: View {
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
-            PlayerInitial(name: name, dimmed: isAway, size: 32, isBot: isBot)
+            PlayerInitial(name: name, dimmed: isAway, size: 32, isBot: isBot, isYou: isYou)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: Theme.Spacing.xs) {
                     Text(verbatim: name)
@@ -52,12 +52,7 @@ struct PlayerChip: View {
     }
 
     private var accessibilityDetails: Text {
-        var parts: [String] = []
-        if isBot { parts.append(String(localized: "Bot")) }
-        if isHost { parts.append(String(localized: "Host")) }
-        if isYou { parts.append(String(localized: "You")) }
-        if isAway { parts.append(String(localized: "Reconnecting")) }
-        return Text(verbatim: parts.formatted(.list(type: .and, width: .narrow)))
+        Text(verbatim: AccessibilityText.playerDetails(presence: presence, isHost: isHost, isYou: isYou, isBot: isBot))
     }
 }
 

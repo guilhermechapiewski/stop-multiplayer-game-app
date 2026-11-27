@@ -160,22 +160,32 @@ private struct AnswerRow: View {
     private var isBlank: Bool { row.isBlank }
     private var isAway: Bool { row.presence != .present }
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// "Ana (you) · away": one string, so it wraps as a sentence at large text sizes.
+    private var nameLine: String {
+        var parts = [row.name]
+        if isMe { parts.append(String(localized: "(you)")) }
+        if row.presence == .away { parts.append(String(localized: "· away")) }
+        if row.presence == .left || row.presence == .removed { parts.append(String(localized: "· left")) }
+        return parts.joined(separator: " ")
+    }
+
     var body: some View {
+        // At accessibility sizes the (decorative) initial gives its room to the name and answer.
         HStack(spacing: Theme.Spacing.m) {
-            PlayerInitial(name: row.name, dimmed: isAway, size: 36)
+            if !dynamicTypeSize.isAccessibilitySize {
+                PlayerInitial(name: row.name, dimmed: isAway, size: 36, isYou: isMe)
+            }
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: Theme.Spacing.xs) {
-                    Text(verbatim: row.name)
-                    if isMe { Text("(you)") }
-                    if row.presence == .away { Text("· away") }
-                    if row.presence == .left || row.presence == .removed { Text("· left") }
-                }
-                .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                Text(verbatim: nameLine)
+                    .font(Theme.Typography.caption)
+                    .foregroundStyle(.secondary)
                 Text(verbatim: row.answer)
                     .font(Theme.Typography.headline)
                     .foregroundStyle(isBlank ? .secondary : .primary)
             }
+            .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: Theme.Spacing.s)
             status
         }
@@ -234,7 +244,7 @@ private struct ScorePicker: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!isEnabled)
-                .accessibilityLabel(Text("\(points) points"))
+                .accessibilityLabel(Text(verbatim: AccessibilityText.score(points)))
                 .accessibilityAddTraits(selected ? .isSelected : [])
                 .accessibilityIdentifier("score-\(points)")
             }

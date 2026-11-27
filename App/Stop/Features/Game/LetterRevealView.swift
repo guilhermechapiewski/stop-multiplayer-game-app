@@ -76,7 +76,7 @@ enum LetterAnnouncement {
     static func announce(_ round: Round) {
         guard announced?.number != round.number || announced?.letter != round.letter else { return }
         announced = (round.number, round.letter)
-        AccessibilityNotification.Announcement(String(localized: "Letter \(round.letter)")).post()
+        AccessibilityNotification.Announcement(AccessibilityText.letter(round.letter)).post()
     }
 }
 

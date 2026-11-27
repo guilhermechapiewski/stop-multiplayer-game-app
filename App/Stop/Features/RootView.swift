@@ -9,6 +9,11 @@ struct RootView: View {
     var body: some View {
         content
             .animation(reduceMotion ? nil : .smooth(duration: 0.3), value: model.route)
+            // The Settings toggle (and `-uiTesting`, which always mutes) drives the sound effects. The unit
+            // tests' host app never starts audio.
+            .onChange(of: model.soundsEnabled && !StopApp.isHostingUnitTests, initial: true) { _, enabled in
+                SoundEngine.shared.enabled = enabled
+            }
     }
 
     @ViewBuilder private var content: some View {

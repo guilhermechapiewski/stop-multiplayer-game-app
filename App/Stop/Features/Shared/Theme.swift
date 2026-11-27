@@ -106,16 +106,17 @@ struct Octagon: InsettableShape {
     func inset(by amount: CGFloat) -> Octagon { Octagon(insetAmount: insetAmount + amount) }
 }
 
-/// The app's mark: a stop sign reading "STOP!". Decorative, so hidden from VoiceOver.
+/// The app's mark, drawn like the app icon: a white-rimmed stop sign reading "STOP!". Decorative, so hidden
+/// from VoiceOver.
 struct StopSign: View {
     var size: CGFloat = 120
 
     var body: some View {
         ZStack {
-            Octagon().fill(Theme.accent)
+            Octagon().fill(.white)
             Octagon()
-                .inset(by: size * 0.06)
-                .strokeBorder(.white, lineWidth: size * 0.035)
+                .inset(by: size * 0.045)
+                .fill(Theme.accent.gradient)
             Text(verbatim: "STOP!")
                 .font(.system(size: size * 0.24, weight: .black, design: .rounded))
                 .foregroundStyle(.white)
@@ -124,6 +125,8 @@ struct StopSign: View {
                 .padding(.horizontal, size * 0.12)
         }
         .frame(width: size, height: size)
+        // A crisp contact shadow outlines the white rim on light backgrounds; the glow gives depth.
+        .shadow(color: .black.opacity(0.18), radius: size * 0.015, y: size * 0.008)
         .shadow(color: Theme.accent.opacity(0.35), radius: size * 0.08, y: size * 0.04)
         .accessibilityHidden(true)
     }
@@ -138,12 +141,17 @@ struct PlayerInitial: View {
     var size: CGFloat = 40
     /// Practice bots ("Robo Ana") show their own name's initial, so they don't all read "R".
     var isBot = false
+    /// The local player: never mistaken for a bot, even if their name starts with "Robo ".
+    var isYou = false
 
     @ScaledMetric private var scale: CGFloat = 1
     /// In practice, views that don't know who's a bot (scoring, results) still get the bots' own initials.
     @Environment(\.isPracticeGame) private var isPractice
 
-    private var showsBotInitial: Bool { isBot || (isPractice && PracticeSetupModel.isBotName(name)) }
+    /// Bots are flagged by the caller, or recognised by name — only other players, and only in practice.
+    nonisolated static func showsBotInitial(name: String, isBot: Bool, isPractice: Bool, isYou: Bool) -> Bool {
+        isBot || (isPractice && !isYou && PracticeSetupModel.isBotName(name))
+    }
 
     nonisolated static func initial(for name: String, isBot: Bool) -> String {
         let words = name.split(separator: " ")
@@ -152,7 +160,7 @@ struct PlayerInitial: View {
     }
 
     var body: some View {
-        Text(verbatim: Self.initial(for: name, isBot: showsBotInitial))
+        Text(verbatim: Self.initial(for: name, isBot: Self.showsBotInitial(name: name, isBot: isBot, isPractice: isPractice, isYou: isYou)))
             .font(.system(size: size * scale * 0.45, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
             .frame(width: size * scale, height: size * scale)

@@ -10,7 +10,13 @@ struct RoundResultsView: View {
     let round: Round
 
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.isPracticeGame) private var isPractice
     @State private var confirmingEnd = false
+
+    /// The host's way out: a practice game ends as a practice, not as a game for everyone.
+    nonisolated static func endTitle(isPractice: Bool) -> LocalizedStringResource {
+        isPractice ? "End practice" : "End game"
+    }
 
     private var names: [PlayerID: String] { state.displayNames }
     private var hostName: String { names[state.hostID] ?? "" }
@@ -47,12 +53,12 @@ struct RoundResultsView: View {
             .padding(.bottom, Theme.Spacing.l)
         }
         .safeAreaInset(edge: .bottom) { bottomBar }
-        .alert("End the game?", isPresented: $confirmingEnd) {
-            Button("End game", role: .destructive) { client.send(.endGame) }
+        .alert(isPractice ? "End the practice?" : "End the game?", isPresented: $confirmingEnd) {
+            Button(role: .destructive) { client.send(.endGame) } label: { Text(Self.endTitle(isPractice: isPractice)) }
                 .accessibilityIdentifier("confirmEndGameButton")
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Everyone sees the final standings.")
+            Text(isPractice ? "You’ll see the final standings." : "Everyone sees the final standings.")
         }
     }
 
@@ -105,7 +111,7 @@ struct RoundResultsView: View {
                 }
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("nextRoundButton")
-                Button("End game") { confirmingEnd = true }
+                Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
                     .font(Theme.Typography.headline)
                     .foregroundStyle(Theme.accent)
                     .frame(minHeight: 44)
