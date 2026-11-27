@@ -13,6 +13,9 @@ struct ScoringView: View {
     @Environment(\.reduceMotion) private var reduceMotion
     /// My pick, shown at once while the host confirms it.
     @State private var pendingPick: Int?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// The back-arrow-only Previous button's width.
+    @ScaledMetric(relativeTo: .title3) private var compactPreviousWidth: CGFloat = 64
 
     private var me: PlayerID { client.localPlayerID }
     private var presentation: ScoringPresentation { ScoringPresentation(state: state, viewer: me) }
@@ -131,7 +134,9 @@ struct ScoringView: View {
                     Text("Blank answers score 0.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
-                } else if presentation.isReadAloud, presentation.myScore == nil {
+                } else if presentation.isReadAloud, presentation.myScore == nil,
+                          !dynamicTypeSize.isAccessibilitySize {
+                    // Left out at accessibility sizes, where the pinned bar has no room to spare.
                     Text("Read your answer out loud, then score it.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
@@ -158,18 +163,19 @@ struct ScoringView: View {
         }
     }
 
-    /// Host only: Previous beside Next (from the second category on), stacked when they don't fit side by side
-    /// (large text, long labels).
+    /// Host only: Previous beside Next (from the second category on). Its label shows when both fit side by
+    /// side; otherwise it's just the back arrow, so the pinned bar stays one button tall.
     @ViewBuilder private func hostButtons(_ presentation: ScoringPresentation) -> some View {
         if presentation.showsPreviousButton {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: Theme.Spacing.s) {
-                    previousButton(presentation)
+                    previousButton(presentation, compact: false)
                     nextButton(presentation)
                 }
-                VStack(spacing: Theme.Spacing.s) {
-                    nextButton(presentation)
-                    previousButton(presentation)
+                // Next stays on one line (shrinking a little at the largest sizes) rather than hyphenating.
+                HStack(spacing: Theme.Spacing.s) {
+                    previousButton(presentation, compact: true)
+                    nextButton(presentation, oneLine: true)
                 }
             }
         } else {
@@ -178,27 +184,41 @@ struct ScoringView: View {
     }
 
     /// Host only: takes everyone back to the category before, to review or correct its scores.
-    private func previousButton(_ presentation: ScoringPresentation) -> some View {
-        Button {
+    @ViewBuilder private func previousButton(_ presentation: ScoringPresentation, compact: Bool) -> some View {
+        let button = Button {
             client.send(.previousCategory(round: round.number, category: presentation.categoryIndex))
         } label: {
-            Label("Previous category", systemImage: "arrow.backward")
+            if compact {
+                Image(systemName: "arrow.backward")
+            } else {
+                Label("Previous category", systemImage: "arrow.backward")
+            }
         }
         .buttonStyle(.secondary)
+        .accessibilityLabel(Text("Previous category"))
         .accessibilityHint(Text("Takes everyone back to the category before."))
         .accessibilityIdentifier("previousCategoryButton")
+        if compact {
+            button.frame(width: compactPreviousWidth)
+        } else {
+            button
+        }
     }
 
     /// Host only: moves everyone on once the category is complete.
-    private func nextButton(_ presentation: ScoringPresentation) -> some View {
+    private func nextButton(_ presentation: ScoringPresentation, oneLine: Bool = false) -> some View {
         Button {
             client.send(.nextCategory(round: round.number, category: presentation.categoryIndex))
         } label: {
-            if presentation.isLastCategory {
-                Label("See results", systemImage: "trophy")
-            } else {
-                Label("Next category", systemImage: "arrow.forward")
+            Group {
+                if presentation.isLastCategory {
+                    Label("See results", systemImage: "trophy")
+                } else {
+                    Label("Next category", systemImage: "arrow.forward")
+                }
             }
+            .lineLimit(oneLine ? 1 : nil)
+            .minimumScaleFactor(oneLine ? 0.6 : 1)
         }
         .buttonStyle(.primary)
         .disabled(!presentation.canAdvance)
