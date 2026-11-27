@@ -110,6 +110,11 @@ private final class Harness {
 
     private var hidden: EndpointRef?
 
+    /// Makes the host reachable again (without waiting for anyone to reconnect).
+    func reconnectHidden() {
+        if let hidden { net.setReachable(true, listener: hidden) }
+    }
+
     /// Makes the host reachable again and moves the clock past any backoff.
     func reconnect(_ client: ClientSession) async {
         if let hidden { net.setReachable(true, listener: hidden) }
@@ -673,6 +678,82 @@ struct ClientSessionTests {
         h.host.localClient.send(.removePlayer(ana.localPlayerID))
         await waitUntil("ended") { ana.hostStatus == .ended(.removed) }
         await waitUntil("ref cleared") { await store.loadActiveGame() == nil }
+    }
+
+    @Test func onlyTheFirstHelloAfterChoosingTheGameAsksToRejoinExplicitly() async throws {
+        let net = InMemoryNetwork(), clock = TestClock(), gameID = UUID(), me = UUID()
+        let fake = FakeHost(net: net, gameID: gameID)
+        let ana = try await fakeClient(net, clock: clock, gameID: gameID, me: me)
+        await waitUntil("hello") { !fake.received.isEmpty }
+        // Until a welcome, even a redial still carries the player's choice.
+        fake.connections.last?.close()
+        await stepUntil(clock, seconds: 5) { fake.received.count >= 2 }
+        fake.send(.welcome(fakeState(gameID: gameID, me: me, version: 1)))
+        await waitUntil("connected") { ana.hostStatus == .connected }
+        // An automatic reconnect after the welcome doesn't.
+        fake.connections.last?.close()
+        await stepUntil(clock, seconds: 5) { fake.received.count >= 3 }
+        let explicit = fake.received.compactMap { body -> Bool? in
+            if case .hello(_, _, _, _, let explicitRejoin) = body { explicitRejoin } else { nil }
+        }
+        #expect(explicit == [true, true, false])
+    }
+
+    @Test func rejoinAfterRelaunchIsNotExplicit() async throws {
+        let net = InMemoryNetwork(), clock = TestClock(), gameID = UUID()
+        let fake = FakeHost(net: net, gameID: gameID)
+        let ana = ClientSession(profile: Profile(playerID: UUID(), name: "Ana", soundsEnabled: false),
+                                target: .rejoin(gameID: gameID), factory: net, store: InMemoryGameStore(),
+                                clock: clock)
+        ana.start()
+        await waitUntil("hello") { !fake.received.isEmpty }
+        guard case .hello(_, _, _, _, let explicitRejoin) = fake.received.first else {
+            Issue.record("expected hello")
+            return
+        }
+        #expect(!explicitRejoin)
+        ana.stop()
+    }
+
+    @Test func removedPlayerReconnectingOnItsOwnEndsRemoved() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        h.toWriting()
+        try await h.disconnect(ana)
+        h.host.localClient.send(.removePlayer(ana.localPlayerID))
+        #expect(h.host.state.player(ana.localPlayerID)?.presence == .removed)
+        h.reconnectHidden()
+        await stepUntil(h.clock, seconds: 10) { ana.hostStatus == .ended(.removed) }
+        #expect(ana.hostStatus == .ended(.removed))
+        #expect(h.host.state.player(ana.localPlayerID)?.presence == .removed)
+    }
+
+    @Test func removedPlayerChoosingTheGameAgainRejoins() async throws {
+        let h = try Harness()
+        let id = UUID()
+        let ana = try await h.join("Ana", id: id)
+        h.toWriting()
+        h.host.localClient.send(.removePlayer(id))
+        await waitUntil("ended") { ana.hostStatus == .ended(.removed) }
+        let again = try await h.join("Ana", id: id)
+        #expect(again.hostStatus == .connected)
+        #expect(h.host.state.player(id)?.presence == .present)
+    }
+
+    @Test func endingLeavesAnotherGamesReferenceAlone() async throws {
+        let h = try Harness()
+        let store = InMemoryGameStore()
+        let ana = try await h.join("Ana", store: store)
+        await waitUntil("ref saved") { await store.loadActiveGame()?.gameID == h.gameID }
+        // Meanwhile this phone started on another game.
+        let other = ActiveGameRef(gameID: UUID(), role: .host, hostName: "Ana")
+        await store.saveActiveGame(other)
+        h.host.localClient.send(.removePlayer(ana.localPlayerID))
+        await waitUntil("ended") { ana.hostStatus == .ended(.removed) }
+        var drained = false
+        ana.storeQueue.enqueue { _ in drained = true }
+        await waitUntil("store queue drained") { drained }
+        #expect(await store.loadActiveGame() == other)
     }
 
     @Test func gameOverClearsActiveGame() async throws {

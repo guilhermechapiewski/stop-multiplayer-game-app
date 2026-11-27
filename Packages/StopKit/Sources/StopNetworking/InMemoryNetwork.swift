@@ -82,6 +82,33 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
         }
     }
 
+    /// Simulates the Local Network permission being refused (or granted again) on every phone: while denied,
+    /// browsers report `.permissionDenied` instead of results and listeners report `.permissionDenied` (they keep
+    /// running). Granting it again publishes the current results.
+    public func setLocalNetworkDenied(_ denied: Bool) {
+        state.withLock { state in
+            guard state.localNetworkDenied != denied else { return }
+            state.localNetworkDenied = denied
+            if denied {
+                for listener in state.listeners.values { listener.events.yield(.permissionDenied) }
+            }
+            state.publishResults()
+        }
+    }
+
+    /// Makes running listeners (or just `endpoint`'s) fail on their own: each emits `.failed` and finishes, and
+    /// stops advertising and accepting. Existing connections are unaffected.
+    public func failListeners(of endpoint: EndpointRef? = nil) {
+        state.withLock { state in
+            for id in Array(state.listeners.keys) where endpoint == nil || endpoint == .inMemory(id) {
+                guard let listener = state.listeners.removeValue(forKey: id) else { continue }
+                listener.events.yield(.failed)
+                listener.events.finish()
+            }
+            state.publishResults()
+        }
+    }
+
     /// The next message sent on any connection is delivered twice.
     public func duplicateNextMessage() {
         state.withLock { $0.duplicateNext = true }
@@ -180,6 +207,7 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
         let (stream, continuation) = AsyncStream.makeStream(of: ListenerEvent.self)
         continuation.yield(.ready)
         state.withLock { state in
+            if state.localNetworkDenied { continuation.yield(.permissionDenied) }
             state.listeners[endpointID]?.events.finish()
             state.nextListenerOrder += 1
             state.listeners[endpointID] = ListenerState(
@@ -210,7 +238,7 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
         state.withLock { state in
             state.browsers.removeValue(forKey: id)?.finish()
             state.browsers[id] = continuation
-            continuation.yield(.results(state.visibleGames()))
+            continuation.yield(state.browserEvent())
         }
         return stream
     }
@@ -297,6 +325,7 @@ fileprivate struct State {
     var nextListenerOrder = 0
     var unreachable: Set<UUID> = []
     var browsers: [UUID: AsyncStream<BrowserEvent>.Continuation] = [:]
+    var localNetworkDenied = false
 
     func isVisible(_ listenerID: UUID) -> Bool {
         listeners[listenerID] != nil && !unreachable.contains(listenerID)
@@ -312,9 +341,14 @@ fileprivate struct State {
             }
     }
 
+    /// What a browser sees now: the visible games, or `.permissionDenied`.
+    func browserEvent() -> BrowserEvent {
+        localNetworkDenied ? .permissionDenied : .results(visibleGames())
+    }
+
     func publishResults() {
-        let games = visibleGames()
-        for browser in browsers.values { browser.yield(.results(games)) }
+        let event = browserEvent()
+        for browser in browsers.values { browser.yield(event) }
     }
 
     /// Both ends get `.closed` immediately; in-flight messages are dropped.

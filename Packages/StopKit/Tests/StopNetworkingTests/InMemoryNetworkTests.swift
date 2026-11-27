@@ -296,3 +296,65 @@ private func eventually(within timeout: Duration = .seconds(1), _ condition: () 
         #expect(mine == (0..<perSender).map { "\(s):\($0)" })
     }
 }
+
+extension ListenerEvent {
+    fileprivate var isPermissionDenied: Bool { if case .permissionDenied = self { true } else { false } }
+    fileprivate var isFailed: Bool { if case .failed = self { true } else { false } }
+}
+
+extension BrowserEvent {
+    fileprivate var isPermissionDenied: Bool { if case .permissionDenied = self { true } else { false } }
+}
+
+@Test(.timeLimit(.minutes(1))) func localNetworkDeniedReachesBrowsersAndListeners() async throws {
+    let net = InMemoryNetwork()
+    let running = net.makeListener()
+    var runningEvents = running.start(advertising: ad("Ana")).makeAsyncIterator()
+    #expect(await runningEvents.next()?.isReady == true)
+    let browser = net.makeBrowser()
+    var browse = browser.start().makeAsyncIterator()
+    #expect(await waitForResults(&browse) { $0.count == 1 } != nil)
+
+    net.setLocalNetworkDenied(true)
+    #expect(await browse.next()?.isPermissionDenied == true)
+    #expect(await runningEvents.next()?.isPermissionDenied == true)
+    // Started while denied: a listener is told at once, a browser gets no results.
+    let late = net.makeListener()
+    var lateEvents = late.start(advertising: ad("Bia")).makeAsyncIterator()
+    #expect(await lateEvents.next()?.isReady == true)
+    #expect(await lateEvents.next()?.isPermissionDenied == true)
+    let lateBrowser = net.makeBrowser()
+    var lateBrowse = lateBrowser.start().makeAsyncIterator()
+    #expect(await lateBrowse.next()?.isPermissionDenied == true)
+
+    net.setLocalNetworkDenied(false)
+    #expect(await waitForResults(&browse) { $0.count == 2 } != nil)
+    browser.stop()
+    lateBrowser.stop()
+}
+
+@Test(.timeLimit(.minutes(1))) func failedListenerEmitsFailedAndStopsAdvertising() async throws {
+    let net = InMemoryNetwork()
+    let (client, server, endpoint) = try await connectedPair(on: net)
+    let other = net.makeListener()
+    var otherEvents = other.start(advertising: ad("Bia")).makeAsyncIterator()
+    #expect(await otherEvents.next()?.isReady == true)
+    let browser = net.makeBrowser()
+    var browse = browser.start().makeAsyncIterator()
+    #expect(await waitForResults(&browse) { $0.count == 2 } != nil)
+
+    net.failListeners(of: endpoint)
+    let remaining = try #require(await waitForResults(&browse) { $0.count == 1 })
+    #expect(remaining.first?.advertisement.hostName == "Bia")
+    // Existing connections stay up.
+    var serverEvents = server.events.makeAsyncIterator()
+    #expect(await serverEvents.next() == .ready)
+    client.send(Data([7]))
+    #expect(await serverEvents.next() == .message(Data([7])))
+
+    net.failListeners()
+    #expect(await otherEvents.next()?.isFailed == true)
+    #expect(await otherEvents.next() == nil)
+    #expect(await waitForResults(&browse) { $0.isEmpty } != nil)
+    browser.stop()
+}

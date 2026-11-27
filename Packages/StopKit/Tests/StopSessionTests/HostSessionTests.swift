@@ -120,10 +120,10 @@ private final class Harness {
 
     /// Connects and sends `.hello`; doesn't wait for the reply.
     func connect(_ id: PlayerID = UUID(), name: String = "Ana", gameID: UUID? = nil,
-                 protocolVersion: Int = currentProtocolVersion) async throws -> RawClient {
+                 protocolVersion: Int = currentProtocolVersion, explicitRejoin: Bool = true) async throws -> RawClient {
         let game = try #require(await browse())
         let client = RawClient(net.connect(to: game.endpoint), playerID: id)
-        client.send(.hello(playerID: id, name: name, gameID: gameID, lastVersion: nil),
+        client.send(.hello(playerID: id, name: name, gameID: gameID, lastVersion: nil, explicitRejoin: explicitRejoin),
                     protocolVersion: protocolVersion)
         return client
     }
@@ -297,7 +297,7 @@ struct HostSessionTests {
         let h = try Harness()
         let ana = try await h.join("Ana")
         let beaID = UUID()
-        ana.send(.hello(playerID: beaID, name: "Bea", gameID: nil, lastVersion: nil))
+        ana.send(.hello(playerID: beaID, name: "Bea", gameID: nil, lastVersion: nil, explicitRejoin: true))
         await waitUntil("Bea present") { h.host.state.player(beaID)?.presence == .present }
         await waitUntil("Ana away") { h.host.state.player(ana.playerID)?.presence == .away }
         #expect(h.host.connectionPlayer[ana.connection.id] == beaID)
@@ -476,6 +476,148 @@ struct HostSessionTests {
         }
         #expect(h.host.localClient.frozenAnswers == ["Gui", "Gato"])
         #expect(h.host.state.phase == .scoring(categoryIndex: 0, completed: false))
+    }
+
+    // MARK: Rejoining after leaving or removal (Ruling V)
+
+    /// Ana joins and the game starts.
+    private func startedWithAna(_ h: Harness) async throws -> RawClient {
+        let ana = try await h.join("Ana")
+        h.host.localClient.send(.startGame)
+        await waitUntil("started") { h.host.state.currentRound != nil }
+        return ana
+    }
+
+    @Test func removedPlayerReconnectingOnItsOwnIsShownTheStateButNotTakenBack() async throws {
+        let h = try Harness()
+        let ana = try await startedWithAna(h)
+        h.host.localClient.send(.removePlayer(ana.playerID))
+        await waitUntil("removed") { h.host.state.player(ana.playerID)?.presence == .removed }
+        let version = h.host.state.version
+
+        let again = try await h.connect(ana.playerID, name: "Ana", explicitRejoin: false)
+        guard case .welcome(let state) = await again.next() else { Issue.record("expected welcome"); return }
+        #expect(state.player(ana.playerID)?.presence == .removed)
+        #expect(await again.untilClosed())
+        #expect(h.host.state.player(ana.playerID)?.presence == .removed)
+        #expect(h.host.state.version == version)
+        #expect(h.host.connectionPlayer[again.connection.id] == nil)
+    }
+
+    @Test func removedPlayerRejoiningFromTheJoinListComesBackWithScore() async throws {
+        let h = try Harness()
+        let ana = try await startedWithAna(h)
+        h.host.localClient.send(.removePlayer(ana.playerID))
+        await waitUntil("removed") { h.host.state.player(ana.playerID)?.presence == .removed }
+        let rounds = h.host.state.rounds
+
+        let again = try await h.connect(ana.playerID, name: "Ana", explicitRejoin: true)
+        guard case .welcome(let state) = await again.next() else { Issue.record("expected welcome"); return }
+        #expect(state.player(ana.playerID)?.presence == .present)
+        #expect(h.host.state.player(ana.playerID)?.presence == .present)
+        // Back from the next round; what was recorded stays.
+        #expect(h.host.state.currentRound?.participants.contains(ana.playerID) == false)
+        #expect(h.host.state.rounds.map(\.scores) == rounds.map(\.scores))
+    }
+
+    @Test func leftPlayerRejoiningFromTheJoinListComesBack() async throws {
+        let h = try Harness()
+        let ana = try await startedWithAna(h)
+        let id = ana.send(.leave)
+        #expect(await ana.nextAck() == .ack(id: id, error: nil))
+        ana.send(.bye)
+        #expect(await ana.untilClosed())
+        #expect(h.host.state.player(ana.playerID)?.presence == .left)
+
+        let again = try await h.connect(ana.playerID, name: "Ana", explicitRejoin: true)
+        guard case .welcome(let state) = await again.next() else { Issue.record("expected welcome"); return }
+        #expect(state.player(ana.playerID)?.presence == .present)
+        #expect(h.host.state.player(ana.playerID)?.presence == .present)
+    }
+
+    @Test func unknownPlayerRejoiningAStartedGameIsTurnedAway() async throws {
+        let h = try Harness()
+        _ = try await startedWithAna(h)
+        let stranger = try await h.connect(name: "Bea", explicitRejoin: true)
+        #expect(await stranger.next() == .rejected(.gameClosed))
+        #expect(await stranger.untilClosed())
+        #expect(h.host.state.player(stranger.playerID) == nil)
+    }
+
+    // MARK: Listener and local network
+
+    @Test func localNetworkDenialIsSurfacedAndClearsWhenAllowed() async throws {
+        let h = try Harness()
+        #expect(!h.host.isLocalNetworkDenied)
+        h.net.setLocalNetworkDenied(true)
+        await waitUntil("denied") { h.host.isLocalNetworkDenied }
+        h.net.setLocalNetworkDenied(false)
+        await waitUntil("allowed") { !h.host.isLocalNetworkDenied }
+    }
+
+    @Test func hostStartedWhileDeniedReportsItAndRechecksOnResume() async throws {
+        let net = InMemoryNetwork()
+        net.setLocalNetworkDenied(true)
+        let host = HostSession(state: try Harness.newGame(), factory: net, store: InMemoryGameStore(),
+                               clock: TestClock())
+        host.start()
+        await waitUntil("denied") { host.isLocalNetworkDenied }
+        host.suspend()
+        net.setLocalNetworkDenied(false)
+        host.resume()
+        await waitUntil("allowed") { !host.isLocalNetworkDenied }
+        host.shutdown()
+    }
+
+    @Test func failedListenerIsRestartedFromTheHeartbeatWithBackoff() async throws {
+        let h = try Harness()
+        let first = try #require(await h.browse())
+        h.net.failListeners()
+        await waitUntil("failure seen") { h.host.listenerFailed }
+        // First restart after 1 s.
+        await h.advance(seconds: 1)
+        let second = try #require(await h.browse())
+        #expect(second.endpoint != first.endpoint)
+        #expect(second.advertisement.gameID == h.host.state.gameID)
+        #expect(!h.host.listenerFailed)
+        // Players can still join through the new listener.
+        _ = try await h.join("Ana")
+    }
+
+    @Test func repeatedListenerFailuresBackOff() async throws {
+        var timing = SessionTiming()
+        timing.awayAfter = .seconds(3600)
+        timing.listenerRestartBackoff = [.seconds(1), .seconds(3)]
+        let net = InMemoryNetwork(), clock = TestClock()
+        let host = HostSession(state: try Harness.newGame(), factory: net, store: InMemoryGameStore(), clock: clock,
+                               timing: timing)
+        host.start()
+        net.failListeners()
+        await waitUntil("failed") { host.listenerFailed }
+        await waitUntil("loops") { clock.sleeperCount >= 2 }
+        await clock.advance(by: .seconds(1))
+        await waitUntil("restarted once") { !host.listenerFailed && host.listenerRestarts == 1 }
+        net.failListeners()
+        await waitUntil("failed again") { host.listenerFailed }
+        // The second restart waits 3 s.
+        for _ in 0..<2 {
+            await waitUntil("loops") { clock.sleeperCount >= 2 }
+            await clock.advance(by: .seconds(1))
+        }
+        await waitUntil("loops") { clock.sleeperCount >= 2 }
+        #expect(host.listenerFailed)
+        await clock.advance(by: .seconds(1))
+        await waitUntil("restarted twice") { !host.listenerFailed && host.listenerRestarts == 2 }
+        host.shutdown()
+    }
+
+    @Test func listenerIsNotRestartedAfterShutdown() async throws {
+        let h = try Harness()
+        h.host.shutdown()
+        h.net.failListeners()
+        await waitUntil("failure seen") { h.host.listenerFailed }
+        await h.advance(seconds: 2, sleepers: 1)
+        #expect(h.host.listenerFailed)
     }
 
     @Test func endGameBroadcastsFinalSnapshotThenShutsDown() async throws {

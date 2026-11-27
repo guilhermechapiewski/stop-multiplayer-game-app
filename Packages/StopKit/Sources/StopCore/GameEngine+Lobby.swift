@@ -68,7 +68,8 @@ extension GameEngine {
         guard present.count >= 2 else { throw .notEnoughPlayers }
         let pick = LetterPicker.pick(used: state.usedLetters, using: &rng)
         state.usedLetters = pick.used
-        state.rounds.append(Round(number: 1, letter: pick.letter, participants: present))
+        // Like every later round: away players take part too (they're expected back).
+        state.rounds.append(Round(number: 1, letter: pick.letter, participants: state.activePlayers.map(\.id)))
         state.phase = .revealing(ticksRemaining: 2)
         return true
     }

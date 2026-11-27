@@ -103,6 +103,28 @@ private func started() throws -> (GameState, PlayerID, PlayerID) {
     #expect(s.currentRound?.participants == [host, b])
 }
 
+@Test func roundOneIncludesAwayPlayersLikeLaterRounds() throws {
+    var (s, host) = try lobby()
+    let bia = UUID(), caio = UUID(), dani = UUID()
+    try send(.join(name: "Bia"), bia, &s)
+    try send(.join(name: "Caio"), caio, &s)
+    try send(.join(name: "Dani"), dani, &s)
+    #expect(GameEngine.setPresence(.away, for: caio, in: &s))
+    try send(.leave, dani, &s)
+    try send(.startGame, host, &s)
+    // Present and away players take part, as `nextRound` does; left ones don't.
+    #expect(s.currentRound?.participants == [host, bia, caio])
+    #expect(s.currentRound?.participants == s.activePlayers.map(\.id))
+}
+
+@Test func awayPlayersDoNotCountTowardsTheTwoNeededToStart() throws {
+    var (s, host) = try lobby()
+    let bia = UUID()
+    try send(.join(name: "Bia"), bia, &s)
+    #expect(GameEngine.setPresence(.away, for: bia, in: &s))
+    #expect(throws: GameError.notEnoughPlayers) { try send(.startGame, host, &s) }
+}
+
 @Test func categoriesCannotChangeAfterStart() throws {
     var (s, host, _) = try started()
     #expect(throws: GameError.wrongPhase) { try send(.updateSettings(settings), host, &s) }

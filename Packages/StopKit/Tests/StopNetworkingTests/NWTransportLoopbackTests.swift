@@ -42,6 +42,13 @@ extension ListenerEvent {
     fileprivate var connection: (any Connection)? { if case .connection(let c) = self { c } else { nil } }
 }
 
+@Test func onlyDNSPolicyDeniedCountsAsPermissionDenied() {
+    #expect(NWTransportBrowser.isPolicyDenied(.dns(DNSServiceErrorType(kDNSServiceErr_PolicyDenied))))
+    #expect(!NWTransportBrowser.isPolicyDenied(.dns(DNSServiceErrorType(kDNSServiceErr_NoSuchRecord))))
+    #expect(!NWTransportBrowser.isPolicyDenied(.posix(.ECONNREFUSED)))
+    #expect(!NWTransportBrowser.isPolicyDenied(.posix(.EPERM)))
+}
+
 /// Starts a non-advertising listener on loopback and returns it once ready, with its port.
 private func loopbackListener(
     _ factory: NWTransportFactory

@@ -101,6 +101,10 @@ public protocol Connection: AnyObject, Sendable {
 
 public enum ListenerEvent: Sendable {
     case ready
+    /// Local network access is denied, so nearby phones can't find or reach this listener. May come before
+    /// `.failed`, or while the listener waits for access.
+    case permissionDenied
+    /// The listener stopped on its own; no more events follow. A requested `stop()` emits nothing.
     case failed
     /// An incoming connection; the receiver must call `start()` on it.
     case connection(any Connection)

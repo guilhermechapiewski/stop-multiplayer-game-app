@@ -7,19 +7,67 @@ extension HostSession {
         let listener = factory.makeListener()
         self.listener = listener
         listenerFailed = false
+        listenerFailedAt = nil
         let ad = advertisement()
         advertised = ad
         let events = listener.start(advertising: ad)
         Task { [weak self] in
             for await event in events {
-                guard let self else { return }
+                guard let self, self.listener === listener else { return }
                 switch event {
-                case .ready: break
-                case .failed: listenerFailed = true
-                case .connection(let connection): accept(connection)
+                case .ready:
+                    break
+                case .permissionDenied:
+                    isLocalNetworkDenied = true
+                case .failed:
+                    listenerFailed = true
+                    listenerFailedAt = Stopwatch(clock)
+                case .connection(let connection):
+                    accept(connection)
                 }
             }
         }
+    }
+
+    func restartListener() {
+        listener?.stop()
+        startListener()
+    }
+
+    /// From the heartbeat (so only in the foreground): restarts a failed listener once the backoff for the
+    /// restarts so far has passed.
+    func restartListenerIfDue() {
+        guard listenerFailed, !isShutDown, let listenerFailedAt else { return }
+        let backoff = timing.listenerRestartBackoff
+        let delay = backoff.isEmpty ? .zero : backoff[min(listenerRestarts, backoff.count - 1)]
+        guard listenerFailedAt.elapsed >= delay else { return }
+        listenerRestarts += 1
+        restartListener()
+    }
+
+    /// Browsing our own service type surfaces a local network denial; any results mean access works. A browser
+    /// that ends is replaced on the next heartbeat.
+    func startPermissionBrowser() {
+        guard permissionBrowser == nil, !isShutDown else { return }
+        let browser = factory.makeBrowser()
+        permissionBrowser = browser
+        let events = browser.start()
+        Task { [weak self] in
+            for await event in events {
+                guard let self, self.permissionBrowser === browser else { return }
+                switch event {
+                case .results: if isLocalNetworkDenied { isLocalNetworkDenied = false }
+                case .permissionDenied: if !isLocalNetworkDenied { isLocalNetworkDenied = true }
+                case .failed: break
+                }
+            }
+            if let self, self.permissionBrowser === browser { stopPermissionBrowser() }
+        }
+    }
+
+    func stopPermissionBrowser() {
+        permissionBrowser?.stop()
+        permissionBrowser = nil
     }
 
     private func accept(_ connection: any Connection) {
@@ -39,8 +87,9 @@ extension HostSession {
 
     private func receive(_ data: Data, on connection: any Connection) {
         guard let message = try? WireMessage.decode(data) else { return }
-        if case .hello(let playerID, let name, let gameID, _) = message.body {
-            hello(message.protocolVersion, playerID: playerID, name: name, gameID: gameID, on: connection)
+        if case .hello(let playerID, let name, let gameID, _, let explicitRejoin) = message.body {
+            hello(message.protocolVersion, playerID: playerID, name: name, gameID: gameID,
+                  explicitRejoin: explicitRejoin, on: connection)
             return
         }
         guard let player = connectionPlayer[connection.id] else { return }
@@ -61,10 +110,17 @@ extension HostSession {
     }
 
     private func hello(_ protocolVersion: Int, playerID: PlayerID, name: String, gameID: UUID?,
-                       on connection: any Connection) {
+                       explicitRejoin: Bool, on connection: any Connection) {
         guard protocolVersion == currentProtocolVersion else { return reject(connection, .versionMismatch) }
         if let gameID, gameID != state.gameID { return reject(connection, .wrongGame) }
         guard !isShutDown, playerID != state.hostID else { return reject(connection, .gameClosed) }
+        if !explicitRejoin, state.player(playerID)?.presence == .removed {
+            // A removed player's phone reconnecting on its own: show it the state (it ends with the "removed"
+            // notice) without taking it back. Only choosing the game in the Join list rejoins.
+            send(.welcome(state.redacted(for: playerID)), to: connection)
+            connection.close()
+            return
+        }
         if let error = apply(.join(name: name), from: playerID, except: playerID) {
             if error == .gameClosed { send(.rejected(.gameClosed), to: connection) }
             connection.close()
