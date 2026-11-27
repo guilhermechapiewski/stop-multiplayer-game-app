@@ -25,18 +25,17 @@ struct RootView: View {
             RejoiningView(hostName: ref.hostName, onCancel: model.cancelRejoin)
                 .transition(.opacity)
         case .hostSetup:
-            // Replaced by HostSetupView (Task 14).
-            ComingSoonView(title: "Host a game", systemImage: "person.3.fill") { model.navigate(to: .home) }
+            HostSetupView(model: model)
+                .transition(.opacity)
         case .join:
-            // Replaced by JoinView (Task 14).
-            ComingSoonView(title: "Join a game", systemImage: "wifi") { model.navigate(to: .home) }
+            JoinView(model: model)
+                .transition(.opacity)
         case .practiceSetup:
             // Replaced by PracticeSetupView (Task 17b).
             ComingSoonView(title: "Practice with bots", systemImage: "cpu") { model.navigate(to: .home) }
         case .game:
-            // Replaced by GameContainerView (Task 14).
-            ComingSoonView(title: "Game", systemImage: "gamecontroller.fill", backTitle: "Leave game",
-                           onBack: model.leaveGame)
+            GameContainerView(model: model)
+                .transition(.opacity)
         }
     }
 }

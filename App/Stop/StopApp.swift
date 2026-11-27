@@ -9,8 +9,21 @@ struct StopApp: App {
     init() {
         let arguments = ProcessInfo.processInfo.arguments
         let store = StoreLocation.makeStore(wipe: LaunchOptions(arguments: arguments).wipesStore)
-        _model = State(initialValue: AppModel(store: store, factory: NWTransportFactory(), launchArguments: arguments))
+        var factory: any TransportFactory = NWTransportFactory()
+        #if DEBUG
+        // `-demoGames`: browse a fake network with a few games on it (for screenshots), not the real one.
+        if arguments.contains("-demoGames") {
+            let demo = PreviewData.demoNetwork()
+            Self.demo = demo
+            factory = demo.network
+        }
+        #endif
+        _model = State(initialValue: AppModel(store: store, factory: factory, launchArguments: arguments))
     }
+
+    #if DEBUG
+    @MainActor private static var demo: DemoNetwork?
+    #endif
 
     /// XCTest sets this for the app that hosts unit tests (not for an app launched by UI tests).
     static var isHostingUnitTests: Bool {

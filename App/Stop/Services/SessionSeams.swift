@@ -61,18 +61,18 @@ struct SessionFactories {
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
 
-    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode starts a host without bots.
+    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode's bots only sit in the game.
     static let live = SessionFactories(
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
         launchMockGame: { profile, bots, settings, language, clock in
-            hostOnlyMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
+            idleBotsMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
         })
 
-    /// A host on its own in-memory network, with no bots (stand-in for `MockGameLauncher`).
+    /// A host on its own in-memory network, joined by bots that never play (stand-in for `MockGameLauncher`).
     @MainActor
-    static func hostOnlyMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
+    static func idleBotsMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
                                  language: GameLanguage, clock: any Clock<Duration>) -> MockGame? {
         let network = InMemoryNetwork()
         let state: GameState
@@ -85,6 +85,13 @@ struct SessionFactories {
         }
         let host = HostSession(state: state, factory: network, store: InMemoryGameStore(), clock: clock)
         host.start()
-        return MockGame(host: host, retained: [network])
+        let bots = botNames.map { name in
+            let bot = ClientSession(profile: Profile(playerID: UUID(), name: name, soundsEnabled: false),
+                                    target: .rejoin(gameID: state.gameID), factory: network,
+                                    store: InMemoryGameStore(), clock: clock)
+            bot.start()
+            return bot
+        }
+        return MockGame(host: host, retained: [network] + bots)
     }
 }

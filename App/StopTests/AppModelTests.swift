@@ -90,6 +90,13 @@ struct AppModelTests {
         #expect(model.profile?.name == "Bia")
     }
 
+    @Test func openRouteArgumentOpensScreen() async {
+        let model = makeModel(arguments: ["-playerName", "Bia", "-openRoute", "join"])
+        await model.bootstrap()
+        #expect(model.route == .join)
+        #expect(LaunchOptions(arguments: ["-openRoute", "game"]).openRoute == nil)
+    }
+
     @Test func uiTestingDisablesSounds() async {
         _ = await saveProfile()
         let model = makeModel(arguments: ["-uiTesting"])
@@ -425,6 +432,7 @@ struct AppModelTests {
         let client = try #require(model.client)
         #expect(client.isHost)
         #expect(client.state?.players.first?.name == "Gui")
+        try await waitUntil { client.state?.players.map(\.name).sorted() == ["Ana", "Bia", "Caio", "Gui"] }
         model.leaveGame()
     }
 
@@ -606,7 +614,7 @@ final class SessionSpy {
             },
             launchMockGame: { [unowned self] profile, botNames, settings, language, clock in
                 mockLaunches.append(MockLaunch(hostProfile: profile, botNames: botNames))
-                return SessionFactories.hostOnlyMockGame(
+                return SessionFactories.idleBotsMockGame(
                     hostProfile: profile, botNames: botNames, settings: settings, language: language, clock: clock)
             })
     }

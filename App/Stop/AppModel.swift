@@ -58,6 +58,12 @@ final class AppModel {
         locale.language.languageCode == "pt" ? .ptBR : .en
     }
 
+    /// Options for a new hosted game, with this device's custom categories.
+    func makeSetupModel() -> HostSetupModel { HostSetupModel(store: store, language: gameLanguage) }
+
+    /// Browses this app's transport for nearby games.
+    func makeJoinModel() -> JoinModel { JoinModel(factory: factory) }
+
     // MARK: Launch
 
     /// Loads the profile, then resumes an interrupted game if there is one; otherwise Home or onboarding.
@@ -78,6 +84,7 @@ final class AppModel {
             await restore(ref)
         } else {
             route = .home
+            if let destination = launch.openRoute { navigate(to: destination) }
         }
     }
 
@@ -334,14 +341,25 @@ struct LaunchOptions: Equatable {
     var mockGame = false
     /// `-playerName <name>`: use this name and skip onboarding.
     var playerName: String?
+    /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests).
+    var openRoute: AppModel.Route?
 
     init(arguments: [String]) {
         uiTesting = arguments.contains("-uiTesting")
         resetState = arguments.contains("-resetState")
         mockGame = arguments.contains("-mockGame")
-        if let index = arguments.firstIndex(of: "-playerName"), arguments.indices.contains(index + 1) {
-            playerName = arguments[index + 1]
+        playerName = Self.value(after: "-playerName", in: arguments)
+        openRoute = switch Self.value(after: "-openRoute", in: arguments) {
+        case "hostSetup": .hostSetup
+        case "join": .join
+        case "practiceSetup": .practiceSetup
+        default: nil
         }
+    }
+
+    private static func value(after flag: String, in arguments: [String]) -> String? {
+        guard let index = arguments.firstIndex(of: flag), arguments.indices.contains(index + 1) else { return nil }
+        return arguments[index + 1]
     }
 
     /// Whether the persisted store must be wiped before it's opened.

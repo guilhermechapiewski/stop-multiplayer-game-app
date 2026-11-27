@@ -129,6 +129,26 @@ struct StopSign: View {
     }
 }
 
+// MARK: Players
+
+/// A player's initial in a tinted circle. Decorative: the name is always shown beside it.
+struct PlayerInitial: View {
+    let name: String
+    var dimmed = false
+    var size: CGFloat = 40
+
+    @ScaledMetric private var scale: CGFloat = 1
+
+    var body: some View {
+        Text(verbatim: name.first.map { String($0).uppercased() } ?? "?")
+            .font(.system(size: size * scale * 0.45, weight: .heavy, design: .rounded))
+            .foregroundStyle(.white)
+            .frame(width: size * scale, height: size * scale)
+            .background(dimmed ? AnyShapeStyle(Color(.systemGray)) : AnyShapeStyle(Theme.accent.gradient), in: .circle)
+            .accessibilityHidden(true)
+    }
+}
+
 // MARK: Layout
 
 extension View {
