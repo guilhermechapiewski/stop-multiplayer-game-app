@@ -155,7 +155,11 @@ struct PlayerInitial: View {
 
     /// Bots are flagged by the caller, or recognised by name — only other players, and only in practice.
     nonisolated static func showsBotInitial(name: String, isBot: Bool, isPractice: Bool, isYou: Bool) -> Bool {
+        #if DEBUG
         isBot || (isPractice && !isYou && PracticeSetupModel.isBotName(name))
+        #else
+        isBot  // No practice games in Release builds.
+        #endif
     }
 
     nonisolated static func initial(for name: String, isBot: Bool) -> String {

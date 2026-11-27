@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The main menu: host, join or practice; the gear opens Settings.
+/// The main menu: host or join (and, in Debug builds only, practice with bots); the gear opens Settings.
 struct HomeView: View {
     let model: AppModel
 
@@ -59,12 +59,15 @@ struct HomeView: View {
             .accessibilityHint("Find games hosted by friends on the same network.")
             .accessibilityIdentifier("joinGameButton")
 
+            #if DEBUG
+            // Development and testing only: Release builds (TestFlight, App Store) have no practice.
             Button { model.navigate(to: .practiceSetup) } label: {
                 Label("Practice with bots", systemImage: "cpu")
             }
             .buttonStyle(.secondary)
             .accessibilityHint("Play on your own against computer players.")
             .accessibilityIdentifier("practiceButton")
+            #endif
         }
     }
 }

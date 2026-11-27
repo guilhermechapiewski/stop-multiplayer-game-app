@@ -62,43 +62,59 @@ struct SessionFactories {
         _ seed: UInt64?, _ store: any GameStore, _ clock: any Clock<Duration>
     ) -> MockGame?
 
-    /// Returns a started practice host on its own in-memory network (never the app's transport), whose bots
+    #if DEBUG
+    /// Debug builds only. Returns a started practice host on its own in-memory network (never the app's transport), whose bots
     /// have been told to join. `store` only lends the profile and custom categories: the game isn't persisted.
     typealias LaunchPractice = @MainActor (
         _ hostProfile: Profile, _ botNames: [String], _ settings: GameSettings, _ language: GameLanguage,
         _ speed: BotSpeed, _ store: any GameStore, _ clock: any Clock<Duration>
     ) -> MockGame?
+    #endif
 
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
+    #if DEBUG
     var launchPractice: LaunchPractice
+    #endif
 
     /// Production wiring. Mock mode's bots play for real, and each waits for someone else's STOP before stopping
-    /// so the local player always gets to write. Practice bots play at the chosen speed.
-    static let live = SessionFactories(
-        makeClient: { profile, target, factory, store, clock in
-            ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
-        },
-        launchMockGame: { profile, bots, settings, language, seed, store, clock in
-            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-                                               language: language, practice: false,
-                                               botBehavior: mockGameBotBehavior(seeded: seed != nil), seed: seed,
-                                               store: store, clock: clock)
-            return MockGame(bots: game.bots, host: game.host, network: game.network)
-        },
-        launchPractice: { profile, bots, settings, language, speed, store, clock in
-            // `MockGameLauncher.launch` has a precondition that the settings are valid (it traps otherwise). The
-            // setup screen never offers invalid ones, but a trap would kill the app, so check first and refuse.
-            guard (try? GameEngine.newGame(gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
-                                           settings: settings, language: language)) != nil else {
-                Logger.app.error("practice: invalid settings")
-                return nil
-            }
-            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-                                               language: language, botSpeed: speed, practice: true, store: store,
-                                               clock: clock)
-            return MockGame(bots: game.bots, host: game.host, network: game.network)
-        })
+    /// so the local player always gets to write. Practice bots (Debug builds only) play at the chosen speed.
+    static let live: SessionFactories = {
+        #if DEBUG
+        SessionFactories(makeClient: liveMakeClient, launchMockGame: liveLaunchMockGame,
+                         launchPractice: liveLaunchPractice)
+        #else
+        SessionFactories(makeClient: liveMakeClient, launchMockGame: liveLaunchMockGame)
+        #endif
+    }()
+
+    private static let liveMakeClient: MakeClient = { profile, target, factory, store, clock in
+        ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
+    }
+
+    private static let liveLaunchMockGame: LaunchMockGame = { profile, bots, settings, language, seed, store, clock in
+        let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                           language: language, practice: false,
+                                           botBehavior: mockGameBotBehavior(seeded: seed != nil), seed: seed,
+                                           store: store, clock: clock)
+        return MockGame(bots: game.bots, host: game.host, network: game.network)
+    }
+
+    #if DEBUG
+    private static let liveLaunchPractice: LaunchPractice = { profile, bots, settings, language, speed, store, clock in
+        // `MockGameLauncher.launch` has a precondition that the settings are valid (it traps otherwise). The
+        // setup screen never offers invalid ones, but a trap would kill the app, so check first and refuse.
+        guard (try? GameEngine.newGame(gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
+                                       settings: settings, language: language)) != nil else {
+            Logger.app.error("practice: invalid settings")
+            return nil
+        }
+        let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                           language: language, botSpeed: speed, practice: true, store: store,
+                                           clock: clock)
+        return MockGame(bots: game.bots, host: game.host, network: game.network)
+    }
+    #endif
 
     /// `-mockGame` bots (screenshots, UI tests, development): normal speed, and each waits for someone else's
     /// STOP before stopping, so the local player always gets to write. Seeded games (screenshots) have every

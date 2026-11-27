@@ -1,3 +1,5 @@
+// Practice with bots exists only in Debug builds (owner decision, 2026-11-27); Release builds leave it out.
+#if DEBUG
 import StopCore
 import StopSession
 import StopSimulation
@@ -135,3 +137,4 @@ extension BotSpeed {
     PracticeSetupView(model: PreviewData.model())
         .environment(\.locale, Locale(identifier: "pt-BR"))
 }
+#endif

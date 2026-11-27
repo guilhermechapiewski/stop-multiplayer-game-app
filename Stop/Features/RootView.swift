@@ -63,9 +63,11 @@ struct RootView: View {
         case .join:
             JoinView(model: model)
                 .transition(.opacity)
+        #if DEBUG
         case .practiceSetup:
             PracticeSetupView(model: model)
                 .transition(.opacity)
+        #endif
         case .game:
             GameContainerView(model: model)
                 .environment(\.isPracticeGame, model.isPractice)

@@ -1,3 +1,5 @@
+// Practice with bots exists only in Debug builds (owner decision, 2026-11-27); Release builds leave it out.
+#if DEBUG
 import Foundation
 import Observation
 import StopCore
@@ -56,3 +58,4 @@ final class PracticeSetupModel {
         }
     }
 }
+#endif

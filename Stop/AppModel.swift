@@ -11,7 +11,11 @@ import SwiftUI
 @MainActor @Observable
 final class AppModel {
     enum Route: Equatable {
-        case loading, onboarding, home, hostSetup, join, practiceSetup, rejoining(ActiveGameRef), game
+        case loading, onboarding, home, hostSetup, join, rejoining(ActiveGameRef), game
+        #if DEBUG
+        /// Practice with bots: Debug builds only (owner decision, 2026-11-27).
+        case practiceSetup
+        #endif
     }
 
     private(set) var route: Route = .loading
@@ -80,8 +84,10 @@ final class AppModel {
     /// Options for a new hosted game, with this device's custom categories.
     func makeSetupModel() -> HostSetupModel { HostSetupModel(store: store, language: gameLanguage) }
 
-    /// Options for a practice game: the shared game options plus the bots.
+    #if DEBUG
+    /// Options for a practice game: the shared game options plus the bots. Debug builds only.
     func makePracticeSetupModel() -> PracticeSetupModel { PracticeSetupModel(store: store, language: gameLanguage) }
+    #endif
 
     /// Browses this app's transport for nearby games.
     func makeJoinModel() -> JoinModel { JoinModel(factory: factory) }
@@ -190,9 +196,14 @@ final class AppModel {
     /// Moves between Home and the screens reachable from it; other routes are entered by the actions below.
     func navigate(to destination: Route) {
         switch destination {
-        case .home, .hostSetup, .join, .practiceSetup:
+        case .home, .hostSetup, .join:
             guard client == nil, profile != nil else { return }
             route = destination
+        #if DEBUG
+        case .practiceSetup:
+            guard client == nil, profile != nil else { return }
+            route = destination
+        #endif
         case .loading, .onboarding, .rejoining, .game:
             return
         }
@@ -212,7 +223,8 @@ final class AppModel {
         }
     }
 
-    /// Starts a practice game: this phone hosts on an in-memory network (never the real one, so no Local
+    #if DEBUG
+    /// Starts a practice game (Debug builds only): this phone hosts on an in-memory network (never the real one, so no Local
     /// Network prompt), the bots join and the lobby opens; the player starts the first round from there.
     /// Nothing about the game is persisted, so it isn't restored after the app is killed.
     func startPractice(settings: GameSettings, botNames: [String], speed: BotSpeed) {
@@ -225,6 +237,7 @@ final class AppModel {
         start(game)
         rememberCategories(of: settings)
     }
+    #endif
 
     /// The next host or practice setup starts with this game's categories, in this order.
     private func rememberCategories(of settings: GameSettings) {
@@ -478,7 +491,8 @@ struct LaunchOptions: Equatable {
     var mockSeed: UInt64?
     /// `-playerName <name>`: use this name and skip onboarding.
     var playerName: String?
-    /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests).
+    /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests). Like
+    /// every launch argument, Debug builds only.
     var openRoute: AppModel.Route?
 
     /// Only Debug builds (development, UI tests, screenshots) honor these; a Release build ignores them all.
