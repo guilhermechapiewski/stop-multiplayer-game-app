@@ -6,8 +6,11 @@ import StopCore
 public struct BotAnswerBank: Sendable {
     /// Folded category name → uppercase letter → answers.
     private let entries: [String: [String: [String]]]
+    /// Category keys exactly as written in the JSON (for tests).
+    let rawCategories: Set<String>
 
     init(entries: [String: [String: [String]]]) {
+        rawCategories = Set(entries.keys)
         var folded: [String: [String: [String]]] = [:]
         for (category, byLetter) in entries {
             folded[Self.fold(category)] = Dictionary(
@@ -41,9 +44,9 @@ public struct BotAnswerBank: Sendable {
     private static let portuguese = decode("pt-BR")
 
     private static func decode(_ name: String) -> BotAnswerBank {
-        let url = Bundle.module.url(forResource: name, withExtension: "json", subdirectory: "BotAnswers")
-            ?? Bundle.module.url(forResource: name, withExtension: "json")
-        guard let url, let data = try? Data(contentsOf: url),
+        // `.process("Resources")` flattens the files to the bundle root.
+        guard let url = Bundle.module.url(forResource: name, withExtension: "json"),
+              let data = try? Data(contentsOf: url),
               let entries = try? JSONDecoder().decode([String: [String: [String]]].self, from: data)
         else {
             assertionFailure("missing or malformed bot answer bank \(name).json")

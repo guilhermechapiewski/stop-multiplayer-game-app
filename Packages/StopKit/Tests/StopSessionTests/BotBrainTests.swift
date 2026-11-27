@@ -1,6 +1,6 @@
 import Foundation
 import StopCore
-import StopSimulation
+@testable import StopSimulation
 import StopTestSupport
 import Testing
 
@@ -16,6 +16,7 @@ struct BotBrainTests {
     @Test(arguments: languages)
     func answerBankCoversEveryDefaultCategory(_ language: GameLanguage) {
         let bank = BotAnswerBank.load(language)
+        #expect(bank.rawCategories == Set(DefaultCategories.list(for: language)))
         for category in DefaultCategories.list(for: language) {
             let filled = Self.letters.filter { !bank.candidates(category: category, letter: $0).isEmpty }
             #expect(filled.count >= 18, "\(category) has only \(filled.count) letters")
