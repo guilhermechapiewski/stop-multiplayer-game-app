@@ -22,6 +22,8 @@ public enum EndReason: Equatable, Sendable { case gameOver, leftGame, removed, v
     var presenceChanges: AsyncStream<PresenceChange> { get }
     /// Error of the most recent ack (nil on success).
     var lastError: GameError? { get }
+    /// Counts the errors acks have reported, so a repeat of the same `lastError` is still noticed (a toast).
+    var errorCount: Int { get }
     /// Answers frozen when the round locked (for the writing screen); nil otherwise.
     var frozenAnswers: [String]? { get }
     func send(_ intent: Intent)

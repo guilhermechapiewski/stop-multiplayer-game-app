@@ -233,6 +233,18 @@ struct HostSessionTests {
         #expect(h.host.state.currentRound?.stops.count == 1)
     }
 
+    @Test func localClientCountsEveryError() throws {
+        let h = try Harness()
+        let client = h.host.localClient
+        client.send(.startGame)
+        client.send(.startGame)
+        #expect(client.lastError == .notEnoughPlayers)
+        #expect(client.errorCount == 2)
+        client.send(.updateRoundSettings(stopsRequired: 1, allowGiveUp: true))
+        #expect(client.lastError == nil)
+        #expect(client.errorCount == 2)
+    }
+
     @Test func snapshotsRedactedPerRecipient() async throws {
         let h = try Harness(stopsRequired: 2)
         let ana = try await h.join("Ana")

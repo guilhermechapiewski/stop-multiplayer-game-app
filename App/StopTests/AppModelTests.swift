@@ -676,6 +676,7 @@ final class FakeRemoteSession: RemoteGameSession {
     /// Feeds `presenceChanges`.
     let presenceEvents: AsyncStream<PresenceChange>.Continuation
     var lastError: GameError?
+    var errorCount = 0
     var frozenAnswers: [String]?
     var isLocalNetworkDenied = false
 

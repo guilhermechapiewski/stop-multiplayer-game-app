@@ -11,6 +11,7 @@ public final class LocalGameClient: GameClient {
     public var hostStatus: HostStatus { host?.state.phase == .gameOver ? .ended(.gameOver) : .connected }
     public let presenceChanges: AsyncStream<PresenceChange>
     public private(set) var lastError: GameError?
+    public private(set) var errorCount = 0
     public var frozenAnswers: [String]? { drafts.frozenAnswers }
 
     @ObservationIgnored weak var host: HostSession?
@@ -24,18 +25,23 @@ public final class LocalGameClient: GameClient {
                                        debounce: timing.draftDebounce)
         drafts.onSubmit = { [weak self] round, answers in
             guard let self, let host else { return }
-            lastError = host.apply(.submitAnswers(round: round, answers: answers), from: localPlayerID)
+            record(host.apply(.submitAnswers(round: round, answers: answers), from: localPlayerID))
         }
     }
 
     public func send(_ intent: Intent) {
         guard let host else { return }
         drafts.willSend(intent)
-        lastError = host.apply(intent, from: localPlayerID)
+        record(host.apply(intent, from: localPlayerID))
         switch intent {
         case .stop, .giveUp: if lastError != nil { drafts.stopRejected() } else { drafts.stopAccepted() }
         default: break
         }
+    }
+
+    private func record(_ error: GameError?) {
+        lastError = error
+        if error != nil { errorCount += 1 }
     }
 
     public func saveDraft(_ answers: [String]) { drafts.saveDraft(answers) }

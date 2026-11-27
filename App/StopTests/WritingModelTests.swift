@@ -105,6 +105,7 @@ final class RecordingGameClient: GameClient {
     var hostStatus: HostStatus = .connected
     let presenceChanges = AsyncStream<PresenceChange> { $0.finish() }
     var lastError: GameError?
+    var errorCount = 0
     var frozenAnswers: [String]?
 
     private(set) var sent: [Intent] = []

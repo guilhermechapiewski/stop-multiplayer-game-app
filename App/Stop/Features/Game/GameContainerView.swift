@@ -48,17 +48,15 @@ enum GameStage: Equatable {
 }
 
 struct GameScreen: View {
+    let client: any GameClient
     /// The presence banner showing now ("Ana left the app").
     let banner: Banner?
     /// Local network access is off, so the host can't be reached.
     let networkDenied: Bool
     let onLeave: () -> Void
 
-    /// The session, wrapped to number its errors (see `ErrorEventClient`).
-    @State private var client: ErrorEventClient
-
     init(client: any GameClient, banner: Banner? = nil, networkDenied: Bool = false, onLeave: @escaping () -> Void) {
-        _client = State(initialValue: ErrorEventClient(client))
+        self.client = client
         self.banner = banner
         self.networkDenied = networkDenied
         self.onLeave = onLeave
@@ -145,10 +143,9 @@ struct GameScreen: View {
             do { try await Task.sleep(for: Self.stampDuration) } catch { return }
             stampedRound = nil
         }
-        .task { await client.watchErrors() }
-        .onChange(of: client.lastEvent) { _, event in
-            // A fresh item for every event, so a repeated error shows again and restarts the timer.
-            if let error = event?.error, ErrorToast.shows(error) { toast = ToastItem(error: error) }
+        .onChange(of: client.errorCount) {
+            // A fresh item for every error (even a repeat of the last one), so it shows again and restarts the timer.
+            if let error = client.lastError, ErrorToast.shows(error) { toast = ToastItem(error: error) }
         }
         .task(id: toast) {
             guard toast != nil else { return }
