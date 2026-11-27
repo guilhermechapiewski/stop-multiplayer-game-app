@@ -1,9 +1,7 @@
 # Publishing Stop to the App Store
 
-The App Store name isn't chosen yet: the listing below uses `{{APP_NAME}}` wherever it goes.
-`python3 tools/check_listing.py` checks every field against Apple's limits, and fails with "App name not
-chosen yet" until each `{{APP_NAME}}` in the two listing sections at the end is replaced. Replace them
-all, then run it again.
+App Store name: **Stop: Multiplayer Party Game** (28 characters). The home screen keeps the short display name **Stop!**.
+`python3 tools/check_listing.py` checks every field against Apple's limits; run it after any listing edit.
 
 ## Step 1. Publish the website and privacy policy
 
@@ -49,10 +47,10 @@ Xcode writes that choice into `project.pbxproj`, which is public.
    | SKU | `stop-local-multiplayer-ios` (private, any unique text) |
    | User Access | **Full Access** |
 
-   The name is `{{APP_NAME}}` until you choose one: at most 30 characters, and it must not already be taken
-   on the App Store (App Store Connect tells you when you click **Create**; search the App Store first). Only
-   the App Store name depends on it: the bundle ID stays the same, and the home screen shows the app's
-   display name (`Stop!` for now, set in the project).
+   Name: **Stop: Multiplayer Party Game**. It must not already be taken on the App Store (App Store Connect tells you when you
+   click **Create**). If it is, pick a variant of at most 30 characters and update both listing sections
+   below. Only the App Store name changes: the bundle ID stays the same, and the home screen shows the app's
+   display name, `Stop!` (set in the project).
 3. **Create**.
 
 ## Step 4. App Information and the age rating
@@ -227,7 +225,7 @@ running the TestFlight build you're submitting.
 
 **Name** (30):
 ```
-{{APP_NAME}}
+Stop: Multiplayer Party Game
 ```
 
 **Subtitle** (30):
@@ -242,7 +240,7 @@ The classic word game for iPhones in the same room. Everyone writes at once, STO
 
 **Description** (4000):
 ```
-{{APP_NAME}} is Stop, the classic word game (also known as Adedanha), for iPhones in the same room. Pick the categories, get a letter, and race to fill in a word for each one. The first to finish shouts STOP, and once enough players have stopped, every phone locks at once. No internet, no accounts and no ads.
+Stop is the classic word game (also known as Adedanha), for iPhones in the same room. Pick the categories, get a letter, and race to fill in a word for each one. The first to finish shouts STOP, and once enough players have stopped, every phone locks at once. No internet, no accounts and no ads.
 
 HOW TO PLAY
 • One player hosts a game and picks the categories: Name, Animal, Fruit, Country... or your own.
@@ -265,7 +263,7 @@ PRIVATE BY DESIGN
 No ads, no in-app purchases, no accounts, no analytics and no tracking. The app talks only to the other phones in your game on your local network; names, answers and scores never leave it. While you host, your display name is shown to nearby phones that open Join a game, so friends can find your game.
 
 FREE AND OPEN SOURCE
-{{APP_NAME}} is completely free, with nothing to unlock. Its source code is published on GitHub under the MIT license.
+Stop is completely free, with nothing to unlock. Its source code is published on GitHub under the MIT license.
 ```
 
 **Keywords** (100):
@@ -281,7 +279,7 @@ TRY IT ON ONE DEVICE: on the home screen, tap Practice with bots and start a gam
 Attached. Recorded on [iPhone models] running iOS [version]. It starts with a short Practice with bots round on one iPhone, then shows two iPhones playing together: hosting, joining, one round, STOP, scoring and results, and one phone being locked to show the "left the app" banner and rejoining. The app has no account registration or login, no user-generated content shared beyond the room and no paid content, so there are no such flows to show.
 
 2. PURPOSE AND AUDIENCE
-{{APP_NAME}} is a free version of Stop (also called Adedanha), the classic category word game, for family and friends sitting in the same room. Each person plays on their own iPhone: a letter is drawn, everyone writes a word for each category, the first to finish calls STOP, and the players score their own answers together. It needs no internet connection, no accounts and no server; the phones talk directly to each other.
+Stop: Multiplayer Party Game is a free version of Stop (also called Adedanha), the classic category word game, for family and friends sitting in the same room. Each person plays on their own iPhone: a letter is drawn, everyone writes a word for each category, the first to finish calls STOP, and the players score their own answers together. It needs no internet connection, no accounts and no server; the phones talk directly to each other.
 
 3. HOW TO USE THE APP
 No login, setup or sample files are needed. On first launch, enter any display name.
@@ -306,7 +304,7 @@ Not applicable. The app is not in a regulated industry and contains no protected
 
 **Name** (30):
 ```
-{{APP_NAME}}
+Stop: Multiplayer Party Game
 ```
 
 **Subtitle** (30):
@@ -321,7 +319,7 @@ O clássico jogo de palavras para iPhones na mesma sala. Todos escrevem juntos, 
 
 **Description** (4000):
 ```
-{{APP_NAME}} é o Stop, o clássico jogo de palavras (também chamado de Adedanha), para iPhones na mesma sala. Escolham as categorias, recebam uma letra e corram para escrever uma palavra em cada uma. Quem terminar primeiro grita STOP, e quando jogadores suficientes dão STOP, todos os celulares travam na hora. Sem internet, sem contas e sem anúncios.
+O Stop é o clássico jogo de palavras (também chamado de Adedanha), para iPhones na mesma sala. Escolham as categorias, recebam uma letra e corram para escrever uma palavra em cada uma. Quem terminar primeiro grita STOP, e quando jogadores suficientes dão STOP, todos os celulares travam na hora. Sem internet, sem contas e sem anúncios.
 
 COMO JOGAR
 • Um jogador cria a partida e escolhe as categorias: Nome, Animal, Fruta, País... ou as suas.
@@ -344,7 +342,7 @@ PRIVACIDADE DE VERDADE
 Sem anúncios, sem compras no app, sem contas, sem análises de uso e sem rastreamento. O app só conversa com os outros celulares da sua partida, na sua rede local; nomes, respostas e pontos nunca saem dela. Enquanto você hospeda uma partida, o seu nome aparece para os celulares por perto que abrem Entrar em um jogo, para que os amigos encontrem a sua partida.
 
 GRÁTIS E DE CÓDIGO ABERTO
-{{APP_NAME}} é totalmente grátis, sem nada para desbloquear. O código-fonte está publicado no GitHub sob a licença MIT.
+O Stop é totalmente grátis, sem nada para desbloquear. O código-fonte está publicado no GitHub sob a licença MIT.
 ```
 
 **Keywords** (100):

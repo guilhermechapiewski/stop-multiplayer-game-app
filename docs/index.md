@@ -17,7 +17,7 @@ No internet, no accounts, no ads. Free, with no in-app purchases and no tracking
 </p>
 -->
 
-**Coming soon to the App Store.** For iPhone.
+**Coming soon to the App Store** as *Stop: Multiplayer Party Game*. For iPhone.
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
   <img src="images/screens/en-US/01-lobby.jpg" alt="The lobby: the host's categories and the players who joined" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">

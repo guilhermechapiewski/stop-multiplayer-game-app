@@ -18,7 +18,7 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 </p>
 -->
 
-**Em breve na App Store.** Para iPhone.
+**Em breve na App Store** como *Stop: Multiplayer Party Game*. Para iPhone.
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
   <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: as categorias de quem criou o jogo e os jogadores que entraram" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">

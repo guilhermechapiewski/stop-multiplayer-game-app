@@ -2,7 +2,7 @@
 
 Stop, the classic word game, for iPhones in the same room. No internet, no accounts, no ads.
 
-Stop (also called Adedanha or Adedonha) is coming to the App Store (name to be announced). This source is open
+Stop (also called Adedanha or Adedonha) is coming to the App Store as **Stop: Multiplayer Party Game**. This source is open
 so that anyone can see how it works, reuse the code under the [MIT license](LICENSE), report problems, and
 contribute improvements.
 
