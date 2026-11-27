@@ -72,6 +72,14 @@ package tests are where most of the logic is tested and finish quickly; the app 
 whole game in the simulator with XCUITest, so they take most of the time. CI (`.github/workflows/ci.yml`) runs
 both on pushes and pull requests to `main`.
 
+The UI tests (`App/StopUITests`) cover a full two-round game, a force-ended round, a relaunch that restores
+the draft, practice with bots in both languages, typing latency (`XCTClockMetric`, under 3 s for 30
+characters) and an accessibility audit of every main screen.
+
+`tools/screenshots.sh` makes the App Store and website screenshots: it runs `ScreenshotTests` on temporary
+iPhone 17 Pro Max and iPhone 17 simulators in English and Portuguese, then `tools/frame_screenshots.swift`
+captions them into `appstore/screenshots/` and `docs/images/screens/`.
+
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).
 
@@ -81,8 +89,10 @@ Set these in the scheme (Product > Scheme > Edit Scheme > Run > Arguments) or pa
 
 | Argument | Effect |
 |---|---|
-| `-mockGame` | Starts a game against bots "Ana", "Bia" and "Caio" over an in-memory connection, with no network. The bots stop only after you do, so tests control the round. |
+| `-mockGame` | Starts a game against bots "Ana", "Bia" and "Caio" over an in-memory connection, with no network. The bots stop only after you do, so tests control the round. The game is saved like a hosted one, so without a wipe a relaunch comes back to it. |
+| `-mockSeed <n>` | With `-mockGame`: a repeatable game (the same letters and bot answers every time, quick bots), for screenshots. |
 | `-resetState` | Wipes the on-device store at launch. |
+| `-keepState` | Keeps the store under `-uiTesting` (for UI tests that relaunch the app; `-resetState` still wipes). |
 | `-playerName <name>` | Sets the display name and skips onboarding. |
 | `-uiTesting` | Clean state, no sounds, and Reduce Motion forced on (views read a custom `\.reduceMotion` value) so XCUITest never waits on looping animations. |
 
