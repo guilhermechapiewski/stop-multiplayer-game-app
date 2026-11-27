@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@ hasn’t sent answers. Continue anyway?" : {
+      "comment" : "Host confirmation on the collecting screen, one player missing. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ainda não enviou as respostas. Continuar mesmo assim?"
+          }
+        }
+      }
+    },
+    "%@ haven’t sent answers. Continue anyway?" : {
+      "comment" : "Host confirmation on the collecting screen, several players missing. %@ is a list of names, e.g. \"Ana and Bia\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ainda não enviaram as respostas. Continuar mesmo assim?"
+          }
+        }
+      }
+    },
     "%@ leaves the game. Their points so far stay in the standings." : {
       "comment" : "Message when the host confirms removing a player. %@ is the player's name.",
       "localizations" : {
@@ -383,17 +405,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permitido"
-          }
-        }
-      }
-    },
-    "Anyone who hasn’t sent answers yet scores 0 this round." : {
-      "comment" : "Caption under the host's Continue anyway button.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quem ainda não enviou as respostas fica com 0 nesta rodada."
           }
         }
       }
@@ -992,6 +1003,17 @@
       },
       "comment" : "Shown while reconnecting to an interrupted game after a relaunch."
     },
+    "Keep waiting" : {
+      "comment" : "Cancel button of the host's Continue anyway confirmation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar esperando"
+          }
+        }
+      }
+    },
     "Keep writing" : {
       "comment" : "Cancel button of the give-up confirmation.",
       "localizations" : {
@@ -1076,6 +1098,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Procurando jogos por perto…"
+          }
+        }
+      }
+    },
+    "Missing answers count as blank this round." : {
+      "comment" : "Caption under the host's Continue anyway button and message of its confirmation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respostas que faltarem contam como em branco nesta rodada."
           }
         }
       }
@@ -1780,6 +1813,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A rodada termina quando %lld jogadores tocam em STOP ou desistem."
+          }
+        }
+      }
+    },
+    "This game doesn’t know you anymore. Leave and join again." : {
+      "comment" : "Error toast when the host doesn't recognize this player.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este jogo não reconhece mais você. Saia e entre de novo."
           }
         }
       }

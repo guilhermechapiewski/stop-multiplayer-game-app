@@ -52,7 +52,7 @@ struct GameScreen: View {
     @Environment(\.reduceMotion) private var reduceMotion
     /// The round whose lock is being stamped "STOP!" over the screen.
     @State private var stampedRound: Round?
-    @State private var toast: GameError?
+    @State private var toast: ToastItem?
 
     private static let stampDuration: Duration = .seconds(1.6)
     private static let toastDuration: Duration = .seconds(3)
@@ -80,12 +80,13 @@ struct GameScreen: View {
         .overlay {
             if let stampedRound, let state = client.state {
                 StopStampOverlay(state: state, round: stampedRound, viewer: client.localPlayerID)
+                    .allowsHitTesting(false)
                     .transition(.opacity)
             }
         }
         .overlay(alignment: .top) {
             if let toast {
-                ErrorToast(error: toast)
+                ErrorToast(error: toast.error)
                     .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
                     .onTapGesture { self.toast = nil }
             }
@@ -97,6 +98,8 @@ struct GameScreen: View {
             if old == .writing, new == .collecting || new == .scoring {
                 stampedRound = client.state?.currentRound
             }
+            // Only the live countdown-to-writing transition, not a reconnect or relaunch into writing.
+            if old == .countdown, new == .writing { GameFeedback.play(.writingStarted) }
         }
         .task(id: stampedRound?.number) {
             guard stampedRound != nil else { return }
@@ -104,7 +107,8 @@ struct GameScreen: View {
             stampedRound = nil
         }
         .onChange(of: client.lastError) { _, error in
-            if let error, ErrorToast.shows(error) { toast = error }
+            // A fresh item each time, so a repeated error shows again and restarts the timer.
+            if let error, ErrorToast.shows(error) { toast = ToastItem(error: error) }
         }
         .task(id: toast) {
             guard toast != nil else { return }
@@ -150,6 +154,12 @@ struct GameScreen: View {
     }
 }
 
+/// One showing of the error toast.
+struct ToastItem: Equatable {
+    let id = UUID()
+    let error: GameError
+}
+
 /// A short-lived message for an action the host turned down.
 struct ErrorToast: View {
     let error: GameError
@@ -167,7 +177,8 @@ struct ErrorToast: View {
         switch error {
         case .notHost: "Only the host can do that."
         case .gameClosed: "This game is closed."
-        case .unknownPlayer, .notParticipant: "You’ll play from the next round."
+        case .unknownPlayer: "This game doesn’t know you anymore. Leave and join again."
+        case .notParticipant: "You’ll play from the next round."
         case .invalidSettings: "Those settings don’t work. Check the categories and stops."
         case .answersIncomplete: "Fill in every category to stop."
         case .giveUpNotAllowed: "Giving up isn’t allowed in this game."

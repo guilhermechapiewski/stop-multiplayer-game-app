@@ -147,7 +147,6 @@ struct WritingView: View {
         let model = WritingModel(categoryCount: categories.count, client: client,
                                  initial: draft ?? client.frozenAnswers ?? round.answers[me])
         self.model = model
-        GameFeedback.play(.writingStarted)
         if frozen == nil, isParticipant {
             focus = model.answers.firstIndex(where: AnswerText.isBlank) ?? 0
         }

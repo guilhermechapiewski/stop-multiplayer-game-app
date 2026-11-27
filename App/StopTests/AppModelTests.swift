@@ -619,3 +619,30 @@ final class SessionSpy {
             })
     }
 }
+
+extension SessionFactories {
+    /// A host on its own in-memory network, joined by bots that never play.
+    @MainActor
+    static func idleBotsMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
+                                 language: GameLanguage, clock: any Clock<Duration>) -> MockGame? {
+        let network = InMemoryNetwork()
+        let state: GameState
+        do {
+            state = try GameEngine.newGame(gameID: UUID(), hostID: hostProfile.playerID, hostName: hostProfile.name,
+                                           settings: settings, language: language)
+        } catch {
+            Issue.record("mock game: invalid settings")
+            return nil
+        }
+        let host = HostSession(state: state, factory: network, store: InMemoryGameStore(), clock: clock)
+        host.start()
+        let bots = botNames.map { name in
+            let bot = ClientSession(profile: Profile(playerID: UUID(), name: name, soundsEnabled: false),
+                                    target: .rejoin(gameID: state.gameID), factory: network,
+                                    store: InMemoryGameStore(), clock: clock)
+            bot.start()
+            return bot
+        }
+        return MockGame(host: host, retained: [network] + bots)
+    }
+}

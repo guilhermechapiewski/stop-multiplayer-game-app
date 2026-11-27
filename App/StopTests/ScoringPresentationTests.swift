@@ -38,6 +38,7 @@ struct ScoringPresentationTests {
         #expect(presentation.categoryIndex == 1)
         #expect(presentation.total == 3)
         #expect(presentation.rows.map(\.answer) == ["Bear", "—", "Bee", "—"])
+        #expect(presentation.rows.map(\.isBlank) == [false, true, false, true])
         #expect(presentation.rows.map(\.score) == [nil, 0, nil, 0])
         #expect(presentation.rows.map(\.presence) == [.present, .present, .away, .left])
         #expect(presentation.myAnswerIsBlank)

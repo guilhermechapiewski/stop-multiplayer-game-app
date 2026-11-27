@@ -44,6 +44,7 @@ struct CountdownView: View {
                    value: secondsRemaining)
         .padding(.horizontal, Theme.Spacing.l)
         .centeredScrolling()
+        .onAppear { LetterAnnouncement.announce(round) }
         .onChange(of: secondsRemaining, initial: true) { _, seconds in
             GameFeedback.play(.countdownTick(seconds))
             AccessibilityNotification.Announcement(seconds.formatted()).post()

@@ -50,10 +50,10 @@ struct LetterRevealView: View {
         }
         let alphabet = (UnicodeScalar("A").value...UnicodeScalar("Z").value)
             .compactMap(UnicodeScalar.init).map(String.init).filter { $0 != round.letter }
-        // Fast at first, easing out: about 1.3 s in all, well inside the 2-tick reveal.
-        for step in 0..<16 {
+        // Fast at first, easing out: about 0.6 s in all, so it lands well inside the 2-tick reveal.
+        for step in 0..<11 {
             shown = alphabet.randomElement()
-            let delay = 30 + step * step * 2
+            let delay = 20 + step * step * 7 / 10
             do { try await Task.sleep(for: .milliseconds(delay)) } catch { return }
         }
         land()
@@ -63,6 +63,19 @@ struct LetterRevealView: View {
         shown = round.letter
         landed = true
         GameFeedback.play(.letterRevealed)
+        LetterAnnouncement.announce(round)
+    }
+}
+
+/// Announces the round's letter to VoiceOver once per round: when the reveal lands, or when the countdown
+/// appears if the reveal was missed (joined late, app in the background).
+@MainActor
+enum LetterAnnouncement {
+    private static var announced: (number: Int, letter: String)?
+
+    static func announce(_ round: Round) {
+        guard announced?.number != round.number || announced?.letter != round.letter else { return }
+        announced = (round.number, round.letter)
         AccessibilityNotification.Announcement(String(localized: "Letter \(round.letter)")).post()
     }
 }

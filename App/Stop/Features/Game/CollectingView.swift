@@ -10,17 +10,21 @@ struct CollectingView: View {
     let round: Round
 
     @Environment(\.reduceMotion) private var reduceMotion
-    /// The host's "Continue anyway" appears only if collecting drags on.
-    @State private var offersContinue = false
+    /// The host's "Continue anyway" appears only if someone's answers are still missing after a moment.
+    @State private var delayPassed = false
+    @State private var confirmingContinue = false
 
-    private static let continueDelay: Duration = .seconds(3)
+    private static let continueDelay: Duration = .seconds(2)
 
     private var names: [PlayerID: String] { state.displayNames }
-    private var stopped: Set<PlayerID> { Set(round.stops.map(\.playerID)) }
     /// Participants still in the game, in join order.
     private var players: [Player] {
         state.players.filter { round.participants.contains($0.id) && $0.presence.isActive }
     }
+    /// Snapshots keep everyone's answer key (with the answers hidden), so a key means "sent".
+    private func hasSent(_ id: PlayerID) -> Bool { round.answers[id] != nil }
+    private var missing: [Player] { players.filter { !hasSent($0.id) } }
+    private var offersContinue: Bool { client.isHost && delayPassed && !missing.isEmpty }
 
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
@@ -45,12 +49,12 @@ struct CollectingView: View {
             .padding(.vertical, Theme.Spacing.s)
             .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
 
-            if client.isHost && offersContinue {
+            if offersContinue {
                 VStack(spacing: Theme.Spacing.s) {
-                    Button("Continue anyway") { client.send(.continueToScoring) }
+                    Button("Continue anyway") { confirmingContinue = true }
                         .buttonStyle(.secondary)
                         .accessibilityIdentifier("continueAnywayButton")
-                    Text("Anyone who hasn’t sent answers yet scores 0 this round.")
+                    Text("Missing answers count as blank this round.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -62,23 +66,37 @@ struct CollectingView: View {
         .padding(.vertical, Theme.Spacing.l)
         .centeredScrolling()
         .animation(reduceMotion ? nil : .smooth, value: offersContinue)
+        .alert(continueTitle, isPresented: $confirmingContinue) {
+            Button("Continue anyway", role: .destructive) { client.send(.continueToScoring) }
+                .accessibilityIdentifier("confirmContinueButton")
+            Button("Keep waiting", role: .cancel) {}
+        } message: {
+            Text("Missing answers count as blank this round.")
+        }
         .task {
             guard client.isHost else { return }
             do { try await Task.sleep(for: Self.continueDelay) } catch { return }
-            offersContinue = true
+            delayPassed = true
         }
+    }
+
+    /// "Ana hasn't sent answers. Continue anyway?" (or several names).
+    private var continueTitle: Text {
+        let missingNames = missing.compactMap { names[$0.id] }
+        let list = missingNames.formatted(.list(type: .and))
+        return missingNames.count == 1 ? Text("\(list) hasn’t sent answers. Continue anyway?")
+                                       : Text("\(list) haven’t sent answers. Continue anyway?")
     }
 
     private func row(_ player: Player) -> some View {
         let name = names[player.id] ?? player.name
-        let sent = stopped.contains(player.id) || (player.id == client.localPlayerID && round.answers[player.id] != nil)
         let away = player.presence == .away
         return HStack(spacing: Theme.Spacing.m) {
             PlayerInitial(name: name, dimmed: away, size: 32)
             Text(verbatim: name)
                 .font(Theme.Typography.body.weight(.semibold))
             Spacer(minLength: Theme.Spacing.s)
-            if sent {
+            if hasSent(player.id) {
                 Label("Sent", systemImage: "checkmark.circle.fill")
                     .foregroundStyle(Theme.accent)
             } else if away {
@@ -114,7 +132,9 @@ struct StopStampOverlay: View {
         if round.forceEnded { return Text("The host ended the round") }
         if round.stops.map(\.playerID) == [viewer] { return Text("You called it!") }
         let names = state.displayNames
-        let callers = round.stops.compactMap { names[$0.playerID] }
+        let callers = round.stops.compactMap { stop in
+            stop.playerID == viewer ? String(localized: "you") : names[stop.playerID]
+        }
         return Text("Called by \(callers.formatted(.list(type: .and)))")
     }
 
@@ -164,6 +184,7 @@ struct StopStampOverlay: View {
     let client = PreviewData.client(isHost: true, phase: .collecting)
     var state = client.state!
     state.rounds[0].stops = [StopRecord(playerID: PreviewData.guestID, kind: .stop)]
+    state.rounds[0].answers = [PreviewData.guestID: [], PreviewData.hostID: ["Bruno"]]
     return CollectingView(client: client, state: state, round: state.rounds[0])
         .background(Theme.background)
 }

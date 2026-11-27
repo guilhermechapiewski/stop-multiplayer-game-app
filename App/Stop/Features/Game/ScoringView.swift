@@ -2,65 +2,6 @@ import StopCore
 import StopSession
 import SwiftUI
 
-/// What the scoring screen shows for the open category, as seen by `viewer`.
-struct ScoringPresentation: Equatable {
-    struct Row: Equatable, Identifiable {
-        let playerID: PlayerID
-        let name: String
-        /// "—" when blank or missing.
-        let answer: String
-        let score: Int?
-        let presence: Presence
-
-        var id: PlayerID { playerID }
-    }
-
-    let categoryName: String
-    let categoryIndex: Int
-    let total: Int
-    /// The round's participants, in join order.
-    let rows: [Row]
-    let myScore: Int?
-    let myAnswerIsBlank: Bool
-    /// Away or left participants the host may still score for (empty for everyone but the host).
-    let canHostScore: Set<PlayerID>
-
-    static let blankAnswer = "—"
-
-    init(state: GameState, viewer: PlayerID) {
-        let round = state.currentRound
-        let index: Int
-        if case .scoring(let category, _) = state.phase { index = category } else { index = 0 }
-        let categories = state.settings.categories
-        categoryIndex = index
-        categoryName = categories.indices.contains(index) ? categories[index] : ""
-        total = categories.count
-
-        let names = state.displayNames
-        let participants = Set(round?.participants ?? [])
-        func answer(_ id: PlayerID) -> String? {
-            guard let answers = round?.answers[id], answers.indices.contains(index) else { return nil }
-            return answers[index]
-        }
-        func score(_ id: PlayerID) -> Int? {
-            guard let scores = round?.scores[id], scores.indices.contains(index) else { return nil }
-            return scores[index]
-        }
-        rows = state.players.filter { participants.contains($0.id) }.map { player in
-            let text = answer(player.id)
-            return Row(playerID: player.id, name: names[player.id] ?? player.name,
-                       answer: text.map(AnswerText.isBlank) ?? true ? Self.blankAnswer : text ?? "",
-                       score: score(player.id), presence: player.presence)
-        }
-        myScore = participants.contains(viewer) ? score(viewer) : nil
-        myAnswerIsBlank = answer(viewer).map(AnswerText.isBlank) ?? true
-        canHostScore = viewer == state.hostID
-            ? Set(rows.filter { [.away, .left].contains($0.presence) && $0.score == nil && $0.playerID != viewer }
-                .map(\.playerID))
-            : []
-    }
-}
-
 /// Scoring, one category at a time: everyone's answers read-only, and each player scores their own
 /// (10 / 5 / 0). The host can score for players who are away. A completed category is highlighted for a beat
 /// before the host's tick moves on.
@@ -191,9 +132,8 @@ struct ScoringView: View {
                     Text("Blank answers score 0.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
-                } else if !isCompleted {
-                    waitingLine(presentation)
                 }
+                if !isCompleted { waitingLine(presentation) }
             }
         }
     }
@@ -217,7 +157,7 @@ private struct AnswerRow: View {
     let isMe: Bool
     let isCompleted: Bool
 
-    private var isBlank: Bool { row.answer == ScoringPresentation.blankAnswer }
+    private var isBlank: Bool { row.isBlank }
     private var isAway: Bool { row.presence != .present }
 
     var body: some View {
@@ -309,7 +249,7 @@ private struct HostScoreControl: View {
     let row: ScoringPresentation.Row
     let onPick: (Int) -> Void
 
-    private var isBlank: Bool { row.answer == ScoringPresentation.blankAnswer }
+    private var isBlank: Bool { row.isBlank }
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {

@@ -28,6 +28,29 @@ struct WritingModelTests {
         #expect(!model.availability.allFilled)
     }
 
+    /// Keystrokes that don't flip "all filled" must not invalidate the STOP button.
+    @Test func keystrokeWithoutFlipDoesNotInvalidateAvailability() {
+        let model = WritingModel(categoryCount: 2, client: client, initial: nil)
+        nonisolated(unsafe) var changes = 0
+        func track() {
+            withObservationTracking { _ = model.availability.allFilled } onChange: { changes += 1 }
+        }
+
+        track()
+        model.update(index: 0, text: "B")
+        model.update(index: 0, text: "Be")
+        model.update(index: 1, text: "B")
+        #expect(changes == 1) // only the flip to filled
+
+        track()
+        model.update(index: 1, text: "Br")
+        model.update(index: 0, text: "Bear")
+        #expect(changes == 1)
+
+        model.update(index: 1, text: " ")
+        #expect(changes == 2) // the flip back
+    }
+
     @Test func updateSavesDraft() {
         let model = WritingModel(categoryCount: 3, client: client, initial: nil)
 

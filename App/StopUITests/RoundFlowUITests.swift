@@ -30,7 +30,9 @@ final class RoundFlowUITests: XCTestCase {
         XCTAssertTrue(fields.firstMatch.waitForExistence(timeout: 5))
         let count = fields.count
         XCTAssertGreaterThan(count, 0)
-        // The first field has focus; Return moves to the next one.
+        // Focus the first field (it's focused on its own, but don't race the keyboard); Return moves on.
+        app.textFields["answerField-0"].tap()
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
         for index in 0..<count {
             app.typeText(index == count - 1 ? "Bento" : "Bento\n")
         }
