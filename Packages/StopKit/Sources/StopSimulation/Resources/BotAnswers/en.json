@@ -1,0 +1,1384 @@
+{
+  "Name": {
+    "A": [
+      "Alice",
+      "Andrew",
+      "Anna",
+      "Adam"
+    ],
+    "B": [
+      "Benjamin",
+      "Bella",
+      "Brian",
+      "Brooke"
+    ],
+    "C": [
+      "Charlotte",
+      "Chris",
+      "Chloe",
+      "Caleb"
+    ],
+    "D": [
+      "David",
+      "Daniel",
+      "Diana",
+      "Dylan"
+    ],
+    "E": [
+      "Emma",
+      "Ethan",
+      "Emily",
+      "Eli"
+    ],
+    "F": [
+      "Frank",
+      "Fiona",
+      "Felix",
+      "Faith"
+    ],
+    "G": [
+      "Grace",
+      "George",
+      "Gabriel",
+      "Gina"
+    ],
+    "H": [
+      "Hannah",
+      "Henry",
+      "Hailey",
+      "Harry"
+    ],
+    "I": [
+      "Isabella",
+      "Isaac",
+      "Ivy",
+      "Ian"
+    ],
+    "J": [
+      "Jack",
+      "Julia",
+      "James",
+      "Jessica"
+    ],
+    "K": [
+      "Kevin",
+      "Katie",
+      "Kyle",
+      "Kate"
+    ],
+    "L": [
+      "Lily",
+      "Liam",
+      "Lucas",
+      "Laura"
+    ],
+    "M": [
+      "Mia",
+      "Michael",
+      "Madison",
+      "Mark"
+    ],
+    "N": [
+      "Noah",
+      "Natalie",
+      "Nathan",
+      "Nora"
+    ],
+    "O": [
+      "Olivia",
+      "Oliver",
+      "Owen",
+      "Oscar"
+    ],
+    "P": [
+      "Peter",
+      "Paige",
+      "Paul",
+      "Penny"
+    ],
+    "Q": [
+      "Quinn",
+      "Quentin"
+    ],
+    "R": [
+      "Ryan",
+      "Rachel",
+      "Rose",
+      "Robert"
+    ],
+    "S": [
+      "Sophia",
+      "Samuel",
+      "Sarah",
+      "Sam"
+    ],
+    "T": [
+      "Thomas",
+      "Taylor",
+      "Tyler",
+      "Tessa"
+    ],
+    "U": [
+      "Uma",
+      "Ursula"
+    ],
+    "V": [
+      "Victoria",
+      "Vincent",
+      "Violet"
+    ],
+    "W": [
+      "William",
+      "Wendy",
+      "Wyatt"
+    ],
+    "X": [
+      "Xavier"
+    ],
+    "Y": [
+      "Yara",
+      "Yvonne"
+    ],
+    "Z": [
+      "Zoe",
+      "Zach",
+      "Zara"
+    ]
+  },
+  "Animal": {
+    "A": [
+      "Alligator",
+      "Ant",
+      "Alpaca",
+      "Antelope"
+    ],
+    "B": [
+      "Bear",
+      "Bee",
+      "Butterfly",
+      "Beaver"
+    ],
+    "C": [
+      "Cat",
+      "Cow",
+      "Camel",
+      "Cheetah"
+    ],
+    "D": [
+      "Dog",
+      "Dolphin",
+      "Duck",
+      "Deer"
+    ],
+    "E": [
+      "Elephant",
+      "Eagle",
+      "Eel",
+      "Emu"
+    ],
+    "F": [
+      "Fox",
+      "Frog",
+      "Flamingo",
+      "Ferret"
+    ],
+    "G": [
+      "Giraffe",
+      "Goat",
+      "Gorilla",
+      "Goose"
+    ],
+    "H": [
+      "Horse",
+      "Hippo",
+      "Hamster",
+      "Hedgehog"
+    ],
+    "I": [
+      "Iguana",
+      "Impala"
+    ],
+    "J": [
+      "Jaguar",
+      "Jellyfish",
+      "Jackal"
+    ],
+    "K": [
+      "Kangaroo",
+      "Koala",
+      "Koi"
+    ],
+    "L": [
+      "Lion",
+      "Llama",
+      "Leopard",
+      "Lobster"
+    ],
+    "M": [
+      "Monkey",
+      "Mouse",
+      "Moose",
+      "Meerkat"
+    ],
+    "N": [
+      "Narwhal",
+      "Newt",
+      "Nightingale"
+    ],
+    "O": [
+      "Owl",
+      "Octopus",
+      "Otter",
+      "Ostrich"
+    ],
+    "P": [
+      "Penguin",
+      "Panda",
+      "Parrot",
+      "Pig"
+    ],
+    "Q": [
+      "Quail"
+    ],
+    "R": [
+      "Rabbit",
+      "Raccoon",
+      "Rhino",
+      "Reindeer"
+    ],
+    "S": [
+      "Shark",
+      "Snake",
+      "Squirrel",
+      "Sheep"
+    ],
+    "T": [
+      "Tiger",
+      "Turtle",
+      "Toucan",
+      "Turkey"
+    ],
+    "U": [],
+    "V": [
+      "Vulture"
+    ],
+    "W": [
+      "Whale",
+      "Wolf",
+      "Walrus",
+      "Wombat"
+    ],
+    "X": [],
+    "Y": [
+      "Yak"
+    ],
+    "Z": [
+      "Zebra"
+    ]
+  },
+  "Fruit": {
+    "A": [
+      "Apple",
+      "Apricot",
+      "Avocado"
+    ],
+    "B": [
+      "Banana",
+      "Blueberry",
+      "Blackberry"
+    ],
+    "C": [
+      "Cherry",
+      "Coconut",
+      "Cantaloupe",
+      "Cranberry"
+    ],
+    "D": [
+      "Date",
+      "Dragon fruit"
+    ],
+    "E": [
+      "Elderberry"
+    ],
+    "F": [
+      "Fig"
+    ],
+    "G": [
+      "Grape",
+      "Grapefruit",
+      "Guava"
+    ],
+    "H": [
+      "Honeydew melon"
+    ],
+    "I": [],
+    "J": [
+      "Jackfruit"
+    ],
+    "K": [
+      "Kiwi",
+      "Kumquat"
+    ],
+    "L": [
+      "Lemon",
+      "Lime",
+      "Lychee"
+    ],
+    "M": [
+      "Mango",
+      "Melon",
+      "Mandarin"
+    ],
+    "N": [
+      "Nectarine"
+    ],
+    "O": [
+      "Orange",
+      "Olive"
+    ],
+    "P": [
+      "Peach",
+      "Pear",
+      "Pineapple",
+      "Plum"
+    ],
+    "Q": [
+      "Quince"
+    ],
+    "R": [
+      "Raspberry",
+      "Raisin"
+    ],
+    "S": [
+      "Strawberry",
+      "Star fruit"
+    ],
+    "T": [
+      "Tangerine",
+      "Tomato"
+    ],
+    "U": [],
+    "V": [],
+    "W": [
+      "Watermelon"
+    ],
+    "X": [],
+    "Y": [
+      "Yuzu"
+    ],
+    "Z": []
+  },
+  "Color": {
+    "A": [
+      "Aqua",
+      "Amber"
+    ],
+    "B": [
+      "Blue",
+      "Black",
+      "Brown",
+      "Beige"
+    ],
+    "C": [
+      "Cyan",
+      "Crimson",
+      "Coral",
+      "Cream"
+    ],
+    "D": [
+      "Denim"
+    ],
+    "E": [
+      "Emerald"
+    ],
+    "F": [
+      "Fuchsia",
+      "Forest green"
+    ],
+    "G": [
+      "Green",
+      "Gray",
+      "Gold"
+    ],
+    "H": [
+      "Hot pink"
+    ],
+    "I": [
+      "Indigo",
+      "Ivory"
+    ],
+    "J": [
+      "Jade"
+    ],
+    "K": [
+      "Khaki"
+    ],
+    "L": [
+      "Lavender",
+      "Lilac",
+      "Lime green"
+    ],
+    "M": [
+      "Magenta",
+      "Maroon",
+      "Mint",
+      "Mustard"
+    ],
+    "N": [
+      "Navy blue",
+      "Neon green"
+    ],
+    "O": [
+      "Orange",
+      "Olive"
+    ],
+    "P": [
+      "Pink",
+      "Purple",
+      "Peach"
+    ],
+    "Q": [],
+    "R": [
+      "Red",
+      "Rose",
+      "Ruby"
+    ],
+    "S": [
+      "Silver",
+      "Salmon",
+      "Sky blue"
+    ],
+    "T": [
+      "Teal",
+      "Turquoise",
+      "Tan"
+    ],
+    "U": [],
+    "V": [
+      "Violet"
+    ],
+    "W": [
+      "White"
+    ],
+    "X": [],
+    "Y": [
+      "Yellow"
+    ],
+    "Z": []
+  },
+  "City": {
+    "A": [
+      "Atlanta",
+      "Austin",
+      "Amsterdam",
+      "Athens"
+    ],
+    "B": [
+      "Boston",
+      "Baltimore",
+      "Berlin",
+      "Barcelona"
+    ],
+    "C": [
+      "Chicago",
+      "Cleveland",
+      "Cairo",
+      "Charlotte"
+    ],
+    "D": [
+      "Dallas",
+      "Denver",
+      "Detroit",
+      "Dublin"
+    ],
+    "E": [
+      "El Paso",
+      "Edinburgh"
+    ],
+    "F": [
+      "Fresno",
+      "Florence",
+      "Fort Worth"
+    ],
+    "G": [
+      "Glasgow",
+      "Geneva"
+    ],
+    "H": [
+      "Houston",
+      "Honolulu",
+      "Hong Kong"
+    ],
+    "I": [
+      "Indianapolis",
+      "Istanbul"
+    ],
+    "J": [
+      "Jacksonville",
+      "Jerusalem"
+    ],
+    "K": [
+      "Kansas City",
+      "Kyoto"
+    ],
+    "L": [
+      "Los Angeles",
+      "London",
+      "Las Vegas",
+      "Lisbon"
+    ],
+    "M": [
+      "Miami",
+      "Memphis",
+      "Madrid",
+      "Montreal"
+    ],
+    "N": [
+      "New York",
+      "Nashville",
+      "New Orleans"
+    ],
+    "O": [
+      "Orlando",
+      "Oakland",
+      "Omaha",
+      "Oslo"
+    ],
+    "P": [
+      "Phoenix",
+      "Philadelphia",
+      "Paris",
+      "Portland"
+    ],
+    "Q": [
+      "Quebec City"
+    ],
+    "R": [
+      "Rome",
+      "Richmond",
+      "Reno",
+      "Rio de Janeiro"
+    ],
+    "S": [
+      "Seattle",
+      "San Diego",
+      "San Francisco",
+      "Sydney"
+    ],
+    "T": [
+      "Tokyo",
+      "Toronto",
+      "Tampa",
+      "Tucson"
+    ],
+    "U": [],
+    "V": [
+      "Vancouver",
+      "Venice",
+      "Vienna"
+    ],
+    "W": [
+      "Washington",
+      "Wichita"
+    ],
+    "X": [],
+    "Y": [
+      "York"
+    ],
+    "Z": [
+      "Zurich"
+    ]
+  },
+  "Object": {
+    "A": [
+      "Alarm clock",
+      "Anchor",
+      "Armchair"
+    ],
+    "B": [
+      "Ball",
+      "Book",
+      "Bottle",
+      "Brush"
+    ],
+    "C": [
+      "Chair",
+      "Clock",
+      "Candle",
+      "Comb"
+    ],
+    "D": [
+      "Door",
+      "Desk",
+      "Doll"
+    ],
+    "E": [
+      "Eraser",
+      "Envelope"
+    ],
+    "F": [
+      "Fan",
+      "Flashlight",
+      "Fork"
+    ],
+    "G": [
+      "Glasses",
+      "Guitar",
+      "Glove"
+    ],
+    "H": [
+      "Hammer",
+      "Hat",
+      "Hanger"
+    ],
+    "I": [
+      "Iron"
+    ],
+    "J": [
+      "Jar",
+      "Jacket"
+    ],
+    "K": [
+      "Key",
+      "Kite",
+      "Kettle"
+    ],
+    "L": [
+      "Lamp",
+      "Ladder",
+      "Lock"
+    ],
+    "M": [
+      "Mirror",
+      "Mug",
+      "Magnet"
+    ],
+    "N": [
+      "Notebook",
+      "Needle",
+      "Napkin"
+    ],
+    "O": [
+      "Ornament",
+      "Oar"
+    ],
+    "P": [
+      "Pen",
+      "Pencil",
+      "Pillow",
+      "Phone"
+    ],
+    "Q": [
+      "Quilt"
+    ],
+    "R": [
+      "Ruler",
+      "Remote",
+      "Rug",
+      "Rope"
+    ],
+    "S": [
+      "Scissors",
+      "Spoon",
+      "Sofa",
+      "Stapler"
+    ],
+    "T": [
+      "Table",
+      "Towel",
+      "Toothbrush",
+      "Tape"
+    ],
+    "U": [
+      "Umbrella"
+    ],
+    "V": [
+      "Vase",
+      "Violin"
+    ],
+    "W": [
+      "Wallet",
+      "Watch",
+      "Window"
+    ],
+    "X": [
+      "Xylophone"
+    ],
+    "Y": [
+      "Yo-yo"
+    ],
+    "Z": [
+      "Zipper"
+    ]
+  },
+  "Brand": {
+    "A": [
+      "Apple",
+      "Adidas",
+      "Amazon"
+    ],
+    "B": [
+      "Barbie",
+      "Band-Aid",
+      "Bose"
+    ],
+    "C": [
+      "Coca-Cola",
+      "Crayola",
+      "Colgate",
+      "Cheerios"
+    ],
+    "D": [
+      "Disney",
+      "Doritos",
+      "Dove"
+    ],
+    "E": [
+      "eBay",
+      "Energizer"
+    ],
+    "F": [
+      "Ford",
+      "Fanta",
+      "Fisher-Price"
+    ],
+    "G": [
+      "Google",
+      "Gatorade",
+      "Gap"
+    ],
+    "H": [
+      "Honda",
+      "Hershey's",
+      "Heinz",
+      "Hasbro"
+    ],
+    "I": [
+      "IKEA",
+      "Intel"
+    ],
+    "J": [
+      "Jeep",
+      "Jell-O"
+    ],
+    "K": [
+      "Kellogg's",
+      "KitKat",
+      "Kleenex",
+      "Kodak"
+    ],
+    "L": [
+      "Lego",
+      "Levi's",
+      "Lexus"
+    ],
+    "M": [
+      "McDonald's",
+      "Mattel",
+      "Microsoft",
+      "M&M's"
+    ],
+    "N": [
+      "Nike",
+      "Nintendo",
+      "Nestlé",
+      "Netflix"
+    ],
+    "O": [
+      "Oreo",
+      "Old Navy"
+    ],
+    "P": [
+      "Pepsi",
+      "Pringles",
+      "PlayStation",
+      "Puma"
+    ],
+    "Q": [
+      "Quaker"
+    ],
+    "R": [
+      "Reebok",
+      "Ray-Ban"
+    ],
+    "S": [
+      "Samsung",
+      "Sony",
+      "Starbucks",
+      "Sprite"
+    ],
+    "T": [
+      "Toyota",
+      "Target",
+      "Tesla",
+      "Tide"
+    ],
+    "U": [
+      "Under Armour",
+      "UPS"
+    ],
+    "V": [
+      "Vans",
+      "Volvo",
+      "Visa"
+    ],
+    "W": [
+      "Walmart",
+      "Wendy's"
+    ],
+    "X": [
+      "Xbox",
+      "Xerox"
+    ],
+    "Y": [
+      "YouTube",
+      "Yamaha"
+    ],
+    "Z": [
+      "Zara"
+    ]
+  },
+  "Job": {
+    "A": [
+      "Architect",
+      "Actor",
+      "Astronaut",
+      "Accountant"
+    ],
+    "B": [
+      "Baker",
+      "Barber",
+      "Builder",
+      "Banker"
+    ],
+    "C": [
+      "Chef",
+      "Carpenter",
+      "Cashier",
+      "Coach"
+    ],
+    "D": [
+      "Doctor",
+      "Dentist",
+      "Driver",
+      "Designer"
+    ],
+    "E": [
+      "Engineer",
+      "Electrician",
+      "Editor"
+    ],
+    "F": [
+      "Firefighter",
+      "Farmer",
+      "Florist",
+      "Fisherman"
+    ],
+    "G": [
+      "Gardener",
+      "Guard",
+      "Game designer"
+    ],
+    "H": [
+      "Hairdresser",
+      "Housekeeper"
+    ],
+    "I": [
+      "Inventor",
+      "Illustrator",
+      "Inspector"
+    ],
+    "J": [
+      "Judge",
+      "Journalist",
+      "Janitor",
+      "Jeweler"
+    ],
+    "K": [
+      "Kindergarten teacher"
+    ],
+    "L": [
+      "Lawyer",
+      "Librarian",
+      "Lifeguard"
+    ],
+    "M": [
+      "Mechanic",
+      "Musician",
+      "Mail carrier",
+      "Model"
+    ],
+    "N": [
+      "Nurse",
+      "Nanny"
+    ],
+    "O": [
+      "Optometrist",
+      "Officer"
+    ],
+    "P": [
+      "Pilot",
+      "Plumber",
+      "Painter",
+      "Police officer"
+    ],
+    "Q": [],
+    "R": [
+      "Reporter",
+      "Receptionist",
+      "Referee"
+    ],
+    "S": [
+      "Scientist",
+      "Singer",
+      "Surgeon",
+      "Sailor"
+    ],
+    "T": [
+      "Teacher",
+      "Tailor",
+      "Taxi driver"
+    ],
+    "U": [
+      "Umpire"
+    ],
+    "V": [
+      "Veterinarian",
+      "Violinist"
+    ],
+    "W": [
+      "Waiter",
+      "Writer",
+      "Welder"
+    ],
+    "X": [],
+    "Y": [
+      "Yoga teacher"
+    ],
+    "Z": [
+      "Zookeeper"
+    ]
+  },
+  "Food": {
+    "A": [
+      "Apple pie",
+      "Applesauce",
+      "Asparagus"
+    ],
+    "B": [
+      "Bread",
+      "Burger",
+      "Bacon",
+      "Burrito"
+    ],
+    "C": [
+      "Cake",
+      "Cheese",
+      "Cookie",
+      "Chicken"
+    ],
+    "D": [
+      "Donut",
+      "Dumpling"
+    ],
+    "E": [
+      "Eggs",
+      "Enchilada"
+    ],
+    "F": [
+      "French fries",
+      "Fish sticks",
+      "Fudge"
+    ],
+    "G": [
+      "Granola",
+      "Gravy",
+      "Garlic bread"
+    ],
+    "H": [
+      "Hot dog",
+      "Ham",
+      "Hamburger"
+    ],
+    "I": [
+      "Ice cream"
+    ],
+    "J": [
+      "Jelly",
+      "Jam"
+    ],
+    "K": [
+      "Ketchup",
+      "Kebab"
+    ],
+    "L": [
+      "Lasagna",
+      "Lettuce",
+      "Lobster"
+    ],
+    "M": [
+      "Macaroni",
+      "Muffin",
+      "Meatballs",
+      "Mashed potatoes"
+    ],
+    "N": [
+      "Nachos",
+      "Noodles",
+      "Nuggets"
+    ],
+    "O": [
+      "Oatmeal",
+      "Omelet",
+      "Onion rings"
+    ],
+    "P": [
+      "Pizza",
+      "Pancakes",
+      "Popcorn",
+      "Pasta"
+    ],
+    "Q": [
+      "Quesadilla",
+      "Quiche"
+    ],
+    "R": [
+      "Rice",
+      "Ravioli",
+      "Ribs"
+    ],
+    "S": [
+      "Sandwich",
+      "Spaghetti",
+      "Soup",
+      "Salad"
+    ],
+    "T": [
+      "Taco",
+      "Toast",
+      "Tuna",
+      "Turkey"
+    ],
+    "U": [
+      "Udon"
+    ],
+    "V": [
+      "Veggie burger"
+    ],
+    "W": [
+      "Waffles"
+    ],
+    "X": [],
+    "Y": [
+      "Yogurt"
+    ],
+    "Z": [
+      "Zucchini"
+    ]
+  },
+  "Movie/TV show": {
+    "A": [
+      "Aladdin",
+      "Avatar",
+      "Annie"
+    ],
+    "B": [
+      "Bluey",
+      "Bambi",
+      "Beauty and the Beast"
+    ],
+    "C": [
+      "Cars",
+      "Coco",
+      "Cinderella"
+    ],
+    "D": [
+      "Dumbo",
+      "Despicable Me"
+    ],
+    "E": [
+      "Encanto",
+      "E.T."
+    ],
+    "F": [
+      "Frozen",
+      "Finding Nemo",
+      "Friends"
+    ],
+    "G": [
+      "Ghostbusters",
+      "Grease"
+    ],
+    "H": [
+      "Home Alone",
+      "Hercules",
+      "Happy Days"
+    ],
+    "I": [
+      "Inside Out",
+      "Ice Age"
+    ],
+    "J": [
+      "Jumanji",
+      "Jaws",
+      "Jurassic Park"
+    ],
+    "K": [
+      "Kung Fu Panda"
+    ],
+    "L": [
+      "Lilo & Stitch",
+      "Luca"
+    ],
+    "M": [
+      "Moana",
+      "Mulan",
+      "Matilda",
+      "Minions"
+    ],
+    "N": [
+      "Night at the Museum"
+    ],
+    "O": [
+      "Onward"
+    ],
+    "P": [
+      "Pinocchio",
+      "Peter Pan",
+      "Paddington"
+    ],
+    "Q": [],
+    "R": [
+      "Ratatouille",
+      "Rocky"
+    ],
+    "S": [
+      "Shrek",
+      "Star Wars",
+      "Sing"
+    ],
+    "T": [
+      "Toy Story",
+      "Tangled",
+      "Titanic"
+    ],
+    "U": [
+      "Up"
+    ],
+    "V": [],
+    "W": [
+      "WALL-E",
+      "Wonka",
+      "Wicked"
+    ],
+    "X": [],
+    "Y": [
+      "Yogi Bear"
+    ],
+    "Z": [
+      "Zootopia"
+    ]
+  },
+  "Body part": {
+    "A": [
+      "Arm",
+      "Ankle"
+    ],
+    "B": [
+      "Back",
+      "Belly",
+      "Brain",
+      "Bone"
+    ],
+    "C": [
+      "Chin",
+      "Cheek",
+      "Chest"
+    ],
+    "D": [],
+    "E": [
+      "Ear",
+      "Eye",
+      "Elbow",
+      "Eyebrow"
+    ],
+    "F": [
+      "Foot",
+      "Finger",
+      "Face",
+      "Forehead"
+    ],
+    "G": [
+      "Gums"
+    ],
+    "H": [
+      "Hand",
+      "Head",
+      "Heart",
+      "Hair"
+    ],
+    "I": [
+      "Index finger"
+    ],
+    "J": [
+      "Jaw"
+    ],
+    "K": [
+      "Knee",
+      "Kidney",
+      "Knuckle"
+    ],
+    "L": [
+      "Leg",
+      "Lip",
+      "Lung",
+      "Liver"
+    ],
+    "M": [
+      "Mouth",
+      "Muscle"
+    ],
+    "N": [
+      "Nose",
+      "Neck",
+      "Nail"
+    ],
+    "O": [],
+    "P": [
+      "Palm"
+    ],
+    "Q": [],
+    "R": [
+      "Rib"
+    ],
+    "S": [
+      "Shoulder",
+      "Stomach",
+      "Skin",
+      "Spine"
+    ],
+    "T": [
+      "Toe",
+      "Tongue",
+      "Thumb",
+      "Tooth"
+    ],
+    "U": [],
+    "V": [
+      "Vein"
+    ],
+    "W": [
+      "Wrist",
+      "Waist"
+    ],
+    "X": [],
+    "Y": [],
+    "Z": []
+  },
+  "Things in a kitchen": {
+    "A": [
+      "Apron",
+      "Apple"
+    ],
+    "B": [
+      "Blender",
+      "Bowl",
+      "Bread"
+    ],
+    "C": [
+      "Cup",
+      "Cutting board",
+      "Cabinet",
+      "Colander"
+    ],
+    "D": [
+      "Dishwasher",
+      "Dish towel"
+    ],
+    "E": [
+      "Eggs",
+      "Egg timer"
+    ],
+    "F": [
+      "Fridge",
+      "Fork",
+      "Frying pan"
+    ],
+    "G": [
+      "Grater",
+      "Glass"
+    ],
+    "H": [
+      "Honey"
+    ],
+    "I": [
+      "Ice cube tray"
+    ],
+    "J": [
+      "Jar",
+      "Juicer"
+    ],
+    "K": [
+      "Knife",
+      "Kettle",
+      "Ketchup"
+    ],
+    "L": [
+      "Ladle",
+      "Lid"
+    ],
+    "M": [
+      "Microwave",
+      "Mug",
+      "Measuring cup",
+      "Mixer"
+    ],
+    "N": [
+      "Napkin",
+      "Nutcracker"
+    ],
+    "O": [
+      "Oven",
+      "Oven mitt"
+    ],
+    "P": [
+      "Pan",
+      "Pot",
+      "Plate",
+      "Pepper"
+    ],
+    "Q": [],
+    "R": [
+      "Rolling pin",
+      "Refrigerator"
+    ],
+    "S": [
+      "Spoon",
+      "Sink",
+      "Spatula",
+      "Stove"
+    ],
+    "T": [
+      "Toaster",
+      "Teapot",
+      "Tray"
+    ],
+    "U": [
+      "Utensils"
+    ],
+    "V": [
+      "Vinegar"
+    ],
+    "W": [
+      "Whisk",
+      "Wooden spoon"
+    ],
+    "X": [],
+    "Y": [
+      "Yogurt"
+    ],
+    "Z": [
+      "Zester"
+    ]
+  }
+}

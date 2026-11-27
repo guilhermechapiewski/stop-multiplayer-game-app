@@ -15,7 +15,7 @@ let package = Package(
         .target(name: "StopCore"),
         .target(name: "StopNetworking"),
         .target(name: "StopSession", dependencies: ["StopCore", "StopNetworking"]),
-        .target(name: "StopSimulation", dependencies: ["StopSession"]),
+        .target(name: "StopSimulation", dependencies: ["StopCore", "StopSession"], resources: [.process("Resources")]),
         .target(name: "StopTestSupport", dependencies: ["StopCore"]),
         .testTarget(name: "StopCoreTests", dependencies: ["StopCore", "StopTestSupport"]),
         .testTarget(name: "StopNetworkingTests", dependencies: ["StopNetworking", "StopTestSupport"]),
