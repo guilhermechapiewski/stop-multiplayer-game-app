@@ -258,6 +258,52 @@ struct HostSessionTests {
         #expect(h.host.state.player(ana.playerID)?.presence == .away)
     }
 
+    @Test func awayOnlyAfterRealSilence() async throws {
+        let h = try Harness(awayAfter: .seconds(3))
+        let ana = try await h.join("Ana")
+        await waitUntil("loops armed") { h.clock.sleeperCount == 2 }
+        await h.clock.advance(by: .milliseconds(900))
+        let id = ana.send(.nextRound)
+        #expect(await ana.nextAck() == .ack(id: id, error: .notHost))
+        // Heartbeats at 1, 2 and 3 s: only 2.1 s of silence by then.
+        await h.clock.advance(by: .milliseconds(100))
+        await h.advance(seconds: 2)
+        #expect(h.host.state.player(ana.playerID)?.presence == .present)
+        await h.advance(seconds: 1)
+        #expect(h.host.state.player(ana.playerID)?.presence == .away)
+    }
+
+    @Test func byeWithoutLeaveMarksAway() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        ana.send(.bye)
+        await waitUntil("Ana away") { h.host.state.player(ana.playerID)?.presence == .away }
+        #expect(await ana.untilClosed())
+    }
+
+    @Test func helloForAnotherPlayerUnmapsTheFirst() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        let beaID = UUID()
+        ana.send(.hello(playerID: beaID, name: "Bea", gameID: nil, lastVersion: nil))
+        await waitUntil("Bea present") { h.host.state.player(beaID)?.presence == .present }
+        await waitUntil("Ana away") { h.host.state.player(ana.playerID)?.presence == .away }
+        #expect(h.host.connectionPlayer[ana.connection.id] == beaID)
+        #expect(h.host.playerConnection[ana.playerID] == nil)
+    }
+
+    @Test func noDraftSavedAfterShutdown() async throws {
+        let h = try Harness()
+        _ = try await h.join("Ana")
+        await h.toWriting()
+        h.host.localClient.saveDraft(["Gui", "Ga"])
+        h.host.localClient.leave()
+        h.host.localClient.saveDraft(["Gui", "Gato"])
+        await h.clock.advance(by: .seconds(1))
+        await waitUntil("store cleared") { await h.store.loadActiveGame() == nil }
+        #expect(await h.store.loadDraft(gameID: h.host.state.gameID, round: 1) == nil)
+    }
+
     @Test func goingAwayMarksAwayImmediately() async throws {
         let h = try Harness()
         let ana = try await h.join("Ana")
@@ -362,6 +408,7 @@ struct HostSessionTests {
         let second = try await h.connect(first.playerID, name: "Ana")
         guard case .welcome = await second.next() else { Issue.record("expected welcome"); return }
         #expect(await first.untilClosed())
+        await waitUntil("old connection removed") { h.host.openConnections[first.connection.id] == nil }
         #expect(h.host.state.player(first.playerID)?.presence == .present)
         let id = second.send(.leave)
         #expect(await second.nextAck() == .ack(id: id, error: nil))

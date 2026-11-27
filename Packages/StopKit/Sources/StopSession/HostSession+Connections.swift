@@ -48,8 +48,10 @@ extension HostSession {
         case .goingAway:
             markAway(player)
         case .bye:
+            // After a leave the engine keeps them `.left`; otherwise they're just gone for now.
             unmap(connection)
             connection.close()
+            markAway(player)
         case .intent(let id, let intent):
             seen(player)
             handleIntent(intent, id: id, from: player, on: connection)
@@ -68,13 +70,16 @@ extension HostSession {
             connection.close()
             return
         }
+        if let other = connectionPlayer[connection.id], other != playerID, unmap(connection) != nil {
+            markAway(other)
+        }
         if let previous = playerConnection[playerID], previous.id != connection.id {
             connectionPlayer[previous.id] = nil
             previous.close()
         }
         connectionPlayer[connection.id] = playerID
         playerConnection[playerID] = connection
-        silence[playerID] = .zero
+        lastSeen[playerID] = Stopwatch(clock)
         // The join's broadcast skipped this player: the welcome carries the same state.
         send(.welcome(state.redacted(for: playerID)), to: connection)
     }
@@ -99,7 +104,7 @@ extension HostSession {
 
     /// Any message from a player resets their silence and brings them back if they were away.
     private func seen(_ player: PlayerID) {
-        silence[player] = .zero
+        lastSeen[player] = Stopwatch(clock)
         guard state.player(player)?.presence == .away else { return }
         mutate { GameEngine.setPresence(.present, for: player, in: &$0) }
     }
@@ -116,7 +121,7 @@ extension HostSession {
         guard let player = connectionPlayer.removeValue(forKey: connection.id),
               playerConnection[player]?.id == connection.id else { return nil }
         playerConnection[player] = nil
-        silence[player] = nil
+        lastSeen[player] = nil
         return player
     }
 }
