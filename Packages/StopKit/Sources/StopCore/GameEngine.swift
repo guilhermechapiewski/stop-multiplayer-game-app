@@ -22,12 +22,14 @@ public enum GameEngine {
         state = copy
     }
 
-    /// Minimal present/away toggle; Task 6 owns the full behavior.
+    /// Called by the session when a peer connects or goes quiet. Only toggles between `.present` and `.away`
+    /// (never overrides left/removed). Returns true, after bumping `version` once, when it changed.
     public static func setPresence(_ presence: Presence, for player: PlayerID, in state: inout GameState) -> Bool {
         guard let index = state.players.firstIndex(where: { $0.id == player }),
               state.players[index].presence.isActive, presence.isActive,
               state.players[index].presence != presence else { return false }
         state.players[index].presence = presence
+        reevaluateRound(&state)
         state.version += 1
         return true
     }
@@ -61,8 +63,13 @@ public enum GameEngine {
             return try submitAnswers(round: round, answers: answers, sender: sender, state: &state)
         case .continueToScoring:
             return try continueToScoring(sender: sender, state: &state)
-        case .nextRound, .endGame, .setScore:
-            throw .wrongPhase
+        case .setScore(let round, let category, let points, let player):
+            return try setScore(round: round, category: category, points: points, player: player,
+                                sender: sender, state: &state)
+        case .nextRound:
+            return try nextRound(sender: sender, state: &state, using: &rng)
+        case .endGame:
+            return try endGame(sender: sender, state: &state)
         }
     }
 }

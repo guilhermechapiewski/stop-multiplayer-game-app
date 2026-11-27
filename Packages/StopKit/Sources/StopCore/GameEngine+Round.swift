@@ -1,10 +1,15 @@
 import Foundation
 
 extension GameEngine {
-    /// Advances reveal and countdown phases by one second. Returns true (and bumps `version` once) when it changed.
+    /// Advances reveal, countdown and completed scoring categories by one tick. Returns true (and bumps `version`
+    /// once) when it changed.
     public static func tick(_ state: inout GameState) -> Bool {
         let next: Phase
         switch state.phase {
+        case .scoring:
+            guard advanceScoring(&state) else { return false }
+            state.version += 1
+            return true
         case .revealing(let ticks):
             next = ticks > 1 ? .revealing(ticksRemaining: ticks - 1) : .countdown(secondsRemaining: 3)
         case .countdown(let seconds):
@@ -28,10 +33,7 @@ extension GameEngine {
         let index = state.rounds.count - 1
         state.rounds[index].stops.append(StopRecord(playerID: sender, kind: kind))
         state.rounds[index].answers[sender] = answers
-        if state.rounds[index].stops.count >= state.effectiveStopsRequired {
-            state.phase = .collecting
-            advanceIfComplete(&state)
-        }
+        reevaluateRound(&state)
         return true
     }
 
@@ -55,6 +57,7 @@ extension GameEngine {
         if round.answers[sender] != nil { return false }
         guard answers.count == state.settings.categories.count else { throw .answersIncomplete }
         state.rounds[state.rounds.count - 1].answers[sender] = answers
+        applyLateAnswers(answers, for: sender, state: &state)
         advanceIfComplete(&state)
         return true
     }
@@ -70,17 +73,29 @@ extension GameEngine {
         return true
     }
 
-    /// In `.collecting`, moves on once every present participant has answers. Away, left and removed players don't block.
-    static func advanceIfComplete(_ state: inout GameState) {
-        guard state.phase == .collecting, let round = state.currentRound else { return }
-        let waiting = round.participants.contains {
-            state.player($0)?.presence == .present && round.answers[$0] == nil
+    /// Re-checks the round after stops or participant/presence changes: in `.writing`, locks once enough
+    /// players stopped; then lets collecting or scoring move on if nobody blocks it any more.
+    static func reevaluateRound(_ state: inout GameState) {
+        if state.phase == .writing, let round = state.currentRound, round.stops.count >= state.effectiveStopsRequired {
+            state.phase = .collecting
         }
-        if !waiting { enterScoring(&state) }
+        advanceIfComplete(&state)
     }
 
-    /// Stub until Task 6 defines scoring.
-    static func enterScoring(_ state: inout GameState) {
-        state.phase = .scoring(categoryIndex: 0, completed: false)
+    /// In `.collecting`, moves on once every present participant has answers (away, left and removed players
+    /// don't block). In an open scoring category, marks it completed once every active participant has a score.
+    static func advanceIfComplete(_ state: inout GameState) {
+        switch state.phase {
+        case .collecting:
+            guard let round = state.currentRound else { return }
+            let waiting = round.participants.contains {
+                state.player($0)?.presence == .present && round.answers[$0] == nil
+            }
+            if !waiting { enterScoring(&state) }
+        case .scoring(let category, false):
+            if settleCategory(category, &state) { state.phase = .scoring(categoryIndex: category, completed: true) }
+        default:
+            return
+        }
     }
 }

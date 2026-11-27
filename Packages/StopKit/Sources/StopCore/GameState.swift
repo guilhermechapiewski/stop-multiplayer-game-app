@@ -47,3 +47,18 @@ public struct GameState: Codable, Sendable, Equatable {
         return max(1, min(settings.stopsRequired, remaining))
     }
 }
+
+extension GameState {
+    /// The snapshot `viewer` may see: before scoring, the current round's answers keep only the viewer's own entry.
+    public func redacted(for viewer: PlayerID) -> GameState {
+        switch phase {
+        case .revealing, .countdown, .writing, .collecting:
+            guard !rounds.isEmpty else { return self }
+            var copy = self
+            copy.rounds[rounds.count - 1].answers = copy.rounds[rounds.count - 1].answers.filter { $0.key == viewer }
+            return copy
+        case .lobby, .scoring, .roundResults, .gameOver:
+            return self
+        }
+    }
+}

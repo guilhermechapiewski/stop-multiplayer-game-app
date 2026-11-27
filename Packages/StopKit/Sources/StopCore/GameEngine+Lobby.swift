@@ -19,8 +19,9 @@ extension GameEngine {
     static func leave(sender: PlayerID, state: inout GameState) throws(GameError) -> Bool {
         guard sender != state.hostID else { throw .notHost }
         guard let index = state.players.firstIndex(where: { $0.id == sender }) else { throw .unknownPlayer }
-        if state.players[index].presence == .left { return false }
+        guard state.players[index].presence.isActive else { return false }
         state.players[index].presence = .left
+        reevaluateRound(&state)
         return true
     }
 
@@ -30,6 +31,7 @@ extension GameEngine {
         guard let index = state.players.firstIndex(where: { $0.id == id }) else { throw .unknownPlayer }
         if state.players[index].presence == .removed { return false }
         state.players[index].presence = .removed
+        reevaluateRound(&state)
         return true
     }
 

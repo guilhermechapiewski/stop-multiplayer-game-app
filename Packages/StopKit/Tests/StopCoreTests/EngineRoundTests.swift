@@ -170,8 +170,31 @@ private func startedGame(players: Int = 3, stopsRequired: Int = 1, allowGiveUp: 
     try send(.submitAnswers(round: 1, answers: full), ids[1], &s)
     #expect(s.phase == .collecting)
     try send(.submitAnswers(round: 1, answers: ["", ""]), ids[2], &s)
-    guard case .scoring(let index, _) = s.phase else { Issue.record("expected scoring, got \(s.phase)"); return }
-    #expect(index == 0)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: false))
+}
+
+@Test func allBlankCategoryCompletesOnEnteringScoring() throws {
+    var (s, ids) = try startedGame(players: 3, stopsRequired: 3)
+    try send(.forceEndRound, ids[0], &s)
+    for id in ids { try send(.submitAnswers(round: 1, answers: ["", ""]), id, &s) }
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+}
+
+@Test func submitAnswersErrors() throws {
+    var (s, ids) = try startedGame(players: 3, stopsRequired: 1)
+    #expect(throws: GameError.wrongPhase) { try send(.submitAnswers(round: 1, answers: full), ids[1], &s) }
+    try send(.stop(answers: full), ids[0], &s)
+    #expect(s.phase == .collecting)
+    let before = s
+    #expect(throws: GameError.answersIncomplete) { try send(.submitAnswers(round: 1, answers: ["Asno"]), ids[1], &s) }
+    #expect(throws: GameError.answersIncomplete) {
+        try send(.submitAnswers(round: 1, answers: ["Asno", "Abacate", "Roma"]), ids[1], &s)
+    }
+    let outsider = UUID()
+    s.players.append(Player(id: outsider, name: "Late", presence: .present))
+    #expect(throws: GameError.notParticipant) { try send(.submitAnswers(round: 1, answers: full), outsider, &s) }
+    s.players.removeLast()
+    #expect(s == before)
 }
 
 @Test func awayParticipantDoesNotBlockCollecting() throws {

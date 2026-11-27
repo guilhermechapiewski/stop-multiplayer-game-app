@@ -159,3 +159,12 @@ private func started() throws -> (GameState, PlayerID, PlayerID) {
     #expect(throws: GameError.notHost) { try send(.removePlayer(host), host, &s) }
     #expect(s.player(host)?.presence == .present)
 }
+
+@Test func leaveAfterRemovalIsNoOp() throws {
+    var (s, host, b) = try started()
+    try send(.removePlayer(b), host, &s)
+    let before = s
+    try send(.leave, b, &s)
+    #expect(s == before)
+    #expect(s.player(b)?.presence == .removed)
+}
