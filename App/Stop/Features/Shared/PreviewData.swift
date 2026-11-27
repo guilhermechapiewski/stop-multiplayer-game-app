@@ -43,6 +43,7 @@ enum PreviewData {
                                  state: phase == nil ? nil : state)
     }
 
+    #if DEBUG
     /// Games advertised on an in-memory network: one open, one in progress, one from another app version.
     /// Keep the result alive for as long as the games should stay visible.
     static func demoNetwork() -> DemoNetwork {
@@ -63,13 +64,16 @@ enum PreviewData {
         model.start()
         return model
     }
+    #endif
 }
 
+#if DEBUG
 /// An in-memory network and the listeners advertising on it.
 struct DemoNetwork {
     let network: InMemoryNetwork
     let listeners: [any Listener]
 }
+#endif
 
 /// A `GameClient` with fixed state, for previews. Intents are applied locally where that's simple.
 @MainActor @Observable

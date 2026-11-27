@@ -7,6 +7,7 @@ struct JoinView: View {
     let model: AppModel
 
     @State private var join: JoinModel
+    @Environment(\.scenePhase) private var scenePhase
 
     init(model: AppModel) {
         self.model = model
@@ -27,6 +28,7 @@ struct JoinView: View {
         }
         .onAppear { join.start() }
         .onDisappear { join.stop() }
+        .onChange(of: scenePhase) { if $1 == .active { join.sceneBecameActive() } }
     }
 }
 
@@ -56,7 +58,8 @@ struct JoinContent: View {
         List {
             Section {
                 ForEach(join.games) { game in
-                    GameRow(game: game, availability: JoinModel.availability(of: game)) { onJoin(game) }
+                    GameRow(game: game, hostName: join.hostName(of: game),
+                            availability: JoinModel.availability(of: game)) { onJoin(game) }
                 }
             } header: {
                 HStack(spacing: Theme.Spacing.s) {
@@ -75,11 +78,12 @@ struct JoinContent: View {
 /// One nearby game: host, player count and whether it can be joined.
 private struct GameRow: View {
     let game: DiscoveredGame
+    /// The host's name as listed (with a suffix if two hosts share it).
+    let hostName: String
     let availability: JoinModel.Availability
     let onJoin: () -> Void
 
     private var isJoinable: Bool { availability == .joinable }
-    private var hostName: String { game.advertisement.hostName }
 
     var body: some View {
         Button(action: onJoin) {
@@ -124,25 +128,10 @@ private struct GameRow: View {
 /// While nothing has been found yet.
 private struct SearchingView: View {
     var body: some View {
-        VStack(spacing: Theme.Spacing.l) {
-            ProgressView()
-                .controlSize(.large)
-                .tint(Theme.accent)
-                .accessibilityHidden(true)
-            VStack(spacing: Theme.Spacing.s) {
-                Text("Looking for games nearby…")
-                    .font(Theme.Typography.title)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
-                Text("Ask a friend to host a game. It shows up here as soon as their phone is on the same Wi-Fi network as yours.")
-                    .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .padding(.horizontal, Theme.Spacing.l)
-        .centeredScrolling()
-        .accessibilityIdentifier("searchingForGames")
+        StatusMessageView(
+            icon: .progress, title: Text("Looking for games nearby…"),
+            message: Text("Ask a friend to host a game. It shows up here as soon as their phone is on the same Wi-Fi network as yours."))
+            .accessibilityIdentifier("searchingForGames")
     }
 }
 
@@ -151,21 +140,10 @@ private struct PermissionDeniedView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.xl) {
-            VStack(spacing: Theme.Spacing.m) {
-                Image(systemName: "wifi.exclamationmark")
-                    .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(Theme.accent)
-                    .accessibilityHidden(true)
-                Text("Allow Local Network access")
-                    .font(Theme.Typography.title)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
-                Text("Games are found over your Wi-Fi network, so the app needs Local Network access. Turn it on in Settings, then come back.")
-                    .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
+        StatusMessageView(
+            icon: .symbol("wifi.exclamationmark"), title: Text("Allow Local Network access"),
+            message: Text("Games are found over your Wi-Fi network, so the app needs Local Network access. Turn it on in Settings, then come back.")
+        ) {
             Button {
                 if let url = URL(string: UIApplication.openSettingsURLString) { openURL(url) }
             } label: {
@@ -174,16 +152,16 @@ private struct PermissionDeniedView: View {
             .buttonStyle(.primary)
             .accessibilityIdentifier("openSettingsButton")
         }
-        .padding(.horizontal, Theme.Spacing.l)
-        .centeredScrolling()
     }
 }
 
+#if DEBUG
 #Preview("Join – games nearby") {
     let demo = PreviewData.demoNetwork()
     JoinContent(join: PreviewData.startedJoinModel(demo.network), onJoin: { _ in })
         .onDisappear { _ = demo }
 }
+#endif
 
 #Preview("Join – searching") {
     NavigationStack {

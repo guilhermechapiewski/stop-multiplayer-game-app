@@ -173,7 +173,7 @@ struct GameEndedView: View {
     private var message: LocalizedStringKey {
         switch reason {
         case .versionMismatch: "Update the app on every phone from the App Store, then try again."
-        case .removed: "The host removed you. Ask them to let you back in if it was a mistake."
+        case .removed: "The host removed you from the game."
         case .gameOver, .leftGame, .gameClosed: "The game is no longer available. Start or join another one."
         }
     }

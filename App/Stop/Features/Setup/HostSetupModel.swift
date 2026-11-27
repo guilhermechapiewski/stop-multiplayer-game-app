@@ -24,6 +24,7 @@ final class HostSetupModel {
     @ObservationIgnored private let store: any GameStore
     @ObservationIgnored private let defaults: [String]
     private var custom: [String] = []
+    @ObservationIgnored private var isLoaded = false
 
     init(store: any GameStore, language: GameLanguage) {
         self.store = store
@@ -32,10 +33,15 @@ final class HostSetupModel {
         selected = Array(defaults.prefix(Self.defaultSelectionCount))
     }
 
-    /// Adds the custom categories remembered on this device.
+    /// Adds the custom categories remembered on this device, keeping any added while they were loading.
     func load() async {
         let saved = await store.loadCustomCategories()
-        custom = saved.filter { name in !defaults.contains { Self.same($0, name) } }
+        var merged: [String] = []
+        for name in saved + custom where !(defaults + merged).contains(where: { Self.same($0, name) }) {
+            merged.append(name)
+        }
+        custom = merged
+        isLoaded = true
         rebuildAvailable()
     }
 
@@ -58,6 +64,7 @@ final class HostSetupModel {
     /// case) just gets selected.
     func addCustom(_ name: String) async {
         let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxCategoryLength))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         if let existing = available.first(where: { Self.same($0, trimmed) }) {
             if !isSelected(existing) { selected.append(existing) }
@@ -66,6 +73,8 @@ final class HostSetupModel {
         custom.append(trimmed)
         rebuildAvailable()
         selected.append(trimmed)
+        // Never save over the remembered list before it has been read.
+        if !isLoaded { await load() }
         await store.saveCustomCategories(custom)
     }
 

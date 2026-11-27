@@ -30,6 +30,8 @@ struct GameMenu: View {
     private var names: [PlayerID: String] { state?.displayNames ?? [:] }
     private var isWriting: Bool { state?.phase == .writing }
     private var isOver: Bool { state?.phase == .gameOver }
+    /// The host leaving before game over ends the game on every phone.
+    private var endsGameForEveryone: Bool { client.isHost && !isOver }
     /// Players the host may remove: everyone else still in the game.
     private var removable: [Player] {
         guard let state else { return [] }
@@ -85,7 +87,7 @@ struct GameMenu: View {
 
     private var alertTitle: Text {
         switch confirmation {
-        case .leave: client.isHost ? Text("End the game for everyone?") : Text("Leave the game?")
+        case .leave: endsGameForEveryone ? Text("End the game for everyone?") : Text("Leave the game?")
         case .endGame: Text("End the game?")
         case .forceEndRound: Text("End this round now?")
         case .remove(let id): Text("Remove \(names[id] ?? "")?")
@@ -96,9 +98,13 @@ struct GameMenu: View {
     private func message(_ pending: Confirmation) -> LocalizedStringKey {
         switch pending {
         case .leave:
-            client.isHost
-                ? "You’re the host, so leaving ends the game on every phone."
-                : "Your points so far stay in the standings. You can rejoin while the game is on."
+            if endsGameForEveryone {
+                "You’re the host, so leaving ends the game on every phone."
+            } else if isOver {
+                "You’ll go back to the start screen."
+            } else {
+                "Your points so far stay in the standings."
+            }
         case .endGame:
             "Everyone goes to the final standings."
         case .forceEndRound:
@@ -110,7 +116,7 @@ struct GameMenu: View {
 
     private func confirmButtonTitle(_ pending: Confirmation) -> LocalizedStringKey {
         switch pending {
-        case .leave: client.isHost ? "End game" : "Leave"
+        case .leave: endsGameForEveryone ? "End game" : "Leave"
         case .endGame: "End game"
         case .forceEndRound: "End round"
         case .remove: "Remove"

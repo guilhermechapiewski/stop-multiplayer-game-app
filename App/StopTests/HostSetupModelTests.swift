@@ -57,6 +57,24 @@ struct HostSetupModelTests {
         #expect(await store.loadCustomCategories().isEmpty)
     }
 
+    @Test func addingBeforeLoadKeepsRememberedCategories() async {
+        await store.saveCustomCategories(["Cartoons"])
+        let model = HostSetupModel(store: store, language: .en)
+
+        await model.addCustom("Bands")
+        await model.load()
+
+        #expect(model.available.suffix(2) == ["Cartoons", "Bands"])
+        #expect(model.selected.last == "Bands")
+        #expect(await store.loadCustomCategories() == ["Cartoons", "Bands"])
+    }
+
+    @Test func longNamesAreCutAndTrimmed() async {
+        let model = await makeModel()
+        await model.addCustom("  " + String(repeating: "a", count: 29) + " tail")
+        #expect(model.selected.last == String(repeating: "a", count: 29))
+    }
+
     @Test func deletingCustomCategoryForgetsIt() async {
         let model = await makeModel()
         await model.addCustom("Cartoons")

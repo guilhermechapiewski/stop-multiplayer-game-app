@@ -158,7 +158,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Permitido"
+            "value" : "Permitida"
           }
         }
       }
@@ -367,7 +367,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Todos precisam da mesma versão do app"
+            "value" : "Todo mundo precisa da mesma versão do app"
           }
         }
       }
@@ -510,7 +510,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Desistir"
+            "value" : "Desistência"
           }
         }
       }
@@ -532,7 +532,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Anfitrião"
+            "value" : "Quem criou o jogo"
           }
         }
       }
@@ -708,7 +708,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não permitido"
+            "value" : "Não permitida"
           }
         }
       }
@@ -1109,13 +1109,13 @@
         }
       }
     },
-    "The host removed you. Ask them to let you back in if it was a mistake." : {
-      "comment" : "Message when this player was removed by the host.",
+    "The host removed you from the game." : {
+      "comment" : "Message when the host removed this player.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Quem criou o jogo removeu você. Se foi engano, peça para deixar você voltar."
+            "value" : "Quem criou o jogo tirou você da partida."
           }
         }
       }
@@ -1214,7 +1214,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esperando %@ começar…"
+            "value" : "Esperando %@ começar o jogo…"
           }
         }
       }
@@ -1235,7 +1235,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Boas-vindas ao %@"
+            "value" : "Que bom ter você no %@"
           }
         }
       },
@@ -1291,7 +1291,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Você foi removido do jogo"
+            "value" : "Você não está mais no jogo"
           }
         }
       }
@@ -1329,13 +1329,24 @@
       },
       "comment" : "Placeholder and label of the player's name field."
     },
-    "Your points so far stay in the standings. You can rejoin while the game is on." : {
-      "comment" : "Confirmation message when a guest leaves.",
+    "Your points so far stay in the standings." : {
+      "comment" : "Confirmation message when a guest leaves the game.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seus pontos até agora continuam na classificação. Você pode voltar enquanto o jogo estiver rolando."
+            "value" : "Seus pontos até agora continuam na classificação."
+          }
+        }
+      }
+    },
+    "You’ll go back to the start screen." : {
+      "comment" : "Confirmation message when leaving a game that is already over.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você volta para a tela inicial."
           }
         }
       }
@@ -1346,7 +1357,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Você entrou! O jogo começa quando %@ estiver pronto."
+            "value" : "Você entrou! O jogo começa quando %@ der a largada."
           }
         }
       }

@@ -11,6 +11,7 @@
 		5700000000000000000B0002 /* StopNetworking in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0002 /* StopNetworking */; };
 		5700000000000000000B0003 /* StopSession in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0003 /* StopSession */; };
 		5700000000000000000B0004 /* StopSimulation in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0004 /* StopSimulation */; };
+		5700000000000000000B0005 /* StopTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 5700000000000000000D0005 /* StopTestSupport */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5700000000000000000B0005 /* StopTestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -176,6 +178,9 @@
 				570000000000000000020002 /* StopTests */,
 			);
 			name = StopTests;
+			packageProductDependencies = (
+				5700000000000000000D0005 /* StopTestSupport */,
+			);
 			productName = StopTests;
 			productReference = 5700000000000000000F0002 /* StopTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -556,6 +561,10 @@
 		5700000000000000000D0004 /* StopSimulation */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = StopSimulation;
+		};
+		5700000000000000000D0005 /* StopTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StopTestSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

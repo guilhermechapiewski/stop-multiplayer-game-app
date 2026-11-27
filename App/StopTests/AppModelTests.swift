@@ -3,6 +3,7 @@ import Observation
 import StopCore
 import StopNetworking
 import StopSession
+import StopTestSupport
 import Testing
 @testable import Stop
 
@@ -349,6 +350,24 @@ struct AppModelTests {
             let draft = await store.loadDraft(gameID: gameID, round: 1)
             return ref == nil && draft == nil
         }
+    }
+
+    @Test func leavingSessionThatNeverEndsIsAbandonedAfterTimeout() async throws {
+        _ = await saveProfile()
+        let clock = TestClock()
+        let model = AppModel(store: store, factory: network, clock: clock, launchArguments: [],
+                             sessions: sessions.factories)
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let session = try #require(sessions.clients.first?.session)
+
+        model.leaveGame()
+
+        try await waitUntil { clock.sleeperCount == 1 }
+        await clock.advance(by: AppModel.leaveTimeout - .milliseconds(1))
+        #expect(!session.abandoned)
+        await clock.advance(by: .milliseconds(1))
+        try await waitUntil { session.abandoned }
     }
 
     @Test func sessionEndingMidGameRoutesHome() async throws {
