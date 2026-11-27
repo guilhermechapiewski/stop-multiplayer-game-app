@@ -1,5 +1,5 @@
 /// Deterministic SplitMix64 generator for reproducible tests.
-public struct SeededRNG: RandomNumberGenerator {
+public struct SeededRNG: RandomNumberGenerator, Sendable {
     private var state: UInt64
     public init(seed: UInt64) { state = seed }
     public mutating func next() -> UInt64 {

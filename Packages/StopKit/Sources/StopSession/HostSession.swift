@@ -30,7 +30,7 @@ public final class HostSession {
     @ObservationIgnored var isShutDown = false
 
     @ObservationIgnored private var loops: [Task<Void, Never>] = []
-    @ObservationIgnored private var storeTail: Task<Void, Never>?
+    @ObservationIgnored private let storeQueue: StoreQueue
     @ObservationIgnored private var stateWriteQueued = false
 
     public init(state: GameState, factory: any TransportFactory, store: any GameStore, clock: any Clock<Duration>,
@@ -47,7 +47,8 @@ public final class HostSession {
         self.clock = clock
         self.timing = timing
         self.rng = rng
-        localClient = LocalGameClient(hostID: state.hostID)
+        storeQueue = StoreQueue(store)
+        localClient = LocalGameClient(hostID: state.hostID, queue: storeQueue, clock: clock, timing: timing)
         localClient.host = self
     }
 
@@ -69,6 +70,7 @@ public final class HostSession {
         guard !isShutDown else { return }
         broadcast(.goingAway)
         stopLoops()
+        localClient.flushDraft()
         persist()
     }
 
@@ -216,12 +218,7 @@ public final class HostSession {
 
     /// Store operations run one at a time, in order, so a final clear can't be overtaken by an earlier save.
     func enqueueStore(_ operation: @escaping @MainActor (any GameStore) async -> Void) {
-        let previous = storeTail
-        let store = store
-        storeTail = Task {
-            await previous?.value
-            await operation(store)
-        }
+        storeQueue.enqueue(operation)
     }
 
     /// Saves the latest state; changes arriving while a save is queued are coalesced into it.

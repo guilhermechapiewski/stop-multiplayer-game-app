@@ -4,7 +4,8 @@ import StopCore
 
 public enum HostStatus: Equatable, Sendable {
     case connecting, connected
-    case away(since: ContinuousClock.Instant)
+    /// The host went quiet or said it was going away; the session moves on to `.mayBeGone` after `hostGoneAfter`.
+    case away
     case mayBeGone
     case ended(EndReason)
 }
