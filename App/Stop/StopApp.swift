@@ -30,9 +30,22 @@ struct StopApp: App {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
+    @ViewBuilder private var root: some View {
+        #if DEBUG
+        // `-demoPresence <kind>`: a host-away or presence-banner screen (for screenshots).
+        if let kind = LaunchOptions.value(after: "-demoPresence", in: ProcessInfo.processInfo.arguments) {
+            DemoPresenceScreen(kind: kind)
+        } else {
+            RootView(model: model)
+        }
+        #else
+        RootView(model: model)
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
-            RootView(model: model)
+            root
                 .fontDesign(.rounded)
                 .tint(Theme.accent)
                 .reduceMotion(forced: model.isUITesting)

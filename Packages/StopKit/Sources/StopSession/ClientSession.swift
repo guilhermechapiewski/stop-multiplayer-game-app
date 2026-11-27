@@ -20,6 +20,7 @@ public final class ClientSession: GameClient {
     public internal(set) var hostStatus: HostStatus = .connecting
     public let presenceChanges: AsyncStream<PresenceChange>
     public private(set) var lastError: GameError?
+    public private(set) var errorCount = 0
     /// The browser reported that local network access is denied (the UI can point to Settings).
     public internal(set) var isLocalNetworkDenied = false
     /// Set at STOP / give up (optimistic) or on receiving the lock.
@@ -186,6 +187,11 @@ public final class ClientSession: GameClient {
         return item.id
     }
 
+    private func record(_ error: GameError?) {
+        lastError = error
+        if error != nil { errorCount += 1 }
+    }
+
     private func acked(_ id: UUID, error: GameError?) {
         guard let index = pending.firstIndex(where: { $0.id == id }) else { return }
         let item = pending.remove(at: index)
@@ -195,10 +201,10 @@ public final class ClientSession: GameClient {
             // `.wrongPhase` once the round locked with my answers recorded.
             let recorded = state?.currentRound?.answers[localPlayerID] != nil
             let error = error == .alreadyStopped || (error == .wrongPhase && recorded) ? nil : error
-            lastError = error
+            record(error)
             if error == nil { drafts.stopAccepted() } else { drafts.stopRejected() }
         default:
-            lastError = error
+            record(error)
         }
         if id == leaveID { finishLeaving() }
     }

@@ -335,7 +335,7 @@ COMO JOGAR
 FEITO PARA REUNIR A TURMA
 • Funciona no mesmo Wi-Fi, ou só com o Wi-Fi ligado e sem rede nenhuma. Não precisa de internet.
 • Alguém atendeu uma ligação ou bloqueou o celular? A pessoa volta sozinha, e as respostas que ela já tinha escrito voltam junto, mesmo se o app foi fechado.
-• O anfitrião decide quantos STOPs encerram a rodada, e pode deixar os jogadores desistirem de uma letra difícil.
+• Quem cria o jogo decide quantos STOPs encerram a rodada, e pode deixar os jogadores desistirem de uma letra difícil.
 • Todas as 26 letras, sem repetir até que todas tenham saído.
 • Em português e inglês: cada celular mostra o próprio idioma na mesma partida.
 • Categorias prontas e personalizadas, vibração, sons opcionais, VoiceOver, texto maior e modo escuro.

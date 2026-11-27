@@ -68,6 +68,40 @@ enum PreviewData {
 }
 
 #if DEBUG
+/// `-demoPresence <kind>` (screenshots): the game screen as a guest sees it while the host is away
+/// (`hostAway`: round results, dimmed; `mayBeGone`; `writingAway`: the banner while writing) or with a presence
+/// banner (`banner`).
+struct DemoPresenceScreen: View {
+    let kind: String
+
+    @State private var client = PreviewData.client(isHost: false, phase: .writing)
+
+    var body: some View {
+        GameScreen(client: client, banner: banner, onLeave: {})
+            .onAppear(perform: configure)
+    }
+
+    private var banner: Banner? {
+        guard kind == "banner" else { return nil }
+        return Banner(change: PresenceChange(playerID: UUID(), kind: .wentAway), name: "Ana")
+    }
+
+    private func configure() {
+        switch kind {
+        case "hostAway":
+            client.state?.phase = .roundResults
+            client.hostStatus = .away
+        case "mayBeGone":
+            client.state?.phase = .roundResults
+            client.hostStatus = .mayBeGone
+        case "writingAway":
+            client.hostStatus = .away
+        default:
+            break
+        }
+    }
+}
+
 /// An in-memory network and the listeners advertising on it.
 struct DemoNetwork {
     let network: InMemoryNetwork
@@ -84,6 +118,7 @@ final class PreviewGameClient: GameClient {
     var hostStatus: HostStatus = .connected
     let presenceChanges = AsyncStream<PresenceChange> { $0.finish() }
     var lastError: GameError?
+    var errorCount = 0
     var frozenAnswers: [String]?
 
     init(localPlayerID: PlayerID, isHost: Bool, state: GameState?) {

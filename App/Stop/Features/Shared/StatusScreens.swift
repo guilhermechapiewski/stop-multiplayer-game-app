@@ -1,12 +1,15 @@
 import SwiftUI
 
+/// What a `StatusMessageView` shows above its title.
+enum StatusIcon {
+    case symbol(String)
+    case progress
+}
+
 /// A full-screen status: a symbol (or a spinner), a title, an optional explanation and optional actions,
 /// centred and scrolling when Dynamic Type makes it tall.
 struct StatusMessageView<Actions: View>: View {
-    enum Icon {
-        case symbol(String)
-        case progress
-    }
+    typealias Icon = StatusIcon
 
     let icon: Icon
     let title: Text
@@ -52,25 +55,44 @@ extension StatusMessageView where Actions == EmptyView {
     }
 }
 
-/// Shown while an interrupted game is being resumed after a relaunch.
+/// Shown while an interrupted game is being resumed after a relaunch: a spinner, then (after about 2 minutes)
+/// word that the host may be gone. With Local Network access off it points to Settings instead.
 struct RejoiningView: View {
     let hostName: String
+    var mayBeGone = false
+    var networkDenied = false
     let onCancel: () -> Void
 
     var body: some View {
-        StatusMessageView(
-            icon: .progress, title: Text("Reconnecting to \(hostName)’s game…"),
-            message: Text("Keep the app open. You’ll be back in the game as soon as the host’s phone is nearby.")
-        ) {
-            Button("Leave this game", action: onCancel)
-                .buttonStyle(.secondary)
-                .accessibilityHint("Stops reconnecting and goes back to the start screen.")
-                .accessibilityIdentifier("cancelRejoinButton")
+        let copy = HostAwayCopy(hostName: hostName, mayBeGone: mayBeGone, networkDenied: networkDenied,
+                                rejoining: true)
+        StatusMessageView(icon: copy.systemImage.map(StatusIcon.symbol) ?? .progress, title: Text(copy.title),
+                          message: Text(copy.message)) {
+            VStack(spacing: Theme.Spacing.s) {
+                if networkDenied { OpenSettingsButton() }
+                Button("Leave this game", action: onCancel)
+                    .buttonStyle(.secondary)
+                    .accessibilityHint("Stops reconnecting and goes back to the start screen.")
+                    .accessibilityIdentifier("cancelRejoinButton")
+            }
         }
         .background(Theme.background)
+        .animation(.easeInOut(duration: 0.2), value: mayBeGone)
+        .animation(.easeInOut(duration: 0.2), value: networkDenied)
+        .onChange(of: mayBeGone) { _, gone in
+            if gone { AccessibilityNotification.Announcement(String(localized: copy.title)).post() }
+        }
     }
 }
 
 #Preview("Rejoining") {
     RejoiningView(hostName: "Ana") {}
+}
+
+#Preview("Rejoining – host may be gone") {
+    RejoiningView(hostName: "Ana", mayBeGone: true) {}
+}
+
+#Preview("Rejoining – no local network") {
+    RejoiningView(hostName: "Ana", networkDenied: true) {}
 }

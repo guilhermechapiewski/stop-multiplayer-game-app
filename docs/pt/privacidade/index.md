@@ -35,7 +35,7 @@ Para funcionar, o app guarda algumas poucas informações no armazenamento priva
   quando você volta para uma partida.
 - **As suas categorias personalizadas**, para você usá-las de novo em próximas partidas.
 - **Uma partida em andamento** e as respostas que você está escrevendo (rascunhos), para que a partida possa
-  continuar se o app for fechado ou a conexão cair. Se você é o anfitrião, a partida salva inclui os nomes,
+  continuar se o app for fechado ou a conexão cair. Se você criou o jogo, a partida salva inclui os nomes,
   as respostas e os pontos dos outros jogadores. Tudo isso é apagado quando a partida termina. Partidas de
   Treinar com robôs não são guardadas.
 - **As suas configurações**, como os sons.

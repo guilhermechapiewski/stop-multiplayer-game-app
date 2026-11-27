@@ -497,6 +497,19 @@ struct ClientSessionTests {
         }
     }
 
+    @Test func repeatedErrorsAreCounted() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        ana.send(.nextRound)
+        await waitUntil("first rejection") { ana.errorCount == 1 }
+        ana.send(.nextRound)
+        await waitUntil("second rejection") { ana.errorCount == 2 }
+        #expect(ana.lastError == .notHost)
+        ana.send(.leave)
+        await waitUntil("cleared") { ana.lastError == nil }
+        #expect(ana.errorCount == 2)
+    }
+
     @Test func successfulAckClearsLastErrorAndStopDisconnects() async throws {
         let h = try Harness()
         let ana = try await h.join("Ana")

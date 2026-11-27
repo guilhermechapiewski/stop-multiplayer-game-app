@@ -1,3 +1,4 @@
+import Foundation
 import StopCore
 import StopSession
 import SwiftUI
@@ -6,6 +7,8 @@ import SwiftUI
 /// move the game on to the countdown, so it waits for an away host by itself.
 struct LetterRevealView: View {
     let round: Round
+    /// Keys the VoiceOver announcement, so a new game's round 1 is announced even with the same letter.
+    let gameID: UUID
 
     @Environment(\.reduceMotion) private var reduceMotion
     @State private var shown: String?
@@ -63,20 +66,30 @@ struct LetterRevealView: View {
         shown = round.letter
         landed = true
         GameFeedback.play(.letterRevealed)
-        LetterAnnouncement.announce(round)
+        LetterAnnouncement.announce(round, gameID: gameID)
     }
 }
 
-/// Announces the round's letter to VoiceOver once per round: when the reveal lands, or when the countdown
-/// appears if the reveal was missed (joined late, app in the background).
+/// Announces the round's letter to VoiceOver once per round of each game: when the reveal lands, or when the
+/// countdown appears if the reveal was missed (joined late, app in the background).
 @MainActor
 enum LetterAnnouncement {
-    private static var announced: (number: Int, letter: String)?
+    private struct Key: Equatable {
+        let gameID: UUID
+        let number: Int
+        let letter: String
+    }
 
-    static func announce(_ round: Round) {
-        guard announced?.number != round.number || announced?.letter != round.letter else { return }
-        announced = (round.number, round.letter)
+    private static var announced: Key?
+
+    /// Returns whether it announced (false when this round was already announced).
+    @discardableResult
+    static func announce(_ round: Round, gameID: UUID) -> Bool {
+        let key = Key(gameID: gameID, number: round.number, letter: round.letter)
+        guard announced != key else { return false }
+        announced = key
         AccessibilityNotification.Announcement(String(localized: "Letter \(round.letter)")).post()
+        return true
     }
 }
 
@@ -105,12 +118,12 @@ struct LetterTile: View {
 }
 
 #Preview("Letter reveal") {
-    LetterRevealView(round: Round(number: 2, letter: "B", participants: []))
+    LetterRevealView(round: Round(number: 2, letter: "B", participants: []), gameID: UUID())
         .background(Theme.background)
 }
 
 #Preview("Letter reveal – reduce motion") {
-    LetterRevealView(round: Round(number: 2, letter: "M", participants: []))
+    LetterRevealView(round: Round(number: 2, letter: "M", participants: []), gameID: UUID())
         .background(Theme.background)
         .environment(\.reduceMotion, true)
 }

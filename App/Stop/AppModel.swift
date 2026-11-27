@@ -20,6 +20,10 @@ final class AppModel {
     private(set) var client: (any GameClient)?
     /// The game in progress is a practice game against bots on this phone (never saved or restored).
     private(set) var isPractice = false
+    /// "Ana left the app" and friends, for the game in progress.
+    private(set) var banners: BannerQueue?
+    /// Why the last game ended, when that needs explaining on Home (removed, wrong version, game closed).
+    private(set) var endNotice: EndReason?
 
     /// `-uiTesting`: clean state, no sounds, forced Reduce Motion.
     let isUITesting: Bool
@@ -34,12 +38,17 @@ final class AppModel {
     @ObservationIgnored private let clock: any Clock<Duration>
     @ObservationIgnored private let sessions: SessionFactories
     @ObservationIgnored private let launch: LaunchOptions
+    @ObservationIgnored private let backgroundTasks: BackgroundTasks
 
     @ObservationIgnored private var hostSession: HostSession?
     @ObservationIgnored private var remoteSession: (any RemoteGameSession)?
     @ObservationIgnored private var retained: [AnyObject] = []
     /// Stops the bots of a mock or practice game.
     @ObservationIgnored private var stopBots: (@MainActor () -> Void)?
+    @ObservationIgnored private var suspendBots: (@MainActor () -> Void)?
+    @ObservationIgnored private var resumeBots: (@MainActor () -> Void)?
+    /// The remote session was started to rejoin a game this phone was already in (after a relaunch).
+    @ObservationIgnored private var isRejoin = false
     @ObservationIgnored private var sessionWatch: Task<Void, Never>?
     /// Remote sessions saying goodbye to their host; kept alive until they end.
     @ObservationIgnored private var departing: [any RemoteGameSession] = []
@@ -47,11 +56,13 @@ final class AppModel {
     @ObservationIgnored private var wasBackgrounded = false
 
     init(store: any GameStore, factory: any TransportFactory, clock: any Clock<Duration> = ContinuousClock(),
-         launchArguments: [String] = ProcessInfo.processInfo.arguments, sessions: SessionFactories = .live) {
+         launchArguments: [String] = ProcessInfo.processInfo.arguments, sessions: SessionFactories = .live,
+         backgroundTasks: BackgroundTasks = .live) {
         self.store = store
         self.factory = factory
         self.clock = clock
         self.sessions = sessions
+        self.backgroundTasks = backgroundTasks
         launch = LaunchOptions(arguments: launchArguments)
         isUITesting = launch.uiTesting
     }
@@ -259,17 +270,39 @@ final class AppModel {
         }
     }
 
+    /// How long a suspended game keeps its background time: enough to say "going away" and save.
+    static let suspendGrace: Duration = .seconds(2)
+
+    /// Whether the screen stays awake: during a game, until the final standings.
+    var keepsScreenAwake: Bool {
+        route == .game && client?.state?.phase != .gameOver
+    }
+
+    /// The local network is off for this app, so the host can't be found (the UI points to Settings).
+    var isLocalNetworkDenied: Bool { remoteSession?.isLocalNetworkDenied ?? false }
+
+    func dismissEndNotice() { endNotice = nil }
+
     func scenePhaseChanged(_ phase: ScenePhase) {
         switch phase {
         case .background:
             wasBackgrounded = true
+            guard hostSession != nil || remoteSession != nil else { return }
+            // Suspending sends "going away" and saves; background time lets that finish.
+            let endBackgroundTime = backgroundTasks.begin("Suspend game")
             hostSession?.suspend()
+            suspendBots?()
             remoteSession?.suspend()
+            Task { [clock] in
+                try? await clock.sleep(for: Self.suspendGrace)
+                endBackgroundTime()
+            }
         case .active:
             // Going inactive and back (Control Center, a system alert) never suspended anything.
             guard wasBackgrounded else { return }
             wasBackgrounded = false
             hostSession?.resume()
+            resumeBots?()
             remoteSession?.resume()
         default:
             break
@@ -293,8 +326,12 @@ final class AppModel {
     private func start(_ game: MockGame) {
         retained = game.retained
         stopBots = game.stopBots
+        suspendBots = game.suspendBots
+        resumeBots = game.resumeBots
         hostSession = game.host
         client = game.host.localClient
+        // Bots never go away, so a practice game has no presence banners.
+        if !isPractice { showBanners(for: game.host.localClient) }
         route = .game
     }
 
@@ -302,6 +339,7 @@ final class AppModel {
         hostSession = host
         host.start()
         client = host.localClient
+        showBanners(for: host.localClient)
         route = .game
     }
 
@@ -309,10 +347,18 @@ final class AppModel {
         guard let profile else { return }
         let session = sessions.makeClient(profile, target, factory, store, clock)
         remoteSession = session
+        isRejoin = if case .rejoin = target { true } else { false }
         client = session
+        showBanners(for: session)
         route = destination
         session.start()
         watch(session)
+    }
+
+    private func showBanners(for client: any GameClient) {
+        let queue = BannerQueue(clock: clock)
+        queue.consume(client.presenceChanges) { [weak client] in client?.state?.displayNames ?? [:] }
+        banners = queue
     }
 
     /// While rejoining, moves to the game once state arrives. A session that ends returns to Home, except at
@@ -328,11 +374,12 @@ final class AppModel {
             for await change in changes {
                 guard let self, let change, self.remoteSession === session else { return }
                 if let reason = change.ended {
-                    // Task 17 explains versionMismatch / removed / gameClosed with an alert on Home.
                     let showsGameOver = reason == .gameOver && change.hasState && self.route == .game
                     if !showsGameOver {
+                        let notice = self.notice(for: reason, hadState: change.hasState)
                         session?.stop()
                         self.endSession()
+                        self.endNotice = notice
                     }
                     return
                 }
@@ -341,11 +388,27 @@ final class AppModel {
         }
     }
 
+    /// What Home's alert explains about a session that ended, if anything (a game over or leaving needs no
+    /// words). A game that turns this phone away after it had played in it (a rejoin, or a reconnect once the
+    /// game was on screen) no longer exists, so that reads "This game has ended", not "already started".
+    private func notice(for reason: EndReason, hadState: Bool) -> EndReason? {
+        switch reason {
+        case .removed, .versionMismatch: reason
+        case .gameClosed: isRejoin || hadState ? .gameOver : .gameClosed
+        case .gameOver, .leftGame: nil
+        }
+    }
+
     private func endSession() {
         sessionWatch?.cancel()
         sessionWatch = nil
+        banners?.stop()
+        banners = nil
         stopBots?()
         stopBots = nil
+        suspendBots = nil
+        resumeBots = nil
+        isRejoin = false
         hostSession = nil
         remoteSession = nil
         retained = []
@@ -387,7 +450,7 @@ struct LaunchOptions: Equatable {
         }
     }
 
-    private static func value(after flag: String, in arguments: [String]) -> String? {
+    static func value(after flag: String, in arguments: [String]) -> String? {
         guard let index = arguments.firstIndex(of: flag), arguments.indices.contains(index + 1) else { return nil }
         return arguments[index + 1]
     }

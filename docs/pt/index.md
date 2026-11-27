@@ -21,7 +21,7 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 **Em breve na App Store.** Para iPhone.
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
-  <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: as categorias do anfitrião e os jogadores que entraram" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
+  <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: as categorias de quem criou o jogo e os jogadores que entraram" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/02-letter.jpg" alt="A letra da rodada aparece" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/03-writing.jpg" alt="Escrevendo uma resposta por categoria" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/04-stop.jpg" alt="STOP! Todos os celulares travam ao mesmo tempo" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
@@ -32,7 +32,7 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 
 ## Como funciona
 
-1. **O anfitrião escolhe as categorias**: Nome, Animal, Fruta, País... ou as suas.
+1. **Quem cria o jogo escolhe as categorias**: Nome, Animal, Fruta, País... ou as suas.
 2. **Aparece uma letra**, e depois uma contagem 3-2-1.
 3. **Todo mundo escreve junto**, uma palavra por categoria começando com essa letra.
 4. **STOP!** Quando jogadores suficientes dão STOP, todos os celulares travam no mesmo instante.

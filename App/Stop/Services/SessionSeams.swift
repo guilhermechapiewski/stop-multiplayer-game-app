@@ -10,6 +10,8 @@ import StopSimulation
 
 /// A game client that talks to a host over a transport: `ClientSession`'s lifecycle on top of `GameClient`.
 @MainActor protocol RemoteGameSession: GameClient {
+    /// The browser was refused local network access (the UI points to Settings).
+    var isLocalNetworkDenied: Bool { get }
     func start()
     func suspend()
     func resume()
@@ -41,6 +43,9 @@ struct MockGame {
     let retained: [AnyObject]
     /// Stops the bots when the game is closed.
     var stopBots: @MainActor () -> Void = {}
+    /// Suspends and resumes the bots with the host (scene phase), so they don't drop and redial the host.
+    var suspendBots: @MainActor () -> Void = {}
+    var resumeBots: @MainActor () -> Void = {}
 }
 
 struct SessionFactories {
@@ -76,7 +81,7 @@ struct SessionFactories {
         launchMockGame: { profile, bots, settings, language, clock in
             let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
                                                language: language, botBehavior: mockGameBotBehavior, clock: clock)
-            return MockGame(host: game.host, retained: game.bots + [game.network]) { stop(game.bots) }
+            return MockGame(bots: game.bots, host: game.host, network: game.network)
         },
         launchPractice: { profile, bots, settings, language, speed, store, clock in
             // `MockGameLauncher.launch` has a precondition that the settings are valid (it traps otherwise). The
@@ -89,7 +94,7 @@ struct SessionFactories {
             let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
                                                language: language, botSpeed: speed, practice: true, store: store,
                                                clock: clock)
-            return MockGame(host: game.host, retained: game.bots + [game.network]) { stop(game.bots) }
+            return MockGame(bots: game.bots, host: game.host, network: game.network)
         })
 
     /// `-mockGame` bots (screenshots, UI tests, development): normal speed, and each waits for someone else's
@@ -98,6 +103,16 @@ struct SessionFactories {
         var behavior = BotPlayer.Behavior.practice(.normal)
         behavior.stopWhenOthersStopped = true
         return behavior
+    }
+}
+
+extension MockGame {
+    /// A host and its bots on their own network: stopping, suspending and resuming reach every bot.
+    @MainActor
+    init(bots: [BotPlayer], host: HostSession, network: AnyObject) {
+        self.init(host: host, retained: bots + [network]) { stop(bots) }
+        suspendBots = { for bot in bots { bot.client.suspend() } }
+        resumeBots = { for bot in bots { bot.client.resume() } }
     }
 }
 
