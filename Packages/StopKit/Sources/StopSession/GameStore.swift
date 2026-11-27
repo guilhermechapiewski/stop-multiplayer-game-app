@@ -57,5 +57,5 @@ public actor InMemoryGameStore: GameStore {
     public func saveActiveGame(_ r: ActiveGameRef?) { activeGame = r }
     public func loadDraft(gameID: UUID, round: Int) -> [String]? { drafts["\(gameID.uuidString)-\(round)"] }
     public func saveDraft(_ a: [String], gameID: UUID, round: Int) { drafts["\(gameID.uuidString)-\(round)"] = a }
-    public func clearDrafts(gameID: UUID) { drafts = drafts.filter { !$0.key.hasPrefix(gameID.uuidString) } }
+    public func clearDrafts(gameID: UUID) { drafts = drafts.filter { !$0.key.hasPrefix(gameID.uuidString + "-") } }
 }

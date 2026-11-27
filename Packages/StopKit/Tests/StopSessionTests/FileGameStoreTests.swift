@@ -50,4 +50,13 @@ struct FileGameStoreTests {
         #expect(await store.loadDraft(gameID: g1, round: 2) == nil)
         #expect(await store.loadDraft(gameID: g2, round: 2) == ["other"])
     }
+
+    @Test func corruptFileLoadsAsNil() async throws {
+        let dir = tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store = FileGameStore(directory: dir)
+        await store.saveHostGame(WireMessageTests.state)
+        try Data("{ not json".utf8).write(to: dir.appendingPathComponent("hostGame.json"))
+        #expect(await store.loadHostGame() == nil)
+    }
 }

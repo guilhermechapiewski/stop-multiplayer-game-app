@@ -25,6 +25,10 @@ public final class TestClock: Clock, @unchecked Sendable {
         var cancelled: Set<Int> = []
     }
 
+    /// Heuristic yield counts so woken tasks get to run; not a guarantee for deep async chains.
+    private static let yieldsPerSleeper = 10
+    private static let yieldsAfterAdvance = 3
+
     private let state = Mutex(State())
 
     public init() {}
@@ -74,9 +78,9 @@ public final class TestClock: Clock, @unchecked Sendable {
             }
             guard let next else { break }
             next.continuation.resume()
-            for _ in 0..<10 { await Task.yield() }
+            for _ in 0..<Self.yieldsPerSleeper { await Task.yield() }
         }
         state.withLock { if target > $0.now { $0.now = target } }
-        for _ in 0..<3 { await Task.yield() }
+        for _ in 0..<Self.yieldsAfterAdvance { await Task.yield() }
     }
 }

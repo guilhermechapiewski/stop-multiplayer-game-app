@@ -2,29 +2,56 @@ import StopTestSupport
 import Synchronization
 import Testing
 
+@MainActor
 struct TestClockTests {
+    /// Spins (yielding) until the clock has `n` sleepers; fails the test instead of hanging.
+    private func waitForSleepers(_ clock: TestClock, _ n: Int) async {
+        for _ in 0..<10_000 {
+            if clock.sleeperCount == n { return }
+            await Task.yield()
+        }
+        Issue.record("expected \(n) sleepers, have \(clock.sleeperCount)")
+    }
+
     @Test func testClockResumesSleepersInOrder() async {
         let clock = TestClock()
-        let order = Mutex<[Int]>([])
-        let t3 = Task { try? await clock.sleep(for: .seconds(3)); order.withLock { $0.append(3) } }
-        let t1 = Task { try? await clock.sleep(for: .seconds(1)); order.withLock { $0.append(1) } }
-        let t2 = Task { try? await clock.sleep(for: .seconds(2)); order.withLock { $0.append(2) } }
-        while !(await sleeperCount(clock, expecting: 3)) { await Task.yield() }
+        var order: [Int] = []
+        let t3 = Task { @MainActor in try? await clock.sleep(for: .seconds(3)); order.append(3) }
+        let t1 = Task { @MainActor in try? await clock.sleep(for: .seconds(1)); order.append(1) }
+        let t2 = Task { @MainActor in try? await clock.sleep(for: .seconds(2)); order.append(2) }
+        await waitForSleepers(clock, 3)
         await clock.advance(by: .milliseconds(500))
-        #expect(order.withLock { $0 }.isEmpty)
+        #expect(order.isEmpty)
         await clock.advance(by: .seconds(5))
-        #expect(order.withLock { $0 } == [1, 2, 3])
+        #expect(order == [1, 2, 3])
         _ = (await t1.value, await t2.value, await t3.value)
     }
 
     @Test func cancellationThrowsAndRemovesSleeper() async {
         let clock = TestClock()
         let t = Task { do { try await clock.sleep(for: .seconds(10)); return false } catch { return error is CancellationError } }
-        while !(await sleeperCount(clock, expecting: 1)) { await Task.yield() }
+        await waitForSleepers(clock, 1)
         t.cancel()
         #expect(await t.value)
-        #expect(await sleeperCount(clock, expecting: 0))
+        #expect(clock.sleeperCount == 0)
     }
 
-    private func sleeperCount(_ clock: TestClock, expecting n: Int) async -> Bool { clock.sleeperCount == n }
+    @Test func pastDeadlineReturnsImmediately() async throws {
+        let clock = TestClock()
+        await clock.advance(by: .seconds(5))
+        try await clock.sleep(until: TestClock.Instant(offset: .seconds(1)))
+        try await clock.sleep(for: .zero)
+        #expect(clock.sleeperCount == 0)
+    }
+
+    @Test func cancelledBeforeSleepThrows() async {
+        let clock = TestClock()
+        let t = Task { () -> Bool in
+            while !Task.isCancelled { await Task.yield() }
+            do { try await clock.sleep(for: .seconds(10)); return false } catch { return error is CancellationError }
+        }
+        t.cancel()
+        #expect(await t.value)
+        #expect(clock.sleeperCount == 0)
+    }
 }
