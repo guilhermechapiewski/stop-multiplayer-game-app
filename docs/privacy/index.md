@@ -30,7 +30,8 @@ To work, the app keeps a small amount of information in its private storage on y
   rejoin a game.
 - **Your custom categories**, so you can use them again in future games.
 - **A game in progress**, and the answers you're typing (drafts), so a game can continue if the app is closed
-  or you lose the connection. They're removed when the game ends.
+  or you lose the connection. If you're the host, the saved game includes the other players' names,
+  answers and scores. These are removed when the game ends. Practice with bots games aren't kept.
 - **Your settings**, such as sounds.
 
 Deleting the app removes all of it.

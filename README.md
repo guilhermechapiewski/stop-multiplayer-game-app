@@ -24,7 +24,7 @@ contribute improvements.
   0 blank). The app never judges answers.
 - Round results with running totals, and final standings with a celebration for the winner.
 - Survives normal phone life: locking the screen, a phone call, switching apps, even the app being closed.
-  Players rejoin automatically, and typed answers are never lost.
+  Players rejoin automatically, and the answers they've typed are kept.
 - Haptics, optional sounds, VoiceOver labels, Dynamic Type, Reduce Motion, dark mode.
 
 ## How to play
@@ -70,7 +70,7 @@ tools/test.sh app        # app unit and UI tests: xcodebuild test on an iPhone s
 `tools/test.sh` uses the `iPhone 17` simulator, or the first available iPhone if that isn't installed. The
 package tests are where most of the logic is tested and finish quickly; the app tests build the app and drive a
 whole game in the simulator with XCUITest, so they take most of the time. CI (`.github/workflows/ci.yml`) runs
-both on every push and pull request.
+both on pushes and pull requests to `main`.
 
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).
@@ -116,7 +116,7 @@ everyone. When an app goes to the background it says so right away. On return, o
 client looks for the same game ID again and reconnects (after 0.25 s, 0.5 s, 1 s, then every 2 s), sending its
 player ID and last snapshot version; the host replies with the current snapshot. The host saves the whole game
 on every change, so if the host app is closed and reopened it restores the game and advertises it again, and
-everyone rejoins. Clients save their in-progress answers per game and round, so nothing typed is lost.
+everyone rejoins. Clients save their in-progress answers per game and round, so the answers you've typed come back with you.
 
 ```
             Host iPhone                              Each player's iPhone

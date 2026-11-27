@@ -85,8 +85,9 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 ### Mismatched app versions
 
 - [ ] Install a build with a different protocol version on one phone (an older TestFlight build, or a local
-      build with the wire `protocolVersion` changed). Trying to join shows "Everyone needs the same app
-      version", and neither phone crashes or gets stuck.
+      build with the wire `protocolVersion` changed). On **Join a game**, the other phone's game appears
+      dimmed with "Update the app" and can't be joined. If a phone does connect (for example, rejoining a
+      saved game), it shows "Everyone needs the same app version". Neither phone crashes or gets stuck.
 
 ## Also check once per release
 

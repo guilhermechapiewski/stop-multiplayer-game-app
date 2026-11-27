@@ -60,20 +60,23 @@ Xcode writes that choice into `project.pbxproj`, which is public.
 App Store Connect → your app → **General** → **App Information**.
 
 1. **Subtitle**: from [Listing — English (U.S.)](#listing--english-us).
-2. **Category**: Primary **Games**, with subcategory **Word**. Secondary: **Games** → **Family**.
+2. **Category**: Primary **Games**, with subcategories **Word** and **Family**. Secondary:
+   **Entertainment** (optional).
 3. **Content Rights**: "No, it does not contain, show, or access third-party content." (The categories and
    the bots' word lists are written for the app.)
 4. **Age Ratings** → **Set Up Age Ratings**. Answer every question **No** or **None**:
    - In-App Controls, Capabilities (web access, user-generated content, messaging, advertising...): all
      **No**. Answers are typed for the game and shown only to the other phones in the same room; nothing is
-     published or sent through a service.
+     published or sent through a service. (Answering **No** to user-generated content on that basis is the
+     owner's call.)
    - Mature Themes, Medical, Sexuality or Nudity, Violence, Chance-Based Activities: all **None** / **No**.
    - The calculated rating should be **4+**. Don't choose **Made for Kids**: that's the Kids Category, which
      has extra rules and can't be undone.
    - **Save**.
 5. **Add the Portuguese localization**: at the top right of **Localizable Information**, the language menu
    (it shows **English (U.S.)**) → **Portuguese (Brazil)**. Enter its **Name** and **Subtitle** from
-   [Listing — Portuguese (Brazil)](#listing--portuguese-brazil), and the same Privacy Policy URL.
+   [Listing — Portuguese (Brazil)](#listing--portuguese-brazil), and the Portuguese privacy policy URL:
+   `https://guilhermechapiewski.github.io/stop-multiplayer-game-app/pt/privacidade/`.
 6. **Save** the page.
 
 ## Step 5. Pricing and Availability
@@ -203,8 +206,8 @@ running the TestFlight build you're submitting.
 
 1. Top right: **Add for Review** → **Submit for Review**.
 2. Review usually takes 1 to 3 days.
-3. If Apple rejects it, the message is under **App Review**. Paste it to me and I'll fix the
-   app or draft the reply.
+3. If Apple rejects it, the message is under **App Review**. Read it, fix the app or draft a
+   reply, and resubmit.
 
 ## Step 11. After approval
 
@@ -213,7 +216,10 @@ running the TestFlight build you're submitting.
    `docs/pt/index.md`, remove the `<!-- badge: ... -->` comment markers around the badge, replace `APPLE_ID`
    in its link with the app's Apple ID (on **App Information**, e.g. `https://apps.apple.com/app/id1234567890`),
    remove the "Coming soon to the App Store" / "Em breve na App Store" line, and update the README's first
-   paragraph with the App Store name. The link works once Apple releases the app.
+   paragraph with the App Store name. On the Portuguese page, use Apple's pt-BR badge ("Baixar na App
+   Store", from Apple's Marketing Resources) instead of `app-store-badge.svg`: add it as
+   `docs/images/app-store-badge-pt-br.svg` and point the pt page's `<img>` at it, with a
+   `https://apps.apple.com/br/app/id…` link. The links work once Apple releases the app.
 3. **Accessibility Nutrition Labels** (optional): **App Accessibility** → **Get Started**.
    Declare only what you checked on a device (VoiceOver, Larger Text, Dark Interface, Reduced Motion...).
 
@@ -236,11 +242,11 @@ The classic word game for iPhones in the same room. Everyone writes at once, STO
 
 **Description** (4000):
 ```
-{{APP_NAME}} is Stop, the classic word game (also known as Adedanha), for iPhones in the same room. Pick the categories, get a letter, and race to fill in a word for each one. The first to finish shouts STOP, and every phone locks at once. No internet, no accounts and no ads.
+{{APP_NAME}} is Stop, the classic word game (also known as Adedanha), for iPhones in the same room. Pick the categories, get a letter, and race to fill in a word for each one. The first to finish shouts STOP, and once enough players have stopped, every phone locks at once. No internet, no accounts and no ads.
 
 HOW TO PLAY
 • One player hosts a game and picks the categories: Name, Animal, Fruit, Country... or your own.
-• Everyone nearby taps Join and picks the game. No codes to type.
+• Everyone nearby taps Join a game and picks the game. No codes to type.
 • A letter appears, then a 3-2-1 countdown, and everyone writes at the same time.
 • Fill in every category and tap STOP. When enough players stop, every phone locks instantly.
 • Score together: everyone sees all the answers and gives their own 10 (unique), 5 (repeated) or 0. The app never judges; the table decides.
@@ -249,7 +255,7 @@ HOW TO PLAY
 
 MADE FOR GAME NIGHT
 • Works on the same Wi-Fi, or with just Wi-Fi turned on and no network at all. No internet needed.
-• Someone took a call or locked their phone? They rejoin by themselves, and nothing they typed is lost, even if the app was closed.
+• Someone took a call or locked their phone? They rejoin by themselves, and the answers they've typed come back with them, even if the app was closed.
 • The host decides how many stops end a round, and can let players give up on a hard letter.
 • All 26 letters, with no repeats until every letter has come up.
 • In English and Portuguese: each phone shows its own language in the same game.
@@ -264,7 +270,7 @@ FREE AND OPEN SOURCE
 
 **Keywords** (100):
 ```
-word game,party,family,categories,scattergories,stop,offline,friends,multiplayer,local,game night
+word game,party,family,categories,stop,offline,friends,multiplayer,local,game night,letters
 ```
 
 **Review Notes** (4000):
@@ -279,7 +285,7 @@ Attached. Recorded on [iPhone models] running iOS [version]. It starts with a sh
 
 3. HOW TO USE THE APP
 No login, setup or sample files are needed. On first launch, enter any display name.
-- Single device: tap Practice with bots, choose the number of bots, and tap Start.
+- Single device: tap Practice with bots, choose the number of bots, tap Start, then tap Start again in the lobby.
 - Multiplayer needs two or more iPhones on the same Wi-Fi network, or near each other with Wi-Fi turned on (they don't need to be joined to a network).
 - Host (iPhone A): tap Host a game, keep the default categories (or edit them), and wait in the lobby. Tap Start once the other player appears.
 - Joiner (iPhone B): tap Join a game and tap iPhone A's game in the list.
@@ -315,20 +321,20 @@ O clássico jogo de palavras para iPhones na mesma sala. Todos escrevem juntos, 
 
 **Description** (4000):
 ```
-{{APP_NAME}} é o Stop, o clássico jogo de palavras (também chamado de Adedanha), para iPhones na mesma sala. Escolham as categorias, recebam uma letra e corram para escrever uma palavra em cada uma. Quem terminar primeiro grita STOP, e todos os celulares travam na hora. Sem internet, sem contas e sem anúncios.
+{{APP_NAME}} é o Stop, o clássico jogo de palavras (também chamado de Adedanha), para iPhones na mesma sala. Escolham as categorias, recebam uma letra e corram para escrever uma palavra em cada uma. Quem terminar primeiro grita STOP, e quando jogadores suficientes dão STOP, todos os celulares travam na hora. Sem internet, sem contas e sem anúncios.
 
 COMO JOGAR
 • Um jogador cria a partida e escolhe as categorias: Nome, Animal, Fruta, País... ou as suas.
-• Quem está por perto toca em Entrar e escolhe a partida. Sem códigos para digitar.
+• Quem está por perto toca em Entrar em uma partida e escolhe a partida. Sem códigos para digitar.
 • Aparece uma letra, depois uma contagem 3-2-1, e todo mundo escreve ao mesmo tempo.
-• Preencha todas as categorias e toque em STOP. Quando jogadores suficientes param, todos os celulares travam na hora.
+• Preencha todas as categorias e toque em STOP. Quando jogadores suficientes dão STOP, todos os celulares travam na hora.
 • Pontuem juntos: todo mundo vê todas as respostas e dá a própria nota: 10 (única), 5 (repetida) ou 0. O app nunca julga; quem decide é a turma.
 • Vejam a classificação da rodada e o placar geral, e joguem quantas rodadas quiserem.
-• Ninguém por perto? Pratique com robôs: jogue sozinho contra 1 a 5 jogadores do computador.
+• Ninguém por perto? Treine com robôs: jogue sozinho contra 1 a 5 jogadores do computador.
 
 FEITO PARA REUNIR A TURMA
 • Funciona no mesmo Wi-Fi, ou só com o Wi-Fi ligado e sem rede nenhuma. Não precisa de internet.
-• Alguém atendeu uma ligação ou bloqueou o celular? A pessoa volta sozinha, e nada do que ela escreveu se perde, mesmo se o app foi fechado.
+• Alguém atendeu uma ligação ou bloqueou o celular? A pessoa volta sozinha, e as respostas que ela já tinha escrito voltam junto, mesmo se o app foi fechado.
 • O anfitrião decide quantos STOPs encerram a rodada, e pode deixar os jogadores desistirem de uma letra difícil.
 • Todas as 26 letras, sem repetir até que todas tenham saído.
 • Em português e inglês: cada celular mostra o próprio idioma na mesma partida.

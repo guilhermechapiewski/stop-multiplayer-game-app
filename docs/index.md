@@ -47,7 +47,7 @@ players. It's a good way to learn the game, and it works anywhere, even in Airpl
 
 Everyone just needs to be on the same Wi-Fi, or simply near each other with Wi-Fi turned on: no router and no
 internet needed. One phone hosts and the others join with a tap, with no codes or accounts. If someone takes a
-call, locks their phone or the app is closed, they rejoin by themselves and nothing they typed is lost.
+call, locks their phone or the app is closed, they rejoin by themselves, and the answers they've typed come back with them.
 
 The app is in English and Brazilian Portuguese, and each phone uses its own language in the same game.
 

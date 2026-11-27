@@ -5,7 +5,8 @@
 The listing text lives in one section per locale ("## Listing — English (U.S.)",
 "## Listing — Portuguese (Brazil)"). Within each section, a field's value is the first code
 block after the line containing its label. It also fails while the app name placeholder
-{{APP_NAME}} is still in a listing section.
+{{APP_NAME}} is still in a listing section, and warns about [...] placeholders left
+in the Review Notes.
 """
 import os
 import re
@@ -40,11 +41,10 @@ def section(text, locale):
 
 
 def field(body, label):
-    """The first code block after the label, with each line's indentation removed, or None."""
-    start = body.find(label)
-    if start < 0:
-        return None
-    block = re.search(r"```[^\n]*\n(.*?)\n\s*```", body[start:], re.S)
+    """The code block that directly follows the label's line (only blank lines may come between),
+    with each line's indentation removed; None if the label or its block is missing."""
+    pattern = re.escape(label) + r"[^\n]*\n(?:[ \t]*\n)*[ \t]*```[^\n]*\n(.*?)^[ \t]*```"
+    block = re.search(pattern, body, re.S | re.M)
     if not block:
         return None
     return "\n".join(line.strip() for line in block.group(1).split("\n")).strip()
@@ -54,13 +54,19 @@ def check(locale, label, limit, value):
     """Prints one result line; returns True when the field is within its limit."""
     name = label.split("**")[1]
     if value is None:
-        print(f"✗ {locale} · {name}: label or code block not found")
+        print(f"✗ {locale} · {name}: label not found, or no code block right after it")
+        return False
+    if not value:
+        print(f"✗ {locale} · {name}: empty")
         return False
     ok = len(value) <= limit
     print(f"{'✓' if ok else '✗'} {locale} · {name}: {len(value)}/{limit}")
     if name == "Keywords" and ", " in value:
         print(f"✗ {locale} · Keywords: no spaces after commas")
         ok = False
+    if name == "Review Notes":
+        for placeholder in re.findall(r"\[[^\]\n]+\]", value):
+            print(f"! {locale} · Review Notes: fill in {placeholder} before submitting (warning)")
     return ok
 
 
