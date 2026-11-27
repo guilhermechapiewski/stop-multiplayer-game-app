@@ -20,7 +20,7 @@ public enum EndReason: Equatable, Sendable { case gameOver, leftGame, removed, v
     var hostStatus: HostStatus { get }
     /// For banners.
     var presenceChanges: AsyncStream<PresenceChange> { get }
-    /// Most recent rejected intent (UI may show/clear).
+    /// Error of the most recent ack (nil on success).
     var lastError: GameError? { get }
     /// Answers frozen when the round locked (for the writing screen); nil otherwise.
     var frozenAnswers: [String]? { get }

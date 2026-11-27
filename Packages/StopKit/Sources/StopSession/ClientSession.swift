@@ -136,6 +136,7 @@ public final class ClientSession: GameClient {
         stopBrowsing()
         drafts.flush()
         closeConnection()
+        awaySince = nil
         if !isEnded { hostStatus = .connecting }
     }
 
@@ -183,8 +184,10 @@ public final class ClientSession: GameClient {
         let item = pending.remove(at: index)
         switch item.intent {
         case .stop, .giveUp:
-            // `.alreadyStopped` for my own stop: a resend the host already applied (a restart lost its intent log).
-            let error = error == .alreadyStopped ? nil : error
+            // A resend the host already applied (a restart lost its intent log): `.alreadyStopped`, or
+            // `.wrongPhase` once the round locked with my answers recorded.
+            let recorded = state?.currentRound?.answers[localPlayerID] != nil
+            let error = error == .alreadyStopped || (error == .wrongPhase && recorded) ? nil : error
             lastError = error
             if error == nil { drafts.stopAccepted() } else { drafts.stopRejected() }
         default:
@@ -297,6 +300,8 @@ public final class ClientSession: GameClient {
     /// recycle a connection that has gone silent (half-open) or never got a welcome.
     private func watch() {
         guard !isEnded else { return stopWatchdog() }
+        // A browser that failed before anything was found (e.g. a rejoin) is retried here.
+        if connection == nil, browser == nil { startBrowsing() }
         if isWelcomed {
             transmit(.heartbeat)
             let quiet = lastHeard.elapsed

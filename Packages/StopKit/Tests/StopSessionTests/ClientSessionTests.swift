@@ -508,6 +508,48 @@ struct ClientSessionTests {
         #expect(ana.hostStatus == .connecting)
     }
 
+    @Test func rejoinBrowserFailureIsRetried() async throws {
+        let h = try Harness()
+        let ana = ClientSession(profile: Profile(playerID: UUID(), name: "Ana", soundsEnabled: false),
+                                target: .rejoin(gameID: h.gameID), factory: FailingFirstBrowser(h.net),
+                                store: InMemoryGameStore(), clock: h.clock)
+        ana.start()
+        await waitUntil("first browser failed") { ana.isLocalNetworkDenied }
+        await stepUntil(h.clock, seconds: 3) { ana.hostStatus == .connected }
+        await waitUntil("connected") { ana.hostStatus == .connected }
+    }
+
+    @Test func stopRestartsTheMayBeGoneTimer() async throws {
+        let net = InMemoryNetwork(), clock = TestClock()
+        let ana = ClientSession(profile: Profile(playerID: UUID(), name: "Ana", soundsEnabled: false),
+                                target: .rejoin(gameID: UUID()), factory: net, store: InMemoryGameStore(),
+                                clock: clock)
+        ana.start()
+        await stepUntil(clock, seconds: 100) { false }
+        ana.stop()
+        ana.start()
+        await stepUntil(clock, seconds: 30) { false }
+        #expect(ana.hostStatus == .connecting)
+        ana.stop()
+    }
+
+    @Test func resentStopRejectedAfterLockWithMyAnswersCountsAsSuccess() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing }
+        try await h.disconnect(ana)
+        let answers = ["Ana", "Anta"]
+        ana.send(.stop(answers: answers))
+        // The host applied it (and locked) earlier, but its intent log was lost.
+        #expect(h.host.apply(.stop(answers: answers), from: ana.localPlayerID) == nil)
+        #expect(h.host.state.phase == .collecting)
+        await h.reconnect(ana)
+        await waitUntil("acked") { ana.pendingIntentCount == 0 }
+        #expect(ana.lastError == nil)
+        #expect(ana.frozenAnswers == answers)
+    }
+
     @Test func lockFreezesDraftAndSubmits() async throws {
         let h = try Harness()
         let ana = try await h.join("Ana")
