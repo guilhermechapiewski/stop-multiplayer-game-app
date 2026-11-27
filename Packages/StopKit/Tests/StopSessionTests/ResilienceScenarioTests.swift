@@ -38,7 +38,7 @@ private final class Scenario {
     var retiredHosts: [HostSession] = []
 
     init(bots behaviors: [BotPlayer.Behavior], stopsRequired: Int = 1, allowGiveUp: Bool = true,
-         rounds: Int = 1, latency: Duration = .zero) throws {
+         rounds: Int = 1, latency: Duration = .zero, categories: [String] = categories) throws {
         self.rounds = rounds
         net = InMemoryNetwork(clock: clock)
         net.setLatency(latency)
@@ -119,7 +119,9 @@ private final class Scenario {
     }
 
     /// The host's answers for `round` (what `playHost` types).
-    func hostAnswers(_ round: Round) -> [String] { categories.map { round.letter + $0.prefix(3) } }
+    func hostAnswers(_ round: Round) -> [String] {
+        host.state.settings.categories.map { round.letter + $0.prefix(3) }
+    }
 
     /// Bot `index`'s answers recorded by the host for round `round` (1-based) equal what it typed, all filled.
     func expectBotAnswersSurvived(_ index: Int, round: Int = 1) {
@@ -357,6 +359,35 @@ private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
         s.host.localClient.send(.giveUp(answers: ["", "", ""]))
         await s.run("bot stopped too") { s.host.state.phase != .writing }
         #expect(s.host.state.currentRound?.stops.map(\.playerID) == [s.hostID, s.id(0)])
+    }
+
+    @Test func finishersFillCustomCategoriesAndBotsScoreGuessesZero() async throws {
+        // "Dinosaur" has no bank answers: finishers still fill it (with a guess) and STOP; nobody claims points.
+        let fast = BotPlayer.Behavior(stopAfter: .seconds(2), giveUpAfter: nil, scoreDelay: .milliseconds(300),
+                                      speed: .fast)
+        let s = try Scenario(bots: [fast, fast, fast, fast], stopsRequired: 5, rounds: 2,
+                             categories: ["Animal", "Dinosaur", "Fruit"])
+        defer { s.tearDown() }
+        s.hostStops = true
+        var finisherRounds = 0
+        await s.start()
+        for number in 1...2 {
+            await s.run("round \(number) scoring") {
+                s.host.state.rounds.count == number && { if case .scoring = s.host.state.phase { true } else { false } }()
+            }
+            let round = s.host.state.rounds[number - 1]
+            for index in 0..<4 where round.stops.contains(where: { $0.playerID == s.id(index) && $0.kind == .stop }) {
+                finisherRounds += 1
+                #expect(s.bots[index].typed.count == 3)
+                #expect(!s.bots[index].typed.contains(where: AnswerText.isBlank), "\(s.bots[index].typed)")
+            }
+        }
+        await s.runToGameOver()
+        #expect(finisherRounds > 0)
+        for round in s.host.state.rounds {
+            for index in 0..<4 { #expect(round.scores[s.id(index)]?[1] == 0, "\(s.bots[index].name)") }
+        }
+        s.expectConsistentEverywhere()
     }
 
     @Test func latency500msStillConverges() async throws {

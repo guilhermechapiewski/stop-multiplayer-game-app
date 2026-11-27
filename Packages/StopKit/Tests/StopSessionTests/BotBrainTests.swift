@@ -74,17 +74,22 @@ struct BotBrainTests {
         #expect(abs(rate - expected) < 0.08, "\(speed) finish rate \(rate)")
     }
 
-    @Test func finishersFillEveryCategoryIncludingCustomOnes() {
+    @Test func guessesAreMarkedSoTheBotScoresThemZero() {
         var seeds = SeededRNG(seed: 3)
-        var finishers = 0
+        var finishers = 0, strugglers = 0
         for letter in Self.letters {
-            var brain = BotBrain(language: .ptBR, speed: .fast, seed: seeds.next())
-            let plan = brain.plan(categories: ["Dinossauro", "Animal", "Time de futebol"], letter: letter)
-            #expect(plan.answers.count == 3)
-            #expect(!plan.answers.contains(where: AnswerText.isBlank))
-            if plan.finishes { finishers += 1 }
+            var brain = BotBrain(language: .ptBR, speed: .normal, seed: seeds.next())
+            let categories = ["Dinossauro", "Animal", "Time de futebol"]
+            let plan = brain.plan(categories: categories, letter: letter)
+            let unknown = Set(categories.indices.filter {
+                BotAnswerBank.load(.ptBR).candidates(category: categories[$0], letter: letter).isEmpty
+            })
+            // Custom categories (and letters the bank lacks) are always guesses, and so is every late answer.
+            #expect(plan.guessed == unknown.union(plan.late), "\(letter)")
+            #expect(plan.guessed.isSuperset(of: [0, 2]))
+            if plan.finishes { finishers += 1 } else { strugglers += 1 }
         }
-        #expect(finishers > 10)
+        #expect(finishers > 0 && strugglers > 0)
     }
 
     @Test func strugglersLeaveOneOrTwoBlanksAndAlwaysCustomOnes() {

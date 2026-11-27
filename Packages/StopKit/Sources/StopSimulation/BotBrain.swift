@@ -30,6 +30,9 @@ public struct BotRoundPlan: Sendable, Equatable {
     /// Categories the bot can't think of in time: it leaves them blank and gives up if it may, else guesses
     /// them last. Empty when the bot finishes the round.
     public var late: [Int]
+    /// Categories answered with a guess rather than a known answer for the category (a bank word from another
+    /// category, or a late guess): an honest bot scores these 0.
+    public var guessed: Set<Int>
     public var finishes: Bool { late.isEmpty }
 }
 
@@ -56,18 +59,20 @@ public struct BotBrain: Sendable {
         let finishes = Double.random(in: 0..<1, using: &rng) < speed.finishProbability
         var answers: [String] = []
         var late: [Int] = []
+        var guessed: Set<Int> = []
         for (index, category) in categories.enumerated() {
             let candidates = bank.candidates(category: category, letter: letter)
             if !finishes, candidates.isEmpty || Double.random(in: 0..<1, using: &rng) < Self.blankProbability {
                 late.append(index)
             }
+            if candidates.isEmpty { guessed.insert(index) }
             let pool = candidates.isEmpty ? fallback : candidates
             answers.append(pool.randomElement(using: &rng) ?? letter)
         }
         if !finishes, late.isEmpty, !categories.isEmpty {
             late.append(Int.random(in: categories.indices, using: &rng))
         }
-        return BotRoundPlan(answers: answers, late: late)
+        return BotRoundPlan(answers: answers, late: late, guessed: guessed.union(late))
     }
 
     /// A random delay (millisecond resolution) within the speed's stop window.

@@ -52,7 +52,12 @@ import StopSession
     public private(set) var typed: [String] = []
     private var doneTyping = false
     private var hasStopped = false
+    /// Categories of `writingRound` the bot only guessed; it scores them 0.
+    private var guessed: Set<Int> = []
     private var scoringKey: (round: Int, category: Int)?
+    /// The self-score sent and not yet seen in a snapshot; not re-sent until a reconnect or `scoreResendAfter`.
+    private var scoreSent: (round: Int, category: Int)?
+    private static let scoreResendAfter: Duration = .seconds(5)
 
     public init(name: String, client: ClientSession, behavior: Behavior = .default, clock: any Clock<Duration>,
                 seed: UInt64 = .random(in: .min ... .max)) {
@@ -70,9 +75,12 @@ import StopSession
         guard observer == nil else { return }
         let client = client
         observer = Task { [weak self] in
+            var wasConnected = false
             for await (state, status) in Observations({ (client.state, client.hostStatus) }) {
                 guard let self else { return }
                 if case .ended = status { return self.cancel() }
+                if status == .connected, !wasConnected { self.reconnected() }
+                wasConnected = status == .connected
                 if let state { self.react(to: state) }
             }
         }
@@ -120,6 +128,7 @@ import StopSession
         let stopAt = behavior.stopAfter ?? brain.stopDelay()
         self.brain = brain
         let planned = roundPlan.answers
+        guessed = roundPlan.guessed
         let allowGiveUp = state.settings.allowGiveUp
         // A struggling bot leaves its late categories blank and gives up if it may; otherwise it guesses them
         // last and still STOPs.
@@ -184,11 +193,21 @@ import StopSession
 
     // MARK: Scoring
 
+    /// A score in flight may have been lost with the old connection: allow sending it again.
+    private func reconnected() {
+        guard scoreSent != nil else { return }
+        scoreSent = nil
+        scoring?.cancel()
+        scoring = nil
+    }
+
     /// Scores the bot's own answer for `category` after `scoreDelay`, unless someone already did. Called on
-    /// every snapshot: re-arms while its score is still missing (e.g. a score sent before a reconnect was lost).
+    /// every snapshot; once sent, it is sent again only if the score is still missing after a reconnect or
+    /// `scoreResendAfter`.
     private func scheduleScore(round: Int, category: Int, scored: Bool) {
         let same = scoringKey?.round == round && scoringKey?.category == category
         guard !scored, !same || scoring == nil else { return }
+        if let sent = scoreSent, sent.round == round, sent.category == category { return }
         scoringKey = (round, category)
         scoring?.cancel()
         scoring = Task { [weak self, clock, behavior] in
@@ -200,8 +219,17 @@ import StopSession
                   current.scores[self.me]?[category] == nil, let mine = current.answers[self.me]?[category]
             else { return }
             let others = current.answers.filter { $0.key != self.me }.compactMap { $0.value[safe: category] }
-            let points = BotBrain.selfScore(mine: mine, others: others)
+            let honest = round == self.writingRound && self.guessed.contains(category)
+            let points = honest ? 0 : BotBrain.selfScore(mine: mine, others: others)
             self.client.send(.setScore(round: round, category: category, points: points, player: self.me))
+            self.scoreSent = (round, category)
+            self.scoring = Task { [weak self, clock] in
+                do { try await clock.sleep(for: Self.scoreResendAfter) } catch { return }
+                guard !Task.isCancelled, let self else { return }
+                self.scoreSent = nil
+                self.scoring = nil
+                if let state = self.client.state { self.react(to: state) }
+            }
         }
     }
 }
