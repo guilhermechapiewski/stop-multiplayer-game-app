@@ -33,12 +33,14 @@ extension GameEngine {
     }
 
     /// Answers that arrive during scoring fill only the categories not yet scored: none the host has already
-    /// been through, even after going back to an earlier one.
+    /// completed, even after going back to an earlier one. The furthest category reached still counts as
+    /// unscored when the host left it unfinished, so the late answer can be scored there.
     static func applyLateAnswers(_ answers: [String], for player: PlayerID, state: inout GameState) {
-        guard case .scoring(let current, let completed) = state.phase else { return }
+        guard case .scoring(let current, _) = state.phase, let round = state.currentRound else { return }
         let index = state.rounds.count - 1
-        let furthest = state.rounds[index].furthestCategory ?? current
-        let first = furthest > current ? furthest + 1 : (completed ? current + 1 : current)
+        // Every category before the furthest one was completed to move past it.
+        let furthest = max(round.furthestCategory ?? current, current)
+        let first = isComplete(furthest, round, state) ? furthest + 1 : furthest
         guard var scores = state.rounds[index].scores[player] else { return }
         for category in first..<max(first, scores.count) { scores[category] = initialScore(answers[category]) }
         state.rounds[index].scores[player] = scores
@@ -108,16 +110,19 @@ extension GameEngine {
     /// True when every present or away participant has a score for `category`; then left/removed
     /// participants' missing scores become 0.
     static func settleCategory(_ category: Int, _ state: inout GameState) -> Bool {
-        guard let round = state.currentRound else { return false }
-        let complete = round.participants.allSatisfy { id in
-            state.player(id)?.presence.isActive != true || round.scores[id]?[category] != nil
-        }
-        guard complete else { return false }
+        guard let round = state.currentRound, isComplete(category, round, state) else { return false }
         let index = state.rounds.count - 1
         for id in round.participants where round.scores[id]?[category] == nil {
             state.rounds[index].scores[id]?[category] = 0
         }
         return true
+    }
+
+    /// True when every present or away participant has a score for `category`.
+    private static func isComplete(_ category: Int, _ round: Round, _ state: GameState) -> Bool {
+        round.participants.allSatisfy { id in
+            state.player(id)?.presence.isActive != true || round.scores[id]?[category] != nil
+        }
     }
 
     /// Missing answers count as blank.

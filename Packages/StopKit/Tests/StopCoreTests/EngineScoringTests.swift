@@ -376,7 +376,7 @@ private let threeAnswers = [["Ana", "Uva", "Rio"], ["Asno", "Abacate", "Roma"], 
     #expect(throws: GameError.cannotScoreForOthers) { try score(&s, ids[0], category: 0, points: 5, for: ids[1]) }
 }
 
-@Test func lateAnswersAfterGoingBackLeaveCategoriesAlreadyReached() throws {
+@Test func lateAnswersAfterGoingBackLeaveCompletedCategoriesOnly() throws {
     var (s, ids) = try writingGame(categories: ["Animal", "Fruta", "Lugar", "Cor"])
     #expect(GameEngine.setPresence(.away, for: ids[2], in: &s))
     try collect(&s, ids, [["Ana", "Uva", "Rio", "Azul"], ["Asno", "Abacate", "Roma", "Anil"], nil])
@@ -391,7 +391,25 @@ private let threeAnswers = [["Ana", "Uva", "Rio"], ["Asno", "Abacate", "Roma"], 
     #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
     #expect(GameEngine.setPresence(.present, for: ids[2], in: &s))
     try send(.submitAnswers(round: 1, answers: ["Arara", "Amora", "Acre", "Amarelo"]), ids[2], &s)
-    // Categories 0 to 2 were reached already; only the last one is still unscored.
+    // Categories 0 and 1 were completed already; category 2 was reached but left unfinished, so the late
+    // answer still gets scored there, like the last one.
+    #expect(s.currentRound?.scores[ids[2]] == [0, 0, nil, nil])
+}
+
+@Test func lateAnswersAfterGoingBackFromACompletedCategoryLeaveIt() throws {
+    var (s, ids) = try writingGame(categories: ["Animal", "Fruta", "Lugar", "Cor"])
+    #expect(GameEngine.setPresence(.away, for: ids[2], in: &s))
+    try collect(&s, ids, [["Ana", "Uva", "Rio", "Azul"], ["Asno", "Abacate", "Roma", "Anil"], nil])
+    for c in 0..<3 {
+        try score(&s, ids[0], category: c, points: 10)
+        try score(&s, ids[1], category: c, points: 10)
+        if c < 2 { try next(&s) }
+    }
+    #expect(s.phase == .scoring(categoryIndex: 2, completed: true))
+    try previous(&s)
+    #expect(GameEngine.setPresence(.present, for: ids[2], in: &s))
+    try send(.submitAnswers(round: 1, answers: ["Arara", "Amora", "Acre", "Amarelo"]), ids[2], &s)
+    // Category 2 was completed before the host went back, so its 0 stands.
     #expect(s.currentRound?.scores[ids[2]] == [0, 0, 0, nil])
 }
 
