@@ -41,6 +41,9 @@ import StopSession
     public let behavior: Behavior
     private let clock: any Clock<Duration>
     private let seed: UInt64
+    /// Position among the game's bots and the seed they share, so their answers spread (see `BotBrain`).
+    public let index: Int
+    private let sharedSeed: UInt64?
     private var brain: BotBrain?
 
     private var observer: Task<Void, Never>?
@@ -60,12 +63,14 @@ import StopSession
     private static let scoreResendAfter: Duration = .seconds(5)
 
     public init(name: String, client: ClientSession, behavior: Behavior = .default, clock: any Clock<Duration>,
-                seed: UInt64 = .random(in: .min ... .max)) {
+                seed: UInt64 = .random(in: .min ... .max), index: Int = 0, sharedSeed: UInt64? = nil) {
         self.name = name
         self.client = client
         self.behavior = behavior
         self.clock = clock
         self.seed = seed
+        self.index = index
+        self.sharedSeed = sharedSeed
     }
 
     private var me: PlayerID { client.localPlayerID }
@@ -123,8 +128,9 @@ import StopSession
         hasStopped = false
         let categories = state.settings.categories
         typed = Array(repeating: "", count: categories.count)
-        var brain = brain ?? BotBrain(language: state.language, speed: behavior.speed, seed: seed)
-        let roundPlan = brain.plan(categories: categories, letter: round.letter)
+        var brain = brain ?? BotBrain(language: state.language, speed: behavior.speed, seed: seed,
+                                         index: index, sharedSeed: sharedSeed)
+        let roundPlan = brain.plan(categories: categories, letter: round.letter, round: round.number)
         let stopAt = behavior.stopAfter ?? brain.stopDelay()
         self.brain = brain
         let planned = roundPlan.answers

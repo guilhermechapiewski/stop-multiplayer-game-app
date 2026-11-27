@@ -115,7 +115,8 @@
     ],
     "U": [
       "Ulisses",
-      "Úrsula"
+      "Úrsula",
+      "Uriel"
     ],
     "V": [
       "Valentina",
@@ -133,11 +134,13 @@
     ],
     "Y": [
       "Yasmin",
-      "Yuri"
+      "Yuri",
+      "Yago"
     ],
     "Z": [
       "Zeca",
-      "Zélia"
+      "Zélia",
+      "Zilda"
     ]
   },
   "Animal": {
@@ -161,7 +164,8 @@
     ],
     "D": [
       "Dromedário",
-      "Doninha"
+      "Doninha",
+      "Dourado"
     ],
     "E": [
       "Elefante",
@@ -183,7 +187,8 @@
     ],
     "H": [
       "Hipopótamo",
-      "Hiena"
+      "Hiena",
+      "Hamster"
     ],
     "I": [
       "Iguana",
@@ -225,7 +230,8 @@
       "Papagaio"
     ],
     "Q": [
-      "Quati"
+      "Quati",
+      "Quero-quero"
     ],
     "R": [
       "Rato",
@@ -247,7 +253,8 @@
     ],
     "U": [
       "Urso",
-      "Urubu"
+      "Urubu",
+      "Uirapuru"
     ],
     "V": [
       "Vaca",
@@ -258,7 +265,8 @@
     "X": [],
     "Y": [],
     "Z": [
-      "Zebra"
+      "Zebra",
+      "Zebu"
     ]
   },
   "Fruta": {
@@ -285,7 +293,9 @@
     "E": [],
     "F": [
       "Figo",
-      "Framboesa"
+      "Framboesa",
+      "Fruta-do-conde",
+      "Fruta-pão"
     ],
     "G": [
       "Goiaba",
@@ -302,7 +312,8 @@
       "Jambo"
     ],
     "K": [
-      "Kiwi"
+      "Kiwi",
+      "Kinkan"
     ],
     "L": [
       "Laranja",
@@ -330,10 +341,12 @@
     ],
     "Q": [],
     "R": [
-      "Romã"
+      "Romã",
+      "Rambutã"
     ],
     "S": [
-      "Siriguela"
+      "Siriguela",
+      "Sapoti"
     ],
     "T": [
       "Tangerina",
@@ -342,7 +355,8 @@
     ],
     "U": [
       "Uva",
-      "Umbu"
+      "Umbu",
+      "Uvaia"
     ],
     "V": [],
     "W": [],
@@ -377,7 +391,8 @@
       "Fúcsia"
     ],
     "G": [
-      "Grafite"
+      "Grafite",
+      "Grená"
     ],
     "H": [],
     "I": [
@@ -403,7 +418,8 @@
     ],
     "O": [
       "Ocre",
-      "Oliva"
+      "Oliva",
+      "Ouro"
     ],
     "P": [
       "Preto",
@@ -458,7 +474,8 @@
     ],
     "D": [
       "Dinamarca",
-      "Diadema"
+      "Diadema",
+      "Dubai"
     ],
     "E": [
       "Espanha",
@@ -479,7 +496,8 @@
     ],
     "H": [
       "Holanda",
-      "Haiti"
+      "Haiti",
+      "Honduras"
     ],
     "I": [
       "Itália",
@@ -511,7 +529,8 @@
     ],
     "O": [
       "Olinda",
-      "Osasco"
+      "Osasco",
+      "Ouro Preto"
     ],
     "P": [
       "Portugal",
@@ -582,7 +601,8 @@
     ],
     "D": [
       "Dado",
-      "Dedal"
+      "Dedal",
+      "Disco"
     ],
     "E": [
       "Escova",
@@ -605,11 +625,13 @@
     "H": [],
     "I": [
       "Ímã",
-      "Ioiô"
+      "Ioiô",
+      "Isqueiro"
     ],
     "J": [
       "Jarra",
-      "Janela"
+      "Janela",
+      "Jornal"
     ],
     "K": [],
     "L": [
@@ -625,7 +647,8 @@
       "Moeda"
     ],
     "N": [
-      "Novelo"
+      "Novelo",
+      "Navalha"
     ],
     "O": [
       "Óculos"
@@ -670,7 +693,8 @@
     "W": [],
     "X": [
       "Xícara",
-      "Xampu"
+      "Xampu",
+      "Xadrez"
     ],
     "Y": [],
     "Z": [
@@ -702,7 +726,8 @@
     ],
     "E": [
       "Elma Chips",
-      "Electrolux"
+      "Electrolux",
+      "Embraer"
     ],
     "F": [
       "Faber-Castell",
@@ -721,10 +746,12 @@
     ],
     "I": [
       "Itaú",
-      "Ipiranga"
+      "Ipiranga",
+      "Ipanema"
     ],
     "J": [
-      "Jeep"
+      "Jeep",
+      "Johnson & Johnson"
     ],
     "K": [
       "Kibon",
@@ -784,7 +811,8 @@
     ],
     "V": [
       "Volkswagen",
-      "Vivo"
+      "Vivo",
+      "Vans"
     ],
     "W": [
       "Wickbold"
@@ -794,7 +822,8 @@
     ],
     "Y": [
       "Yakult",
-      "YouTube"
+      "YouTube",
+      "Yamaha"
     ],
     "Z": [
       "Zara"
@@ -845,7 +874,8 @@
       "Historiador"
     ],
     "I": [
-      "Intérprete"
+      "Intérprete",
+      "Instrutor"
     ],
     "J": [
       "Jornalista",
@@ -864,7 +894,9 @@
       "Músico"
     ],
     "N": [
-      "Nutricionista"
+      "Nutricionista",
+      "Nadador",
+      "Neurologista"
     ],
     "O": [
       "Oftalmologista",
@@ -882,7 +914,8 @@
     ],
     "R": [
       "Recepcionista",
-      "Repórter"
+      "Repórter",
+      "Radialista"
     ],
     "S": [
       "Sapateiro",
@@ -993,7 +1026,8 @@
     ],
     "Q": [
       "Quindim",
-      "Queijo"
+      "Queijo",
+      "Quiche"
     ],
     "R": [
       "Risoto",
@@ -1014,13 +1048,16 @@
     "U": [],
     "V": [
       "Vatapá",
-      "Virado à paulista"
+      "Virado à paulista",
+      "Vaca atolada"
     ],
     "W": [
       "Waffle"
     ],
     "X": [
-      "X-salada"
+      "X-salada",
+      "X-tudo",
+      "X-burguer"
     ],
     "Y": [
       "Yakisoba"
@@ -1059,11 +1096,13 @@
       "Friends"
     ],
     "G": [
-      "Gato de Botas"
+      "Gato de Botas",
+      "Gravity Falls"
     ],
     "H": [
       "Harry Potter",
-      "Hércules"
+      "Hércules",
+      "Homem-Aranha"
     ],
     "I": [
       "Irmão Urso"
@@ -1122,7 +1161,8 @@
     ],
     "V": [
       "Valente",
-      "Viva"
+      "Viva",
+      "Velozes e Furiosos"
     ],
     "W": [
       "WALL-E",
@@ -1170,7 +1210,8 @@
     ],
     "G": [
       "Garganta",
-      "Gengiva"
+      "Gengiva",
+      "Glúteo"
     ],
     "H": [],
     "I": [

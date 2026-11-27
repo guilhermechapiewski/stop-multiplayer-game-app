@@ -98,7 +98,8 @@
     ],
     "Q": [
       "Quinn",
-      "Quentin"
+      "Quentin",
+      "Quincy"
     ],
     "R": [
       "Ryan",
@@ -120,7 +121,8 @@
     ],
     "U": [
       "Uma",
-      "Ursula"
+      "Ursula",
+      "Ulysses"
     ],
     "V": [
       "Victoria",
@@ -133,11 +135,15 @@
       "Wyatt"
     ],
     "X": [
-      "Xavier"
+      "Xavier",
+      "Xander",
+      "Ximena"
     ],
     "Y": [
       "Yara",
-      "Yvonne"
+      "Yvonne",
+      "Yolanda",
+      "Yasmin"
     ],
     "Z": [
       "Zoe",
@@ -196,7 +202,9 @@
     ],
     "I": [
       "Iguana",
-      "Impala"
+      "Impala",
+      "Ibis",
+      "Ibex"
     ],
     "J": [
       "Jaguar",
@@ -238,7 +246,8 @@
       "Pig"
     ],
     "Q": [
-      "Quail"
+      "Quail",
+      "Quokka"
     ],
     "R": [
       "Rabbit",
@@ -260,7 +269,9 @@
     ],
     "U": [],
     "V": [
-      "Vulture"
+      "Vulture",
+      "Viper",
+      "Vole"
     ],
     "W": [
       "Whale",
@@ -295,7 +306,8 @@
     ],
     "D": [
       "Date",
-      "Dragon fruit"
+      "Dragon fruit",
+      "Durian"
     ],
     "E": [
       "Elderberry"
@@ -309,7 +321,8 @@
       "Guava"
     ],
     "H": [
-      "Honeydew melon"
+      "Honeydew melon",
+      "Huckleberry"
     ],
     "I": [],
     "J": [
@@ -317,7 +330,8 @@
     ],
     "K": [
       "Kiwi",
-      "Kumquat"
+      "Kumquat",
+      "Key lime"
     ],
     "L": [
       "Lemon",
@@ -330,7 +344,8 @@
       "Mandarin"
     ],
     "N": [
-      "Nectarine"
+      "Nectarine",
+      "Navel orange"
     ],
     "O": [
       "Orange",
@@ -351,11 +366,13 @@
     ],
     "S": [
       "Strawberry",
-      "Star fruit"
+      "Star fruit",
+      "Satsuma"
     ],
     "T": [
       "Tangerine",
-      "Tomato"
+      "Tomato",
+      "Tamarind"
     ],
     "U": [],
     "V": [],
@@ -371,7 +388,9 @@
   "Color": {
     "A": [
       "Aqua",
-      "Amber"
+      "Amber",
+      "Azure",
+      "Apricot"
     ],
     "B": [
       "Blue",
@@ -401,14 +420,16 @@
       "Gold"
     ],
     "H": [
-      "Hot pink"
+      "Hot pink",
+      "Hazel"
     ],
     "I": [
       "Indigo",
       "Ivory"
     ],
     "J": [
-      "Jade"
+      "Jade",
+      "Jet black"
     ],
     "K": [
       "Khaki"
@@ -493,7 +514,8 @@
     ],
     "E": [
       "El Paso",
-      "Edinburgh"
+      "Edinburgh",
+      "Eugene"
     ],
     "F": [
       "Fresno",
@@ -502,7 +524,8 @@
     ],
     "G": [
       "Glasgow",
-      "Geneva"
+      "Geneva",
+      "Guadalajara"
     ],
     "H": [
       "Houston",
@@ -511,15 +534,19 @@
     ],
     "I": [
       "Indianapolis",
-      "Istanbul"
+      "Istanbul",
+      "Irvine"
     ],
     "J": [
       "Jacksonville",
-      "Jerusalem"
+      "Jerusalem",
+      "Jakarta",
+      "Johannesburg"
     ],
     "K": [
       "Kansas City",
-      "Kyoto"
+      "Kyoto",
+      "Knoxville"
     ],
     "L": [
       "Los Angeles",
@@ -551,7 +578,8 @@
       "Portland"
     ],
     "Q": [
-      "Quebec City"
+      "Quebec City",
+      "Quito"
     ],
     "R": [
       "Rome",
@@ -579,11 +607,14 @@
     ],
     "W": [
       "Washington",
-      "Wichita"
+      "Wichita",
+      "Warsaw",
+      "Wellington"
     ],
     "X": [],
     "Y": [
-      "York"
+      "York",
+      "Yokohama"
     ],
     "Z": [
       "Zurich"
@@ -614,7 +645,8 @@
     ],
     "E": [
       "Eraser",
-      "Envelope"
+      "Envelope",
+      "Easel"
     ],
     "F": [
       "Fan",
@@ -636,7 +668,8 @@
     ],
     "J": [
       "Jar",
-      "Jacket"
+      "Jacket",
+      "Jump rope"
     ],
     "K": [
       "Key",
@@ -690,11 +723,13 @@
       "Tape"
     ],
     "U": [
-      "Umbrella"
+      "Umbrella",
+      "Ukulele"
     ],
     "V": [
       "Vase",
-      "Violin"
+      "Violin",
+      "Vacuum cleaner"
     ],
     "W": [
       "Wallet",
@@ -705,7 +740,8 @@
       "Xylophone"
     ],
     "Y": [
-      "Yo-yo"
+      "Yo-yo",
+      "Yardstick"
     ],
     "Z": [
       "Zipper"
@@ -735,7 +771,8 @@
     ],
     "E": [
       "eBay",
-      "Energizer"
+      "Energizer",
+      "Epson"
     ],
     "F": [
       "Ford",
@@ -755,11 +792,13 @@
     ],
     "I": [
       "IKEA",
-      "Intel"
+      "Intel",
+      "Instagram"
     ],
     "J": [
       "Jeep",
-      "Jell-O"
+      "Jell-O",
+      "Jaguar"
     ],
     "K": [
       "Kellogg's",
@@ -786,7 +825,8 @@
     ],
     "O": [
       "Oreo",
-      "Old Navy"
+      "Old Navy",
+      "Omega"
     ],
     "P": [
       "Pepsi",
@@ -799,7 +839,8 @@
     ],
     "R": [
       "Reebok",
-      "Ray-Ban"
+      "Ray-Ban",
+      "Rolex"
     ],
     "S": [
       "Samsung",
@@ -815,7 +856,8 @@
     ],
     "U": [
       "Under Armour",
-      "UPS"
+      "UPS",
+      "Uber"
     ],
     "V": [
       "Vans",
@@ -824,7 +866,8 @@
     ],
     "W": [
       "Walmart",
-      "Wendy's"
+      "Wendy's",
+      "Whirlpool"
     ],
     "X": [
       "Xbox",
@@ -832,10 +875,12 @@
     ],
     "Y": [
       "YouTube",
-      "Yamaha"
+      "Yamaha",
+      "Yahoo"
     ],
     "Z": [
-      "Zara"
+      "Zara",
+      "Zoom"
     ]
   },
   "Job": {
@@ -910,7 +955,8 @@
     ],
     "N": [
       "Nurse",
-      "Nanny"
+      "Nanny",
+      "News anchor"
     ],
     "O": [
       "Optometrist",
@@ -940,11 +986,13 @@
       "Taxi driver"
     ],
     "U": [
-      "Umpire"
+      "Umpire",
+      "Usher"
     ],
     "V": [
       "Veterinarian",
-      "Violinist"
+      "Violinist",
+      "Valet"
     ],
     "W": [
       "Waiter",
@@ -956,7 +1004,8 @@
       "Yoga teacher"
     ],
     "Z": [
-      "Zookeeper"
+      "Zookeeper",
+      "Zoologist"
     ]
   },
   "Food": {
@@ -979,11 +1028,13 @@
     ],
     "D": [
       "Donut",
-      "Dumpling"
+      "Dumpling",
+      "Dim sum"
     ],
     "E": [
       "Eggs",
-      "Enchilada"
+      "Enchilada",
+      "Egg roll"
     ],
     "F": [
       "French fries",
@@ -1005,7 +1056,8 @@
     ],
     "J": [
       "Jelly",
-      "Jam"
+      "Jam",
+      "Jambalaya"
     ],
     "K": [
       "Ketchup",
@@ -1066,11 +1118,13 @@
       "Veggie burger"
     ],
     "W": [
-      "Waffles"
+      "Waffles",
+      "Wonton soup"
     ],
     "X": [],
     "Y": [
-      "Yogurt"
+      "Yogurt",
+      "Yorkshire pudding"
     ],
     "Z": [
       "Zucchini"
@@ -1094,11 +1148,13 @@
     ],
     "D": [
       "Dumbo",
-      "Despicable Me"
+      "Despicable Me",
+      "Dora the Explorer"
     ],
     "E": [
       "Encanto",
-      "E.T."
+      "E.T.",
+      "Elf"
     ],
     "F": [
       "Frozen",
@@ -1107,7 +1163,8 @@
     ],
     "G": [
       "Ghostbusters",
-      "Grease"
+      "Grease",
+      "Godzilla"
     ],
     "H": [
       "Home Alone",
@@ -1116,7 +1173,8 @@
     ],
     "I": [
       "Inside Out",
-      "Ice Age"
+      "Ice Age",
+      "Iron Man"
     ],
     "J": [
       "Jumanji",
@@ -1124,11 +1182,13 @@
       "Jurassic Park"
     ],
     "K": [
-      "Kung Fu Panda"
+      "Kung Fu Panda",
+      "King Kong"
     ],
     "L": [
       "Lilo & Stitch",
-      "Luca"
+      "Luca",
+      "Lassie"
     ],
     "M": [
       "Moana",
@@ -1140,7 +1200,8 @@
       "Night at the Museum"
     ],
     "O": [
-      "Onward"
+      "Onward",
+      "Over the Hedge"
     ],
     "P": [
       "Pinocchio",
@@ -1150,7 +1211,8 @@
     "Q": [],
     "R": [
       "Ratatouille",
-      "Rocky"
+      "Rocky",
+      "Rio"
     ],
     "S": [
       "Shrek",
@@ -1182,7 +1244,8 @@
   "Body part": {
     "A": [
       "Arm",
-      "Ankle"
+      "Ankle",
+      "Armpit"
     ],
     "B": [
       "Back",
@@ -1245,7 +1308,8 @@
     ],
     "O": [],
     "P": [
-      "Palm"
+      "Palm",
+      "Pinky"
     ],
     "Q": [],
     "R": [
@@ -1278,7 +1342,8 @@
   "Things in a kitchen": {
     "A": [
       "Apron",
-      "Apple"
+      "Apple",
+      "Aluminum foil"
     ],
     "B": [
       "Blender",
@@ -1293,7 +1358,8 @@
     ],
     "D": [
       "Dishwasher",
-      "Dish towel"
+      "Dish towel",
+      "Dish soap"
     ],
     "E": [
       "Eggs",
@@ -1306,10 +1372,12 @@
     ],
     "G": [
       "Grater",
-      "Glass"
+      "Glass",
+      "Garlic press"
     ],
     "H": [
-      "Honey"
+      "Honey",
+      "Hand mixer"
     ],
     "I": [
       "Ice cube tray"

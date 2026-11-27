@@ -139,6 +139,43 @@ struct BotBrainTests {
         #expect(a.stopDelay() == b.stopDelay())
     }
 
+    /// Three bots of one game (shared seed, indices 0–2) answer a category with ≥3 candidates differently.
+    @Test(arguments: languages)
+    func botsOfOneGameSpreadTheirAnswers(_ language: GameLanguage) {
+        let categories = DefaultCategories.list(for: language)
+        let bank = BotAnswerBank.load(language)
+        var seeds = SeededRNG(seed: 23)
+        var checked = 0
+        for round in 1...3 {
+            for letter in Self.letters {
+                let shared = seeds.next()
+                let plans = (0..<3).map { index in
+                    var brain = BotBrain(language: language, speed: .normal, seed: seeds.next(), index: index,
+                                         sharedSeed: shared)
+                    return brain.plan(categories: categories, letter: letter, round: round)
+                }
+                for (c, category) in categories.enumerated()
+                where bank.candidates(category: category, letter: letter).count >= 3 {
+                    let answers = plans.map { $0.answers[c] }
+                    #expect(Set(answers).count == 3, "\(category) \(letter): \(answers)")
+                    checked += 1
+                }
+            }
+        }
+        #expect(checked > 100)
+    }
+
+    @Test func spreadIsDeterministicAndVariesByRound() {
+        let categories = DefaultCategories.list(for: .ptBR)
+        func plan(_ index: Int, round: Int) -> BotRoundPlan {
+            var brain = BotBrain(language: .ptBR, speed: .normal, seed: 11, index: index, sharedSeed: 99)
+            return brain.plan(categories: categories, letter: "M", round: round)
+        }
+        #expect(plan(1, round: 1) == plan(1, round: 1))
+        #expect(plan(1, round: 1).answers != plan(0, round: 1).answers)
+        #expect((2...6).contains { plan(0, round: $0).answers != plan(0, round: 1).answers })
+    }
+
     @Test func selfScoreUniqueDuplicateBlank() {
         #expect(BotBrain.selfScore(mine: "Uva", others: ["uva "]) == 5)
         #expect(BotBrain.selfScore(mine: "Ávila", others: ["avila"]) == 5)

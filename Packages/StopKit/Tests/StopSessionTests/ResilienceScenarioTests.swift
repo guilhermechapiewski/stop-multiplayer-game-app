@@ -53,7 +53,7 @@ private final class Scenario {
             let client = ClientSession(profile: profile, target: .rejoin(gameID: state.gameID), factory: net,
                                        store: InMemoryGameStore(), clock: clock)
             let bot = BotPlayer(name: profile.name, client: client, behavior: behavior, clock: clock,
-                                seed: UInt64(index + 1))
+                                seed: UInt64(index + 1), index: index, sharedSeed: 7)
             clients.append(client)
             bots.append(bot)
         }
@@ -414,6 +414,7 @@ private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
             host.state.players.count == 3 && bots.allSatisfy { $0.client.hostStatus == .connected }
         }
         #expect(Set(host.state.players.map(\.name)) == ["Gui", "Ana", "Bia"])
+        #expect(bots.map(\.index) == [0, 1])
         host.localClient.send(.startGame)
         await waitUntil("bots see the round") { bots.allSatisfy { $0.client.state?.rounds.count == 1 } }
         #expect(await store.loadHostGame() == nil)

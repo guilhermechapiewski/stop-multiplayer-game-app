@@ -26,11 +26,13 @@ import StopSession
                                clock: clock)
         host.start()
         let behavior = botBehavior ?? .practice(botSpeed)
-        let bots = botNames.map { name in
+        let sharedSeed = UInt64.random(in: .min ... .max)
+        let bots = botNames.enumerated().map { index, name in
             let profile = Profile(playerID: UUID(), name: name, soundsEnabled: false)
             let client = ClientSession(profile: profile, target: .rejoin(gameID: state.gameID), factory: network,
                                        store: InMemoryGameStore(), clock: clock)
-            let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock)
+            let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock, index: index,
+                                sharedSeed: sharedSeed)
             bot.run()
             client.start()
             return bot
