@@ -686,7 +686,9 @@ final class FakeRemoteSession: RemoteGameSession {
 
     init(playerID: PlayerID) { localPlayerID = playerID }
 
-    func send(_ intent: Intent) {}
+    private(set) var sent: [Intent] = []
+
+    func send(_ intent: Intent) { sent.append(intent) }
     func saveDraft(_ answers: [String]) {}
     func draft() async -> [String]? { nil }
     func leave() { leftGame = true }

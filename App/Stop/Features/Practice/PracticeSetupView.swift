@@ -74,7 +74,7 @@ struct PracticeSetupView: View {
             Text("Opponents")
         } footer: {
             if practice.hasCustomCategories {
-                Text("Bots only know the built-in categories, so they leave yours blank.")
+                Text("Bots don’t know your own categories — they guess there and score 0.")
             } else {
                 Text("A solo game on this phone. No network needed.")
             }
@@ -89,14 +89,17 @@ struct PracticeSetupView: View {
                 }
             }
             .pickerStyle(.segmented)
+            .labelsHidden()
             .listRowBackground(Color.clear)
             .listRowInsets(EdgeInsets())
+            .accessibilityLabel(Text("Bot speed"))
             .accessibilityIdentifier("botSpeedPicker")
         } header: {
             Text("Bot speed")
         } footer: {
             Text(practice.speed.summary)
                 .contentTransition(.opacity)
+                .animation(reduceMotion ? nil : .smooth(duration: 0.2), value: practice.speed)
         }
     }
 

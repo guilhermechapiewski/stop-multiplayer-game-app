@@ -530,13 +530,13 @@
         }
       }
     },
-    "Bots only know the built-in categories, so they leave yours blank." : {
-      "comment" : "Footer on practice setup when a custom category is selected.",
+    "Bots don’t know your own categories — they guess there and score 0." : {
+      "comment" : "Footer on practice setup when a custom category is selected. Bots guess in those and honestly score 0.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Os robôs só conhecem as categorias prontas, então deixam as suas em branco."
+            "value" : "Os robôs não conhecem as suas categorias: eles chutam uma resposta e marcam 0."
           }
         }
       }
@@ -1751,6 +1751,17 @@
         }
       }
     },
+    "Starts the first round against your bots." : {
+      "comment" : "VoiceOver hint for the Start game button in a practice game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começa a primeira rodada contra seus robôs."
+          }
+        }
+      }
+    },
     "Starts the first round for everyone." : {
       "comment" : "VoiceOver hint for Start game.",
       "localizations" : {
@@ -2246,6 +2257,17 @@
         }
       }
     },
+    "Your bots are on their way…" : {
+      "comment" : "Lobby subtitle in a practice game while the bots are still joining.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus robôs estão chegando…"
+          }
+        }
+      }
+    },
     "Your bots are ready. Start when you are." : {
       "comment" : "Lobby subtitle in a practice game (solo against bots).",
       "localizations" : {
@@ -2329,7 +2351,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Você vê a classificação final."
+            "value" : "Você vai ver a classificação final."
           }
         }
       }

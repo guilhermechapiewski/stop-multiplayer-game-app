@@ -61,7 +61,7 @@ struct LobbyView: View {
 
     private var subtitle: Text {
         if isPractice {
-            Text("Your bots are ready. Start when you are.")
+            canStart ? Text("Your bots are ready. Start when you are.") : Text("Your bots are on their way…")
         } else if client.isHost {
             Text("Friends nearby can join now from “Join a game”.")
         } else {
@@ -76,7 +76,9 @@ struct LobbyView: View {
             FlowLayout(spacing: Theme.Spacing.s) {
                 ForEach(players, id: \.id) { player in
                     PlayerChip(name: names[player.id] ?? player.name, presence: player.presence,
-                               isHost: player.id == state.hostID, isYou: player.id == client.localPlayerID,
+                               // In practice there is nobody to host for: no crown.
+                               isHost: !isPractice && player.id == state.hostID,
+                               isYou: player.id == client.localPlayerID,
                                isBot: isPractice && player.id != client.localPlayerID)
                         .transition(.scale(scale: 0.8).combined(with: .opacity))
                 }
@@ -154,6 +156,16 @@ struct LobbyView: View {
 
     // MARK: Start
 
+    private var startHint: Text {
+        if !canStart {
+            Text("Waiting for players…")
+        } else if isPractice {
+            Text("Starts the first round against your bots.")
+        } else {
+            Text("Starts the first round for everyone.")
+        }
+    }
+
     @ViewBuilder private var bottomBar: some View {
         BottomActionBar {
             if client.isHost {
@@ -162,8 +174,7 @@ struct LobbyView: View {
                 }
                 .buttonStyle(.primary)
                 .disabled(!canStart)
-                .accessibilityHint(canStart ? Text("Starts the first round for everyone.")
-                                            : Text("Waiting for players…"))
+                .accessibilityHint(startHint)
                 .accessibilityIdentifier("startGameButton")
                 if !canStart {
                     Text("Waiting for players…")

@@ -196,8 +196,9 @@ final class AppModel {
         guard let game = sessions.launchPractice(profile, botNames, settings, gameLanguage, speed, store, clock) else {
             return
         }
-        start(game)
+        // Before the route changes, so the game screen never renders as a hosted game.
         isPractice = true
+        start(game)
     }
 
     func join(_ game: DiscoveredGame) {

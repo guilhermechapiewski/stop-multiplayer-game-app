@@ -34,8 +34,7 @@ struct GameMenu: View {
     private var names: [PlayerID: String] { state?.displayNames ?? [:] }
     private var isWriting: Bool { state?.phase == .writing }
     private var isOver: Bool { state?.phase == .gameOver }
-    /// Ending a practice that has rounds shows its final standings; otherwise it just closes.
-    private var endingPracticeShowsStandings: Bool { !isOver && state?.phase != .lobby }
+    private var endingPracticeShowsStandings: Bool { Self.endingPracticeShowsStandings(phase: state?.phase) }
     /// The host leaving before game over ends the game on every phone.
     private var endsGameForEveryone: Bool { client.isHost && !isOver }
     /// Players the host may remove: everyone else still in the game.
@@ -57,6 +56,7 @@ struct GameMenu: View {
         .accessibilityIdentifier("gameMenu")
         .alert(alertTitle, isPresented: isConfirming, presenting: confirmation) { pending in
             Button(confirmButtonTitle(pending), role: .destructive) { perform(pending) }
+                .accessibilityIdentifier("confirmMenuActionButton")
             Button("Cancel", role: .cancel) {}
         } message: { pending in
             Text(message(pending))
@@ -153,9 +153,27 @@ struct GameMenu: View {
         switch pending {
         case .leave: onLeave()
         case .endGame: client.send(.endGame)
-        case .endPractice: if endingPracticeShowsStandings { client.send(.endGame) } else { onLeave() }
+        case .endPractice: Self.endPractice(client: client, onLeave: onLeave)
         case .forceEndRound: client.send(.forceEndRound)
         case .remove(let id): client.send(.removePlayer(id))
+        }
+    }
+
+    // MARK: Practice
+
+    /// Ending a practice once rounds are under way shows its final standings; in the lobby, at game over or
+    /// before any state it just closes.
+    static func endingPracticeShowsStandings(phase: Phase?) -> Bool {
+        guard let phase else { return false }
+        return phase != .lobby && phase != .gameOver
+    }
+
+    /// "End practice": the host's end game (to the final standings), or straight Home when there are none.
+    static func endPractice(client: any GameClient, onLeave: () -> Void) {
+        if endingPracticeShowsStandings(phase: client.state?.phase) {
+            client.send(.endGame)
+        } else {
+            onLeave()
         }
     }
 }

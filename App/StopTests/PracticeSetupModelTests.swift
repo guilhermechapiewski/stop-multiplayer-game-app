@@ -45,6 +45,16 @@ struct PracticeSetupModelTests {
         #expect(model.botNames == Array(names.prefix(2)))
     }
 
+    @Test func botNamesAreRecognized() {
+        for name in PracticeSetupModel.botNames(for: .en) + PracticeSetupModel.botNames(for: .ptBR) {
+            #expect(PracticeSetupModel.isBotName(name))
+            #expect(PracticeSetupModel.isBotName(name + " 2"))
+        }
+        #expect(!PracticeSetupModel.isBotName("Gui"))
+        #expect(!PracticeSetupModel.isBotName("Roberto"))
+        #expect(!PracticeSetupModel.isBotName("Robo"))
+    }
+
     @Test func fewerBotsLowerTheStopsRequired() {
         let model = makeModel()
         model.botCount = 5
@@ -60,7 +70,7 @@ struct PracticeSetupModelTests {
         #expect(!model.canStart)
     }
 
-    @Test func customCategoriesAreFlaggedAsLeftBlankByBots() async {
+    @Test func customCategoriesAreFlaggedForTheBotsNote() async {
         let model = makeModel()
         await model.setup.load()
         #expect(!model.hasCustomCategories)

@@ -38,10 +38,15 @@ final class PracticeSetupModel {
 
     var canStart: Bool { setup.canCreate }
 
-    /// Bots only know the built-in categories: they leave custom ones blank.
+    /// Bots only know the built-in categories: in custom ones they guess and honestly score themselves 0.
     var hasCustomCategories: Bool { setup.selected.contains(where: setup.isCustom) }
 
     func settings() -> GameSettings { setup.settings() }
+
+    /// Whether a display name (possibly with a duplicate suffix, "Robo Ana 2") is a practice bot's.
+    nonisolated static func isBotName(_ name: String) -> Bool {
+        name.hasPrefix("Robo ") || name.hasPrefix("Robô ")
+    }
 
     /// Bot names for each language, always in this order (a game with two bots gets the first two).
     static func botNames(for language: GameLanguage) -> [String] {
