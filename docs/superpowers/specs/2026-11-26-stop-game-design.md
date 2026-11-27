@@ -59,7 +59,7 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 ### 5.2b Practice with bots (owner decision, 2026-11-26)
 - Home has a third action, **Practice with bots**: a solo game on one phone against 1–5 computer players. It lets App Review exercise every screen with a single device, and lets people learn the game.
 - It uses the same setup screen (categories, stops required, allow giving up) plus the number of bots and their speed (Relaxed / Normal / Fast). It runs the real host and client code over an in-memory connection, with no network or Bonjour, so it never shows the Local Network prompt.
-- Bots answer from bundled per-language word lists for the built-in categories. They sometimes leave an answer blank (always for custom categories), stop at plausible times, and score themselves honestly (10 if no one else gave the same answer ignoring case and accents, 5 if someone did, 0 if blank).
+- Bots answer from bundled per-language word lists for the built-in categories. They sometimes leave an answer blank; for custom categories they guess a word and honestly score it 0, stop at plausible times, and score themselves honestly (10 if no one else gave the same answer ignoring case and accents, 5 if someone did, 0 if blank).
 - Practice games aren't restored after the app is killed.
 
 ### 5.3 Game setup (host)
