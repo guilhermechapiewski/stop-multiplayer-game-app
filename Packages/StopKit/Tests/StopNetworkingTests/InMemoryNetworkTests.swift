@@ -232,3 +232,22 @@ private func eventually(within timeout: Duration = .seconds(1), _ condition: () 
     }
     #expect(await eventually { weakNet == nil })
 }
+
+@Test(.timeLimit(.minutes(1))) func severStopsDeliveryWithoutWaitingOutLatency() async throws {
+    weak var weakNet: InMemoryNetwork?
+    do {
+        let net = InMemoryNetwork()
+        weakNet = net
+        let (client, server, _) = try await connectedPair(on: net)
+        var serverEvents = server.events.makeAsyncIterator()
+        #expect(await serverEvents.next() == .ready)
+        net.setLatency(.seconds(30))
+        client.send(Data("in flight".utf8))
+        // Let the delivery task pick the message up and start waiting for its deadline.
+        try await Task.sleep(for: .milliseconds(50))
+        net.severClient(server.id)
+        #expect(await serverEvents.next() == .closed)
+    }
+    // The delivery task stops at once instead of sleeping out the 30 s deadline (holding the network).
+    #expect(await eventually { weakNet == nil })
+}

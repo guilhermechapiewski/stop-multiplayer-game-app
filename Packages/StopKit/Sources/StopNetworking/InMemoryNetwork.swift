@@ -78,12 +78,12 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
     // MARK: Connection operations
 
     fileprivate func start(_ linkID: UUID, _ side: Side) {
-        let inbox: AsyncStream<Delivery>? = state.withLock { state in
-            guard var link = state.links[linkID], var end = link[side], !end.started, !end.closed else { return nil }
+        state.withLock { state in
+            guard var link = state.links[linkID], var end = link[side], !end.started, !end.closed else { return }
             if side == .client {
                 guard let listener = state.listeners[link.listenerID], state.isVisible(link.listenerID) else {
                     state.abort(linkID)
-                    return nil
+                    return
                 }
                 let (serverEvents, serverEnd) = End.make()
                 link.server = serverEnd
@@ -92,21 +92,26 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
             }
             end.started = true
             end.events.yield(.ready)
-            let inbox = end.inboxStream
-            end.inboxStream = nil
+            if let inbox = end.inboxStream {
+                end.inboxStream = nil
+                end.delivery = deliveryTask(inbox, linkID, side)
+            }
             link[side] = end
             state.links[linkID] = link
-            return inbox
         }
-        guard let inbox else { return }
+    }
+
+    /// Drains an end's inbox in order, each message at its deadline. `End.finish()` cancels it, so an aborted
+    /// end stops at once rather than sleeping out the remaining deadlines.
+    private func deliveryTask(_ inbox: AsyncStream<Delivery>, _ linkID: UUID, _ side: Side) -> Task<Void, Never> {
         // Weak: an end nobody closes must not keep the network alive. When the network goes away its state
         // (and so the inbox continuation) is released, which finishes the inbox and ends this task.
         Task { [weak self] in
             for await delivery in inbox {
-                guard let self else { return }
                 if delivery.deadline > .now {
                     try? await Task.sleep(until: delivery.deadline, clock: .continuous)
                 }
+                guard !Task.isCancelled, let self else { return }
                 deliver(delivery.event, linkID, side)
             }
         }
@@ -225,6 +230,7 @@ fileprivate struct End {
     let inbox: AsyncStream<Delivery>.Continuation
     /// Handed to the delivery task on `start()`.
     var inboxStream: AsyncStream<Delivery>?
+    var delivery: Task<Void, Never>?
     var started = false
     /// `.closed` has been emitted.
     var closed = false
@@ -242,6 +248,7 @@ fileprivate struct End {
         events.yield(.closed)
         events.finish()
         inbox.finish()
+        delivery?.cancel()
     }
 }
 
