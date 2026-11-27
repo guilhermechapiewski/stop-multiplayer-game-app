@@ -179,7 +179,7 @@ running the TestFlight build you're submitting.
    - Phone B: **Join a game** → tap phone A's game (allow Local Network if asked: show the prompt).
    - Phone A: **Start**. Both phones show the letter and the 3-2-1 countdown.
    - Both: write an answer in every category; tap **STOP** on both (or on one, if one stop is required).
-   - Both: score each category (each phone shows everyone's points); phone A taps **Next category** after
+   - Both: score each category (each answer shows on both phones once it's scored); phone A taps **Next category** after
      each one, then **See results**.
    - Lock phone B for a few seconds: phone A shows the "left the app" banner. Unlock phone B: it rejoins and
      phone A shows that it's back.
@@ -236,7 +236,7 @@ HOW TO PLAY
 • Everyone nearby taps Join a game and picks the game. No codes to type.
 • A letter appears, then a 3-2-1 countdown, and everyone writes at the same time.
 • Fill in every category and tap STOP. When enough players stop, every phone locks instantly.
-• Score together: everyone sees all the answers and gives their own 10 (unique), 5 (repeated) or 0, with everyone's points on every phone. When all have scored, the host moves on to the next category, and can go back to fix a score. The app never judges; the table decides.
+• Score together: each player reads their answer out loud and gives it 10 (unique), 5 (repeated) or 0, and it shows with its points on every phone. Prefer quiet? Silent mode shows every answer at once. When all have scored, the host moves on to the next category, and can go back to fix a score. The app never judges; the table decides.
 • See the round ranking and running totals, and play as many rounds as you like.
 
 MADE FOR GAME NIGHT
@@ -275,7 +275,7 @@ No login, setup or sample files are needed. On first launch, enter any display n
 2) iPhone B: tap Join a game and tap iPhone A's game in the list. It appears in iPhone A's lobby.
 3) iPhone A: tap Start. Both phones show the letter, then a 3-2-1 countdown.
 4) Both: type a word starting with that letter in every field, then tap STOP (by default one STOP ends the round). Every phone locks at once.
-5) Scoring, one category at a time: both phones show everyone's answers and points. Each player taps 10, 5 or 0 for their own answer. When both have scored, iPhone A taps Next category (See results after the last one). To correct a score, iPhone A can tap Previous category, or Back to scoring on the round results.
+5) Scoring, one category at a time: each player taps 10, 5 or 0 for their own answer. By default (read aloud) the other player's answer stays hidden until they score it, then shows with its points on both phones; with Silent mode on (in the rules, before starting) all answers show at once. When both have scored, iPhone A taps Next category (See results after the last one). To correct a score, iPhone A can tap Previous category, or Back to scoring on the round results.
 6) Round results: iPhone A taps Next round to play again, or End game to show the final standings on both phones.
 The first time you host or join, iOS asks for Local Network permission: tap Allow on both phones. The app uses it only to find and connect to the other iPhones in the game (Bonjour on the local network). If it's denied, the app explains how to turn it on in Settings.
 
@@ -315,7 +315,7 @@ COMO JOGAR
 • Quem está por perto toca em Entrar em uma partida e escolhe a partida. Sem códigos para digitar.
 • Aparece uma letra, depois uma contagem 3-2-1, e todo mundo escreve ao mesmo tempo.
 • Preencha todas as categorias e toque em STOP. Quando jogadores suficientes dão STOP, todos os celulares travam na hora.
-• Pontuem juntos: todo mundo vê todas as respostas e dá a própria nota: 10 (única), 5 (repetida) ou 0, com os pontos de todos em todos os celulares. Quando todo mundo pontuou, quem criou o jogo passa para a próxima categoria, e pode voltar para corrigir uma nota. O app nunca julga; quem decide é a turma.
+• Pontuem juntos: cada pessoa lê a sua resposta em voz alta e dá a nota: 10 (única), 5 (repetida) ou 0, e ela aparece com os pontos em todos os celulares. Preferem sem falar? O modo silencioso mostra todas as respostas de uma vez. Quando todo mundo pontuou, quem criou o jogo passa para a próxima categoria, e pode voltar para corrigir uma nota. O app nunca julga; quem decide é a turma.
 • Vejam a classificação da rodada e o placar geral, e joguem quantas rodadas quiserem.
 
 FEITO PARA REUNIR A TURMA

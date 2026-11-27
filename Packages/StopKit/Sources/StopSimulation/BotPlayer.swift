@@ -14,6 +14,9 @@ import StopSession
         public var giveUpAfter: Duration?
         /// Thinking time before each self-score.
         public var scoreDelay: Duration
+        /// Extra thinking time per position among the bots (the second bot waits this much longer than the
+        /// first, and so on), so they score one after another; zero by default.
+        public var scoreStagger: Duration = .zero
         public var speed: BotSpeed
         /// When done typing, waits until someone else has stopped before stopping.
         public var stopWhenOthersStopped: Bool
@@ -45,6 +48,12 @@ import StopSession
     public let index: Int
     private let sharedSeed: UInt64?
     private var brain: BotBrain?
+    /// The current round with every answer in it, for the self-score's duplicate check only (never shown). In
+    /// read-aloud scoring the bot's own snapshot hides other answers until they're scored, as it does for a
+    /// person; a person then learns them by hearing them read out, and a bot, which can't listen, reads them
+    /// from the host it runs beside (`MockGameLauncher` passes the host's round). Without it, the bot checks the
+    /// answers its snapshot shows.
+    private let fullRound: (@MainActor () -> Round?)?
 
     private var observer: Task<Void, Never>?
     private var writing: Task<Void, Never>?
@@ -63,7 +72,9 @@ import StopSession
     private static let scoreResendAfter: Duration = .seconds(5)
 
     public init(name: String, client: ClientSession, behavior: Behavior = .default, clock: any Clock<Duration>,
-                seed: UInt64 = .random(in: .min ... .max), index: Int = 0, sharedSeed: UInt64? = nil) {
+                seed: UInt64 = .random(in: .min ... .max), index: Int = 0, sharedSeed: UInt64? = nil,
+                fullRound: (@MainActor () -> Round?)? = nil) {
+        self.fullRound = fullRound
         self.name = name
         self.client = client
         self.behavior = behavior
@@ -218,15 +229,17 @@ import StopSession
         if let sent = scoreSent, sent.round == round, sent.category == category { return }
         scoringKey = (round, category)
         scoring?.cancel()
-        scoring = Task { [weak self, clock, behavior] in
-            do { try await clock.sleep(for: behavior.scoreDelay) } catch { return }
+        let delay = behavior.scoreDelay + behavior.scoreStagger * index
+        scoring = Task { [weak self, clock] in
+            do { try await clock.sleep(for: delay) } catch { return }
             guard !Task.isCancelled, let self else { return }
             self.scoring = nil
             guard let state = self.client.state, let current = state.currentRound,
                   current.number == round, state.phase == .scoring(categoryIndex: category, completed: false),
                   current.scores[self.me]?[category] == nil, let mine = current.answers[self.me]?[category]
             else { return }
-            let others = current.answers.filter { $0.key != self.me }.compactMap { $0.value[safe: category] }
+            let full = self.fullRound?().flatMap { $0.number == round ? $0 : nil } ?? current
+            let others = full.answers.filter { $0.key != self.me }.compactMap { $0.value[safe: category] }
             let honest = round == self.writingRound && self.guessed.contains(category)
             let points = honest ? 0 : BotBrain.selfScore(mine: mine, others: others)
             self.client.send(.setScore(round: round, category: category, points: points, player: self.me))

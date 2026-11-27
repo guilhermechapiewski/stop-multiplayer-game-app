@@ -68,6 +68,14 @@ struct HostSetupModelTests {
         #expect(model.selected == ["Fruit", "City"])
     }
 
+    @Test func silentModeStartsOffAndReachesTheSettings() async {
+        let model = await makeModel()
+        #expect(!model.silentScoring)
+        #expect(!model.settings().silentScoring)
+        model.silentScoring = true
+        #expect(model.settings().silentScoring)
+    }
+
     @Test func choicesMadeBeforeLoadingAreKept() async {
         await store.saveLastCategories(["Fruit"])
         let model = HostSetupModel(store: store, language: .en)

@@ -81,7 +81,12 @@ struct RoundResultsView: View {
             Divider()
             Toggle("Allow giving up", isOn: giveUpBinding)
                 .accessibilityIdentifier("resultsAllowGiveUpToggle")
+            Divider()
+            SilentModeToggle(isOn: silentBinding, identifier: "resultsSilentModeToggle")
             Text(RulesText.footer(stopsRequired: stopsRequired, allowGiveUp: state.settings.allowGiveUp))
+                .font(Theme.Typography.caption)
+                .foregroundStyle(.secondary)
+            Text(RulesText.scoring(silent: state.settings.silentScoring))
                 .font(Theme.Typography.caption)
                 .foregroundStyle(.secondary)
         }
@@ -93,13 +98,22 @@ struct RoundResultsView: View {
 
     private var stopsBinding: Binding<Int> {
         Binding(get: { stopsRequired }, set: { stops in
-            client.send(.updateRoundSettings(stopsRequired: stops, allowGiveUp: state.settings.allowGiveUp))
+            client.send(.updateRoundSettings(stopsRequired: stops, allowGiveUp: state.settings.allowGiveUp,
+                                             silentScoring: state.settings.silentScoring))
         })
     }
 
     private var giveUpBinding: Binding<Bool> {
         Binding(get: { state.settings.allowGiveUp }, set: { allow in
-            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired, allowGiveUp: allow))
+            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired, allowGiveUp: allow,
+                                             silentScoring: state.settings.silentScoring))
+        })
+    }
+
+    private var silentBinding: Binding<Bool> {
+        Binding(get: { state.settings.silentScoring }, set: { silent in
+            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired,
+                                             allowGiveUp: state.settings.allowGiveUp, silentScoring: silent))
         })
     }
 

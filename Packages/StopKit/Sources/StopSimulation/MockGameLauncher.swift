@@ -36,8 +36,10 @@ import StopSession
             let client = ClientSession(profile: profile, target: .rejoin(gameID: state.gameID), factory: network,
                                        store: InMemoryGameStore(), clock: clock)
             let botSeed = seed.map { $0 &+ UInt64(index + 1) } ?? .random(in: .min ... .max)
+            // The bots run beside the host, so they read its round for their duplicate check (see `fullRound`).
             let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock, seed: botSeed,
-                                index: index, sharedSeed: sharedSeed)
+                                index: index, sharedSeed: sharedSeed,
+                                fullRound: { [weak host] in host?.state.currentRound })
             bot.run()
             if seed == nil { client.start() }
             return bot

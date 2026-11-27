@@ -18,8 +18,8 @@ contribute improvements.
   countdown.
 - STOP locks every phone at the same instant. The host chooses how many stops end a round, and can allow
   giving up on a hard letter.
-- Score together: everyone sees all the answers and everyone's points, and each player scores their own
-  (10 unique, 5 repeated, 0 blank). Picks can be changed until the host moves on to the next category, and the
+- Score together, out loud: each player reads their answer and scores it (10 unique, 5 repeated, 0 blank), and
+  it shows with its points on every phone as it's scored. Silent mode shows every answer at once instead. Picks can be changed until the host moves on to the next category, and the
   host can go back to fix a score until the next round starts. The app never judges answers.
 - Round results with running totals, and final standings with a celebration for the winner.
 - Survives normal phone life: locking the screen, a phone call, switching apps, even the app being closed.
@@ -33,8 +33,9 @@ contribute improvements.
 3. The host taps **Start**. A letter appears, then a 3-2-1 countdown.
 4. Everyone fills in one word per category starting with that letter.
 5. When you've filled every category, tap **STOP**. Once enough players have stopped, every phone locks.
-6. Go through the categories together: each player gives their own answer 10 (nobody else wrote it),
-   5 (someone else wrote the same) or 0 (blank or wrong). Everyone sees everyone's points; once all have
+6. Go through the categories together: each player reads their answer out loud and gives it 10 (nobody else
+   wrote it), 5 (someone else wrote the same) or 0 (blank or wrong). Each answer shows on every phone with its
+   points once it's scored (with **Silent mode** on in the rules, all answers show right away). Once all have
    scored, the host taps **Next category** (**See results** after the last one). To fix a score, the host taps
    **Previous category** (or **Back to scoring** on the round results).
 7. See the round ranking and totals. The host starts the next round or ends the game.
@@ -128,7 +129,8 @@ For example: `tools/run-sim.sh "iPhone 17" build/shot.png -mockGame -playerName 
 talks to the engine in-process through the same interface as everyone else. Clients send intents (join, stop,
 give up, answers, scores), each with an ID so retries are safe. The host validates and applies them, then sends
 every client a full snapshot of the game with an increasing version number; clients ignore older snapshots.
-Other players' answers are left out of snapshots until scoring starts. Typing never touches the network or the
+Other players' answers are left out of snapshots until scoring starts, and in read-aloud scoring each answer
+stays out until its player has scored it. Typing never touches the network or the
 shared game model: answers stay in the field's local state and are saved on the device in the background.
 
 **Reconnection.** Both sides send a heartbeat every second; a player silent for 3 seconds is shown as away to

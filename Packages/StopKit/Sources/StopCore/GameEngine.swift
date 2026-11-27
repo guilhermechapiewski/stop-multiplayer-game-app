@@ -48,9 +48,9 @@ public enum GameEngine {
             return try removePlayer(id, sender: sender, state: &state)
         case .updateSettings(let settings):
             return try updateSettings(settings, sender: sender, state: &state)
-        case .updateRoundSettings(let stopsRequired, let allowGiveUp):
+        case .updateRoundSettings(let stopsRequired, let allowGiveUp, let silentScoring):
             return try updateRoundSettings(stopsRequired: stopsRequired, allowGiveUp: allowGiveUp,
-                                           sender: sender, state: &state)
+                                           silentScoring: silentScoring, sender: sender, state: &state)
         case .startGame:
             return try startGame(sender: sender, state: &state, using: &rng)
         case .stop(let answers):

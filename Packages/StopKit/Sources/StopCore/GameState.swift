@@ -60,8 +60,28 @@ extension GameState {
     /// The snapshot `viewer` may see: before scoring, the current round keeps the viewer's own answers; everyone
     /// else's entry stays (so screens can show who has sent answers) but is emptied to `[]`, revealing nothing
     /// about what, or how much, they wrote.
+    ///
+    /// During scoring in read-aloud mode (`settings.silentScoring` off), another player's answer for a category
+    /// is withheld, sent as "", while their score for it is nil; once scored (by them, or by the host for an
+    /// away or left player) it's included. A nil score always means a non-blank answer (blank ones start at 0),
+    /// so a "" with a nil score reads as "hidden", never as "blank". Only the current round can have nil scores.
+    /// The viewer's own entry is always intact, and the host also sees the answers of players who are away or
+    /// gone, since it may score for them. The results and game over show everything.
     public func redacted(for viewer: PlayerID) -> GameState {
         switch phase {
+        case .scoring where !settings.silentScoring:
+            guard let round = currentRound else { return self }
+            var copy = self
+            let index = rounds.count - 1
+            let scoresForOthers = viewer == hostID
+            for (id, answers) in round.answers where id != viewer {
+                if scoresForOthers, player(id)?.presence != .present { continue }
+                let scores = round.scores[id] ?? []
+                copy.rounds[index].answers[id] = answers.enumerated().map { category, answer in
+                    scores.indices.contains(category) && scores[category] != nil ? answer : ""
+                }
+            }
+            return copy
         case .revealing, .countdown, .writing, .collecting:
             guard !rounds.isEmpty else { return self }
             var copy = self

@@ -224,7 +224,7 @@ struct ClientSessionTests {
         await waitUntil("active game ref") {
             await store.loadActiveGame() == ActiveGameRef(gameID: h.gameID, role: .client, hostName: "Gui")
         }
-        h.host.localClient.send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: false))
+        h.host.localClient.send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: false, silentScoring: false))
         await waitUntil("settings mirrored") { ana.state?.settings.stopsRequired == 2 }
         #expect(ana.state == h.host.state.redacted(for: ana.localPlayerID))
     }
@@ -566,6 +566,32 @@ struct ClientSessionTests {
         await waitUntil("acked") { ana.pendingIntentCount == 0 }
         #expect(ana.lastError == nil)
         #expect(ana.frozenAnswers == answers)
+    }
+
+    @Test func readAloudRevealsEachAnswerOnEveryPhoneOnceScored() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        let bia = try await h.join("Bia")
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing && bia.state?.phase == .writing }
+        ana.saveDraft(["Ana", "Anta"])
+        bia.saveDraft(["Bia", "Boi"])
+        h.host.localClient.send(.stop(answers: ["Gui", "Gato"]))
+        await waitUntil("scoring") {
+            ana.state?.phase == .scoring(categoryIndex: 0, completed: false)
+                && bia.state?.phase == .scoring(categoryIndex: 0, completed: false)
+                && h.host.state.currentRound?.answers.count == 3
+        }
+        // Nobody has scored: each phone sees only its own answers.
+        #expect(ana.state?.currentRound?.answers == [h.hostID: ["", ""], ana.localPlayerID: ["Ana", "Anta"],
+                                                     bia.localPlayerID: ["", ""]])
+        #expect(bia.state?.currentRound?.answers[ana.localPlayerID] == ["", ""])
+        // Ana scores her first answer: it shows on every phone, her second one still doesn't.
+        ana.send(.setScore(round: 1, category: 0, points: 10, player: ana.localPlayerID))
+        await waitUntil("revealed to Bia") { bia.state?.currentRound?.answers[ana.localPlayerID] == ["Ana", ""] }
+        #expect(h.host.localClient.state?.currentRound?.answers[ana.localPlayerID] == ["Ana", ""])
+        #expect(bia.state?.currentRound?.scores[ana.localPlayerID]?[0] == 10)
+        #expect(ana.state?.currentRound?.answers[bia.localPlayerID] == ["", ""])
     }
 
     @Test func lockFreezesDraftAndSubmits() async throws {

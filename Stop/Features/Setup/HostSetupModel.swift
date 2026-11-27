@@ -20,6 +20,8 @@ final class HostSetupModel {
         didSet { if stopsRequired < 1 { stopsRequired = 1 } }
     }
     var allowGiveUp = false
+    /// Off: read-aloud scoring (answers show as each player scores their own). On: every answer shows at once.
+    var silentScoring = false
 
     @ObservationIgnored private let store: any GameStore
     @ObservationIgnored private let defaults: [String]
@@ -115,7 +117,8 @@ final class HostSetupModel {
     }
 
     func settings() -> GameSettings {
-        GameSettings(categories: selected, stopsRequired: stopsRequired, allowGiveUp: allowGiveUp)
+        GameSettings(categories: selected, stopsRequired: stopsRequired, allowGiveUp: allowGiveUp,
+                     silentScoring: silentScoring)
     }
 
     private func rebuildAvailable() { available = defaults + custom }

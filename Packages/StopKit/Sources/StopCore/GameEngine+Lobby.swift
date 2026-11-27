@@ -49,14 +49,16 @@ extension GameEngine {
         return true
     }
 
-    static func updateRoundSettings(stopsRequired: Int, allowGiveUp: Bool, sender: PlayerID,
+    static func updateRoundSettings(stopsRequired: Int, allowGiveUp: Bool, silentScoring: Bool, sender: PlayerID,
                                     state: inout GameState) throws(GameError) -> Bool {
         guard sender == state.hostID else { throw .notHost }
         guard state.phase == .lobby || state.phase == .roundResults else { throw .wrongPhase }
         guard stopsRequired >= 1 else { throw .invalidSettings }
-        if state.settings.stopsRequired == stopsRequired && state.settings.allowGiveUp == allowGiveUp { return false }
+        if state.settings.stopsRequired == stopsRequired && state.settings.allowGiveUp == allowGiveUp
+            && state.settings.silentScoring == silentScoring { return false }
         state.settings.stopsRequired = stopsRequired
         state.settings.allowGiveUp = allowGiveUp
+        state.settings.silentScoring = silentScoring
         return true
     }
 

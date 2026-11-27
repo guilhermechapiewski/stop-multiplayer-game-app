@@ -40,6 +40,11 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
       other phones as soon as it's made. A player can change their pick after everyone has scored. Only the
       host has **Next category** (**See results** on the last); the others see "Waiting for (host) to
       continue…". Results and totals match on every phone.
+- [ ] Read aloud (default): when a category opens, each phone shows only its own answer; the others show "…"
+      until that player scores, then their answer and points appear on every phone at once. The host sees an
+      away player's answer and scoring for them reveals it. With **Silent mode** on (setup, lobby or round
+      results; the lobby shows the mode to everyone), all answers show as soon as the category opens. The ⓘ
+      beside Silent mode explains both, and VoiceOver reads it.
 - [ ] The host taps **Previous category** on the second category, and later **Back to scoring** on the round
       results: every phone goes back together, a player changes their pick, and after moving on again the
       round totals on every phone show the change. Guests have neither button.

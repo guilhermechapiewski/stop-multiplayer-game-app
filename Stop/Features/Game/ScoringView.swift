@@ -131,6 +131,12 @@ struct ScoringView: View {
                     Text("Blank answers score 0.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
+                } else if presentation.isReadAloud, presentation.myScore == nil {
+                    Text("Read your answer out loud, then score it.")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("readAloudHint")
                 }
             }
             if !isCompleted {
@@ -222,6 +228,7 @@ private struct AnswerRow: View {
     private var isAway: Bool { row.presence != .present }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.reduceMotion) private var reduceMotion
 
     /// "Ana (you) · away": one string, so it wraps as a sentence at large text sizes.
     private var nameLine: String {
@@ -242,9 +249,21 @@ private struct AnswerRow: View {
                 Text(verbatim: nameLine)
                     .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
-                Text(verbatim: row.answer)
-                    .font(Theme.Typography.headline)
-                    .foregroundStyle(isBlank ? .secondary : .primary)
+                if row.isHidden {
+                    // Read aloud: shown once this player scores it.
+                    Text(verbatim: "…")
+                        .font(Theme.Typography.headline)
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
+                } else {
+                    Text(verbatim: row.answer)
+                        .font(Theme.Typography.headline)
+                        .foregroundStyle(isBlank ? .secondary : .primary)
+                        .transition(reduceMotion ? .opacity
+                                    : .asymmetric(insertion: .scale(scale: 0.85, anchor: .leading)
+                                                      .combined(with: .opacity),
+                                                  removal: .opacity))
+                }
             }
             .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: Theme.Spacing.s)
@@ -253,6 +272,7 @@ private struct AnswerRow: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: row.name))
         .accessibilityValue(accessibilityValue)
+        .accessibilityIdentifier(row.isHidden ? "answerRowHidden" : "answerRow")
     }
 
     private var status: some View {
@@ -260,6 +280,7 @@ private struct AnswerRow: View {
     }
 
     private var accessibilityValue: Text {
+        if row.isHidden { return Text("Answer hidden until scored") }
         let answer = isBlank ? Text("Blank") : Text(verbatim: row.answer)
         guard let score = row.score else { return Text("\(answer), not scored yet") }
         return Text("\(answer), \(score) points")

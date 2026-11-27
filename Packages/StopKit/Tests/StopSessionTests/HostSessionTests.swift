@@ -248,7 +248,7 @@ struct HostSessionTests {
         client.send(.startGame)
         #expect(client.lastError == .notEnoughPlayers)
         #expect(client.errorCount == 2)
-        client.send(.updateRoundSettings(stopsRequired: 1, allowGiveUp: true))
+        client.send(.updateRoundSettings(stopsRequired: 1, allowGiveUp: true, silentScoring: false))
         #expect(client.lastError == nil)
         #expect(client.errorCount == 2)
     }

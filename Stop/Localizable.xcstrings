@@ -380,6 +380,17 @@
       },
       "comment" : "Settings row that opens the About screen; also its title."
     },
+    "About silent mode" : {
+      "comment" : "VoiceOver label of the ⓘ button beside the Silent mode switch; it opens an explanation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre o modo silencioso"
+          }
+        }
+      }
+    },
     "Add" : {
       "comment" : "Button that adds the typed custom category.",
       "localizations" : {
@@ -442,6 +453,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Permitida"
+          }
+        }
+      }
+    },
+    "Answer hidden until scored" : {
+      "comment" : "VoiceOver value of a scoring row in read-aloud mode while that player hasn't scored yet (read after the name).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resposta escondida até a nota"
           }
         }
       }
@@ -1645,6 +1667,50 @@
         }
       }
     },
+    "Read aloud" : {
+      "comment" : "Lobby rules value: read-aloud scoring (answers show as each player scores their own).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta"
+          }
+        }
+      }
+    },
+    "Read aloud (default): answers stay hidden until each person scores their own, so everyone reads theirs out loud first." : {
+      "comment" : "First paragraph of the explanation opened by the ⓘ button beside Silent mode.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta (padrão): as respostas ficam escondidas até cada pessoa dar a nota da sua, então todo mundo lê a própria resposta em voz alta antes."
+          }
+        }
+      }
+    },
+    "Read aloud: each answer shows once its player scores it, so read yours out loud first." : {
+      "comment" : "Rules footer (setup, lobby, round results) in read-aloud scoring, the default.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta: cada resposta aparece quando a pessoa dá a nota dela, então leia a sua em voz alta antes."
+          }
+        }
+      }
+    },
+    "Read your answer out loud, then score it." : {
+      "comment" : "Hint above the score picker during read-aloud scoring, until the player has scored.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leia sua resposta em voz alta e depois dê a nota."
+          }
+        }
+      }
+    },
     "Reconnecting" : {
       "comment" : "VoiceOver: this player's connection dropped.",
       "localizations" : {
@@ -1832,6 +1898,17 @@
         }
       }
     },
+    "Scoring" : {
+      "comment" : "Lobby rules row for players other than the host: which scoring mode is on (value: Read aloud or Silent).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pontuação"
+          }
+        }
+      }
+    },
     "See results" : {
       "comment" : "Host button at the bottom of scoring, on the round's last category: shows the round results.",
       "localizations" : {
@@ -1839,6 +1916,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver resultados"
+          }
+        }
+      }
+    },
+    "Silent" : {
+      "comment" : "Lobby rules value: silent scoring is on (everyone's answers show at once).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciosa"
+          }
+        }
+      }
+    },
+    "Silent mode" : {
+      "comment" : "Name of the host's scoring switch (setup, lobby, round results). On: everyone's answers show at once; off (default): read-aloud scoring.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso"
+          }
+        }
+      }
+    },
+    "Silent mode: everyone’s answers show as soon as a category opens." : {
+      "comment" : "Rules footer (setup, lobby, round results) when silent scoring is on.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso: as respostas de todo mundo aparecem assim que a categoria abre."
+          }
+        }
+      }
+    },
+    "Silent mode: everyone’s answers show right away, for playing without talking." : {
+      "comment" : "Second paragraph of the explanation opened by the ⓘ button beside Silent mode.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso: as respostas de todo mundo aparecem na hora, para jogar sem falar."
           }
         }
       }

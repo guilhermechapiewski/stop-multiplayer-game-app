@@ -59,8 +59,19 @@ final class ScreenshotTests: XCTestCase {
         waitFor(game.stopStamp)
         attachScreenshot(app, "04-stop")
 
-        // Everyone's scores are in and the host's Next category button is ready.
-        game.scoreEveryCategory(count, firstCompleted: { self.attachScreenshot(app, "05-scoring") })
+        // Read aloud (the default): the seeded bots score 3 s apart, so the shot has Ana's and Bia's answers
+        // revealed with their points, Caio's still hidden, and the player's own answer waiting for a score.
+        waitFor(game.element("scoringCategory-0"), timeout: UITest.longTimeout)
+        waitUntilGone(game.stopStamp)
+        let bia = app.otherElements.matching(NSPredicate(format: "identifier == 'answerRow' AND label == 'Bia'"))
+            .firstMatch
+        waitFor(bia, timeout: UITest.longTimeout)
+        attachScreenshot(app, "05-scoring")
+        XCTAssertTrue(app.otherElements.matching(NSPredicate(
+            format: "identifier == 'answerRowHidden' AND label == 'Caio'")).firstMatch.exists,
+                      "Caio scored before the shot: it should show one answer still hidden")
+
+        game.scoreEveryCategory(count)
         game.waitForRoundResults(rows: 4)
         // Taken at the top. Scrolling the host's rules card into view was worse: both standings cards then
         // run under the status bar, and the menu button covers the points.
