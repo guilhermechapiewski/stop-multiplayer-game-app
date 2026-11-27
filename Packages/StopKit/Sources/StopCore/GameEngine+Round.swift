@@ -64,11 +64,9 @@ extension GameEngine {
 
     static func continueToScoring(sender: PlayerID, state: inout GameState) throws(GameError) -> Bool {
         guard sender == state.hostID else { throw .notHost }
-        guard state.phase == .collecting, let round = state.currentRound else { throw .wrongPhase }
-        let blank = Array(repeating: "", count: state.settings.categories.count)
-        for id in round.participants where round.answers[id] == nil {
-            state.rounds[state.rounds.count - 1].answers[id] = blank
-        }
+        guard state.phase == .collecting, state.currentRound != nil else { throw .wrongPhase }
+        // Missing answers stay missing: they score 0 for now, and if they arrive later (the player reconnects)
+        // they fill the categories not yet scored.
         enterScoring(&state)
         return true
     }

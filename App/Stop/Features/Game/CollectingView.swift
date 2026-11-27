@@ -54,7 +54,7 @@ struct CollectingView: View {
                     Button("Continue anyway") { confirmingContinue = true }
                         .buttonStyle(.secondary)
                         .accessibilityIdentifier("continueAnywayButton")
-                    Text("Missing answers count as blank this round.")
+                    Text("Missing answers count as blank until they reconnect.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -71,7 +71,7 @@ struct CollectingView: View {
                 .accessibilityIdentifier("confirmContinueButton")
             Button("Keep waiting", role: .cancel) {}
         } message: {
-            Text("Missing answers count as blank this round.")
+            Text("Missing answers count as blank until they reconnect.")
         }
         .task {
             guard client.isHost else { return }

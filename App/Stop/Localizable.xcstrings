@@ -1102,13 +1102,13 @@
         }
       }
     },
-    "Missing answers count as blank this round." : {
+    "Missing answers count as blank until they reconnect." : {
       "comment" : "Caption under the host's Continue anyway button and message of its confirmation.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Respostas que faltarem contam como em branco nesta rodada."
+            "value" : "Respostas que faltarem contam como em branco até a pessoa reconectar."
           }
         }
       }
