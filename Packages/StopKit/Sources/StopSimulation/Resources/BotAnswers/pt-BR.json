@@ -1,0 +1,1367 @@
+{
+  "Nome": {
+    "A": [
+      "Ana",
+      "André",
+      "Amanda",
+      "Antônio"
+    ],
+    "B": [
+      "Bruno",
+      "Beatriz",
+      "Bernardo",
+      "Bianca"
+    ],
+    "C": [
+      "Carlos",
+      "Camila",
+      "Cecília",
+      "Caio"
+    ],
+    "D": [
+      "Daniel",
+      "Débora",
+      "Diego",
+      "Daniela"
+    ],
+    "E": [
+      "Eduardo",
+      "Elisa",
+      "Enzo",
+      "Érica"
+    ],
+    "F": [
+      "Fernanda",
+      "Felipe",
+      "Fábio",
+      "Flávia"
+    ],
+    "G": [
+      "Gabriel",
+      "Giovana",
+      "Gustavo",
+      "Gabriela"
+    ],
+    "H": [
+      "Helena",
+      "Heitor",
+      "Henrique",
+      "Heloísa"
+    ],
+    "I": [
+      "Isabela",
+      "Igor",
+      "Ingrid",
+      "Ivan"
+    ],
+    "J": [
+      "João",
+      "Júlia",
+      "José",
+      "Joana"
+    ],
+    "K": [
+      "Karina",
+      "Kátia",
+      "Kauã"
+    ],
+    "L": [
+      "Lucas",
+      "Laura",
+      "Luíza",
+      "Leonardo"
+    ],
+    "M": [
+      "Maria",
+      "Miguel",
+      "Mariana",
+      "Matheus"
+    ],
+    "N": [
+      "Natália",
+      "Nicolas",
+      "Nelson",
+      "Nina"
+    ],
+    "O": [
+      "Otávio",
+      "Olívia",
+      "Oscar"
+    ],
+    "P": [
+      "Pedro",
+      "Paula",
+      "Paulo",
+      "Patrícia"
+    ],
+    "Q": [],
+    "R": [
+      "Rafael",
+      "Renata",
+      "Rodrigo",
+      "Raquel"
+    ],
+    "S": [
+      "Sofia",
+      "Samuel",
+      "Sara",
+      "Sérgio"
+    ],
+    "T": [
+      "Thiago",
+      "Tatiana",
+      "Tânia",
+      "Teresa"
+    ],
+    "U": [
+      "Ulisses",
+      "Úrsula"
+    ],
+    "V": [
+      "Valentina",
+      "Vinícius",
+      "Vitória",
+      "Vanessa"
+    ],
+    "W": [
+      "Wagner",
+      "Wesley",
+      "Wanda"
+    ],
+    "X": [
+      "Xavier"
+    ],
+    "Y": [
+      "Yasmin",
+      "Yuri"
+    ],
+    "Z": [
+      "Zeca",
+      "Zélia"
+    ]
+  },
+  "Animal": {
+    "A": [
+      "Abelha",
+      "Arara",
+      "Anta",
+      "Avestruz"
+    ],
+    "B": [
+      "Baleia",
+      "Borboleta",
+      "Boi",
+      "Burro"
+    ],
+    "C": [
+      "Cachorro",
+      "Cavalo",
+      "Coelho",
+      "Capivara"
+    ],
+    "D": [
+      "Dromedário",
+      "Doninha"
+    ],
+    "E": [
+      "Elefante",
+      "Esquilo",
+      "Ema",
+      "Escorpião"
+    ],
+    "F": [
+      "Formiga",
+      "Foca",
+      "Flamingo",
+      "Falcão"
+    ],
+    "G": [
+      "Gato",
+      "Girafa",
+      "Galinha",
+      "Gorila"
+    ],
+    "H": [
+      "Hipopótamo",
+      "Hiena"
+    ],
+    "I": [
+      "Iguana",
+      "Impala"
+    ],
+    "J": [
+      "Jacaré",
+      "Jabuti",
+      "Jaguatirica",
+      "Joaninha"
+    ],
+    "K": [],
+    "L": [
+      "Leão",
+      "Lobo",
+      "Lagartixa",
+      "Lhama"
+    ],
+    "M": [
+      "Macaco",
+      "Morcego",
+      "Minhoca",
+      "Mico-leão-dourado"
+    ],
+    "N": [
+      "Naja",
+      "Narval"
+    ],
+    "O": [
+      "Onça",
+      "Ovelha",
+      "Orca",
+      "Ornitorrinco"
+    ],
+    "P": [
+      "Pato",
+      "Porco",
+      "Pinguim",
+      "Papagaio"
+    ],
+    "Q": [
+      "Quati"
+    ],
+    "R": [
+      "Rato",
+      "Rinoceronte",
+      "Raposa",
+      "Rã"
+    ],
+    "S": [
+      "Sapo",
+      "Sabiá",
+      "Siri",
+      "Sucuri"
+    ],
+    "T": [
+      "Tatu",
+      "Tigre",
+      "Tucano",
+      "Tartaruga"
+    ],
+    "U": [
+      "Urso",
+      "Urubu"
+    ],
+    "V": [
+      "Vaca",
+      "Veado"
+    ],
+    "W": [],
+    "X": [],
+    "Y": [],
+    "Z": [
+      "Zebra"
+    ]
+  },
+  "Fruta": {
+    "A": [
+      "Abacaxi",
+      "Abacate",
+      "Amora",
+      "Acerola"
+    ],
+    "B": [
+      "Banana",
+      "Bergamota",
+      "Buriti"
+    ],
+    "C": [
+      "Caju",
+      "Cereja",
+      "Coco",
+      "Carambola"
+    ],
+    "D": [
+      "Damasco"
+    ],
+    "E": [],
+    "F": [
+      "Figo",
+      "Framboesa"
+    ],
+    "G": [
+      "Goiaba",
+      "Graviola",
+      "Groselha"
+    ],
+    "H": [],
+    "I": [
+      "Ingá"
+    ],
+    "J": [
+      "Jabuticaba",
+      "Jaca",
+      "Jambo"
+    ],
+    "K": [
+      "Kiwi"
+    ],
+    "L": [
+      "Laranja",
+      "Limão",
+      "Lichia"
+    ],
+    "M": [
+      "Maçã",
+      "Manga",
+      "Melancia",
+      "Mamão"
+    ],
+    "N": [
+      "Nectarina",
+      "Nêspera"
+    ],
+    "O": [
+      "Oliva"
+    ],
+    "P": [
+      "Pera",
+      "Pêssego",
+      "Pitanga",
+      "Pitaya"
+    ],
+    "Q": [],
+    "R": [
+      "Romã"
+    ],
+    "S": [
+      "Siriguela"
+    ],
+    "T": [
+      "Tangerina",
+      "Tamarindo",
+      "Tâmara"
+    ],
+    "U": [
+      "Uva",
+      "Umbu"
+    ],
+    "V": [],
+    "W": [],
+    "X": [],
+    "Y": [],
+    "Z": []
+  },
+  "Cor": {
+    "A": [
+      "Azul",
+      "Amarelo",
+      "Anil"
+    ],
+    "B": [
+      "Branco",
+      "Bege",
+      "Bordô"
+    ],
+    "C": [
+      "Cinza",
+      "Creme",
+      "Coral",
+      "Ciano"
+    ],
+    "D": [
+      "Dourado"
+    ],
+    "E": [
+      "Esmeralda"
+    ],
+    "F": [
+      "Fúcsia"
+    ],
+    "G": [
+      "Grafite"
+    ],
+    "H": [],
+    "I": [
+      "Índigo"
+    ],
+    "J": [
+      "Jade"
+    ],
+    "K": [],
+    "L": [
+      "Laranja",
+      "Lilás",
+      "Lavanda"
+    ],
+    "M": [
+      "Marrom",
+      "Magenta",
+      "Mostarda",
+      "Marfim"
+    ],
+    "N": [
+      "Nude"
+    ],
+    "O": [
+      "Ocre",
+      "Oliva"
+    ],
+    "P": [
+      "Preto",
+      "Prata",
+      "Púrpura",
+      "Pêssego"
+    ],
+    "Q": [],
+    "R": [
+      "Rosa",
+      "Roxo",
+      "Rubi"
+    ],
+    "S": [
+      "Salmão",
+      "Sépia"
+    ],
+    "T": [
+      "Turquesa",
+      "Terracota"
+    ],
+    "U": [],
+    "V": [
+      "Verde",
+      "Vermelho",
+      "Vinho",
+      "Violeta"
+    ],
+    "W": [],
+    "X": [],
+    "Y": [],
+    "Z": []
+  },
+  "CEP": {
+    "A": [
+      "Amapá",
+      "Alemanha",
+      "Argentina",
+      "Aracaju"
+    ],
+    "B": [
+      "Brasil",
+      "Bahia",
+      "Belém",
+      "Belo Horizonte"
+    ],
+    "C": [
+      "Curitiba",
+      "Canadá",
+      "Chile",
+      "Ceará"
+    ],
+    "D": [
+      "Dinamarca",
+      "Diadema"
+    ],
+    "E": [
+      "Espanha",
+      "Egito",
+      "Espírito Santo",
+      "Estados Unidos"
+    ],
+    "F": [
+      "Fortaleza",
+      "França",
+      "Florianópolis"
+    ],
+    "G": [
+      "Goiânia",
+      "Grécia",
+      "Goiás",
+      "Guarulhos"
+    ],
+    "H": [
+      "Holanda",
+      "Haiti"
+    ],
+    "I": [
+      "Itália",
+      "Inglaterra",
+      "Índia",
+      "Itajaí"
+    ],
+    "J": [
+      "Japão",
+      "João Pessoa",
+      "Jundiaí"
+    ],
+    "K": [],
+    "L": [
+      "Londres",
+      "Lisboa",
+      "Londrina"
+    ],
+    "M": [
+      "Manaus",
+      "Maceió",
+      "México",
+      "Minas Gerais"
+    ],
+    "N": [
+      "Natal",
+      "Niterói",
+      "Noruega"
+    ],
+    "O": [
+      "Olinda",
+      "Osasco"
+    ],
+    "P": [
+      "Portugal",
+      "Paraná",
+      "Paris",
+      "Porto Alegre"
+    ],
+    "Q": [
+      "Quênia"
+    ],
+    "R": [
+      "Recife",
+      "Rio de Janeiro",
+      "Roma",
+      "Rússia"
+    ],
+    "S": [
+      "São Paulo",
+      "Salvador",
+      "Santos",
+      "Suíça"
+    ],
+    "T": [
+      "Teresina",
+      "Tocantins",
+      "Tóquio",
+      "Turquia"
+    ],
+    "U": [
+      "Uruguai",
+      "Uberlândia",
+      "Ubatuba"
+    ],
+    "V": [
+      "Venezuela",
+      "Vitória",
+      "Veneza"
+    ],
+    "W": [
+      "Washington"
+    ],
+    "X": [
+      "Xique-Xique"
+    ],
+    "Y": [],
+    "Z": [
+      "Zurique"
+    ]
+  },
+  "Objeto": {
+    "A": [
+      "Agulha",
+      "Abajur",
+      "Apito",
+      "Armário"
+    ],
+    "B": [
+      "Bola",
+      "Balde",
+      "Bolsa",
+      "Boneca"
+    ],
+    "C": [
+      "Cadeira",
+      "Caneta",
+      "Copo",
+      "Chave"
+    ],
+    "D": [
+      "Dado",
+      "Dedal"
+    ],
+    "E": [
+      "Escova",
+      "Espelho",
+      "Estojo",
+      "Esponja"
+    ],
+    "F": [
+      "Faca",
+      "Fita",
+      "Fone de ouvido",
+      "Ferro de passar"
+    ],
+    "G": [
+      "Garfo",
+      "Garrafa",
+      "Guarda-chuva",
+      "Gaveta"
+    ],
+    "H": [],
+    "I": [
+      "Ímã",
+      "Isqueiro"
+    ],
+    "J": [
+      "Jarra",
+      "Janela"
+    ],
+    "K": [],
+    "L": [
+      "Lápis",
+      "Livro",
+      "Lanterna",
+      "Luminária"
+    ],
+    "M": [
+      "Mesa",
+      "Mochila",
+      "Martelo",
+      "Moeda"
+    ],
+    "N": [
+      "Novelo"
+    ],
+    "O": [
+      "Óculos"
+    ],
+    "P": [
+      "Panela",
+      "Pente",
+      "Prato",
+      "Pião"
+    ],
+    "Q": [
+      "Quadro",
+      "Quebra-cabeça"
+    ],
+    "R": [
+      "Relógio",
+      "Régua",
+      "Rádio",
+      "Rede"
+    ],
+    "S": [
+      "Sofá",
+      "Sapato",
+      "Sabonete",
+      "Sino"
+    ],
+    "T": [
+      "Tesoura",
+      "Travesseiro",
+      "Toalha",
+      "Tapete"
+    ],
+    "U": [
+      "Urso de pelúcia"
+    ],
+    "V": [
+      "Vaso",
+      "Vassoura",
+      "Vela",
+      "Violão"
+    ],
+    "W": [],
+    "X": [
+      "Xícara",
+      "Xampu"
+    ],
+    "Y": [],
+    "Z": [
+      "Zíper"
+    ]
+  },
+  "Marca": {
+    "A": [
+      "Apple",
+      "Adidas",
+      "Avon",
+      "Americanas"
+    ],
+    "B": [
+      "Bauducco",
+      "Bic",
+      "Brastemp"
+    ],
+    "C": [
+      "Coca-Cola",
+      "Casas Bahia",
+      "Colgate",
+      "Cacau Show"
+    ],
+    "D": [
+      "Danone",
+      "Dove",
+      "Disney"
+    ],
+    "E": [
+      "Elma Chips",
+      "Electrolux"
+    ],
+    "F": [
+      "Faber-Castell",
+      "Fiat",
+      "Ford"
+    ],
+    "G": [
+      "Garoto",
+      "Google",
+      "Guaraná Antarctica"
+    ],
+    "H": [
+      "Havaianas",
+      "Hering",
+      "Honda"
+    ],
+    "I": [
+      "Itaú",
+      "Ipiranga"
+    ],
+    "J": [
+      "Jeep"
+    ],
+    "K": [
+      "Kibon",
+      "Kopenhagen",
+      "Kinder"
+    ],
+    "L": [
+      "Lacta",
+      "Lego",
+      "Leite Moça"
+    ],
+    "M": [
+      "McDonald's",
+      "Magazine Luiza",
+      "Mercado Livre",
+      "Melissa"
+    ],
+    "N": [
+      "Nestlé",
+      "Nike",
+      "Natura",
+      "Nescau"
+    ],
+    "O": [
+      "O Boticário",
+      "Omo",
+      "Ovomaltine"
+    ],
+    "P": [
+      "Pepsi",
+      "Perdigão",
+      "Puma",
+      "Piraquê"
+    ],
+    "Q": [
+      "Qualy"
+    ],
+    "R": [
+      "Ray-Ban",
+      "Renault",
+      "Renner"
+    ],
+    "S": [
+      "Samsung",
+      "Sadia",
+      "Sony",
+      "Seara"
+    ],
+    "T": [
+      "Toddy",
+      "Tramontina",
+      "Toyota",
+      "Tang"
+    ],
+    "U": [
+      "Uber"
+    ],
+    "V": [
+      "Volkswagen",
+      "Vivo"
+    ],
+    "W": [
+      "Wickbold"
+    ],
+    "X": [
+      "Xbox"
+    ],
+    "Y": [
+      "Yakult",
+      "YouTube"
+    ],
+    "Z": [
+      "Zara"
+    ]
+  },
+  "Profissão": {
+    "A": [
+      "Advogado",
+      "Arquiteto",
+      "Ator",
+      "Açougueiro"
+    ],
+    "B": [
+      "Bombeiro",
+      "Bailarina",
+      "Barbeiro",
+      "Bancário"
+    ],
+    "C": [
+      "Cozinheiro",
+      "Carpinteiro",
+      "Cabeleireiro",
+      "Caminhoneiro"
+    ],
+    "D": [
+      "Dentista",
+      "Designer",
+      "Delegado"
+    ],
+    "E": [
+      "Engenheiro",
+      "Eletricista",
+      "Enfermeiro",
+      "Escritor"
+    ],
+    "F": [
+      "Fotógrafo",
+      "Farmacêutico",
+      "Faxineiro",
+      "Fisioterapeuta"
+    ],
+    "G": [
+      "Garçom",
+      "Gari",
+      "Guia turístico"
+    ],
+    "H": [
+      "Historiador"
+    ],
+    "I": [
+      "Intérprete"
+    ],
+    "J": [
+      "Jornalista",
+      "Juiz",
+      "Jardineiro",
+      "Jogador de futebol"
+    ],
+    "K": [],
+    "L": [
+      "Locutor"
+    ],
+    "M": [
+      "Médico",
+      "Motorista",
+      "Mecânico",
+      "Músico"
+    ],
+    "N": [
+      "Nutricionista"
+    ],
+    "O": [
+      "Oftalmologista",
+      "Operário",
+      "Ourives"
+    ],
+    "P": [
+      "Professor",
+      "Padeiro",
+      "Pedreiro",
+      "Piloto"
+    ],
+    "Q": [
+      "Químico"
+    ],
+    "R": [
+      "Recepcionista",
+      "Repórter"
+    ],
+    "S": [
+      "Sapateiro",
+      "Secretário",
+      "Soldado",
+      "Salva-vidas"
+    ],
+    "T": [
+      "Taxista",
+      "Técnico",
+      "Tradutor"
+    ],
+    "U": [],
+    "V": [
+      "Veterinário",
+      "Vendedor",
+      "Vigia"
+    ],
+    "W": [
+      "Web designer"
+    ],
+    "X": [
+      "Xerife"
+    ],
+    "Y": [],
+    "Z": [
+      "Zelador",
+      "Zootecnista"
+    ]
+  },
+  "Comida": {
+    "A": [
+      "Arroz",
+      "Açaí",
+      "Acarajé",
+      "Almôndega"
+    ],
+    "B": [
+      "Brigadeiro",
+      "Bolo",
+      "Batata frita",
+      "Biscoito"
+    ],
+    "C": [
+      "Coxinha",
+      "Cuscuz",
+      "Canjica",
+      "Churrasco"
+    ],
+    "D": [
+      "Doce de leite",
+      "Dobradinha"
+    ],
+    "E": [
+      "Empada",
+      "Esfiha",
+      "Estrogonofe",
+      "Escondidinho"
+    ],
+    "F": [
+      "Feijoada",
+      "Farofa",
+      "Frango",
+      "Feijão"
+    ],
+    "G": [
+      "Galinhada",
+      "Goiabada",
+      "Gelatina"
+    ],
+    "H": [
+      "Hambúrguer"
+    ],
+    "I": [
+      "Iogurte"
+    ],
+    "J": [
+      "Jiló"
+    ],
+    "K": [
+      "Kibe",
+      "Ketchup"
+    ],
+    "L": [
+      "Lasanha",
+      "Linguiça",
+      "Lentilha"
+    ],
+    "M": [
+      "Macarrão",
+      "Mandioca",
+      "Moqueca",
+      "Mingau"
+    ],
+    "N": [
+      "Nhoque",
+      "Nuggets"
+    ],
+    "O": [
+      "Omelete",
+      "Ovo frito"
+    ],
+    "P": [
+      "Pão de queijo",
+      "Pizza",
+      "Pastel",
+      "Pamonha"
+    ],
+    "Q": [
+      "Quindim",
+      "Queijo"
+    ],
+    "R": [
+      "Risoto",
+      "Rabanada",
+      "Rocambole"
+    ],
+    "S": [
+      "Sopa",
+      "Sushi",
+      "Salada",
+      "Sanduíche"
+    ],
+    "T": [
+      "Tapioca",
+      "Torta",
+      "Torresmo"
+    ],
+    "U": [],
+    "V": [
+      "Vatapá",
+      "Virado à paulista"
+    ],
+    "W": [
+      "Waffle"
+    ],
+    "X": [
+      "Xis-salada"
+    ],
+    "Y": [
+      "Yakisoba"
+    ],
+    "Z": []
+  },
+  "Filme/Série": {
+    "A": [
+      "Aladdin",
+      "Avatar",
+      "Alice no País das Maravilhas"
+    ],
+    "B": [
+      "Bambi",
+      "Bluey",
+      "Branca de Neve"
+    ],
+    "C": [
+      "Carros",
+      "Cinderela",
+      "Chaves",
+      "Castelo Rá-Tim-Bum"
+    ],
+    "D": [
+      "Divertida Mente",
+      "Dumbo",
+      "Detetives do Prédio Azul"
+    ],
+    "E": [
+      "Encanto",
+      "E.T.",
+      "Enrolados"
+    ],
+    "F": [
+      "Frozen",
+      "Friends"
+    ],
+    "G": [
+      "Gato de Botas"
+    ],
+    "H": [
+      "Harry Potter",
+      "Hércules"
+    ],
+    "I": [
+      "Irmão Urso"
+    ],
+    "J": [
+      "Jumanji",
+      "Jurassic Park"
+    ],
+    "K": [
+      "Kung Fu Panda"
+    ],
+    "L": [
+      "Lilo & Stitch",
+      "Luca"
+    ],
+    "M": [
+      "Moana",
+      "Mulan",
+      "Meu Malvado Favorito",
+      "Matilda"
+    ],
+    "N": [],
+    "O": [
+      "O Rei Leão",
+      "O Auto da Compadecida",
+      "Os Incríveis"
+    ],
+    "P": [
+      "Procurando Nemo",
+      "Pinóquio",
+      "Peter Pan",
+      "Patrulha Canina"
+    ],
+    "Q": [
+      "Quarteto Fantástico"
+    ],
+    "R": [
+      "Ratatouille",
+      "Rio",
+      "Rocky"
+    ],
+    "S": [
+      "Shrek",
+      "Star Wars",
+      "Sítio do Picapau Amarelo",
+      "Sing"
+    ],
+    "T": [
+      "Toy Story",
+      "Titanic",
+      "Turma da Mônica"
+    ],
+    "U": [
+      "Up",
+      "Uma Noite no Museu"
+    ],
+    "V": [
+      "Valente",
+      "Viva"
+    ],
+    "W": [
+      "WALL-E",
+      "Wandinha",
+      "Wicked"
+    ],
+    "X": [
+      "X-Men"
+    ],
+    "Y": [],
+    "Z": [
+      "Zootopia"
+    ]
+  },
+  "Parte do corpo": {
+    "A": [
+      "Antebraço",
+      "Axila",
+      "Abdômen"
+    ],
+    "B": [
+      "Braço",
+      "Boca",
+      "Barriga",
+      "Bochecha"
+    ],
+    "C": [
+      "Cabeça",
+      "Cotovelo",
+      "Coração",
+      "Cabelo"
+    ],
+    "D": [
+      "Dedo",
+      "Dente"
+    ],
+    "E": [
+      "Estômago",
+      "Esôfago"
+    ],
+    "F": [
+      "Fígado",
+      "Face",
+      "Fêmur"
+    ],
+    "G": [
+      "Garganta",
+      "Gengiva"
+    ],
+    "H": [],
+    "I": [
+      "Intestino",
+      "Íris"
+    ],
+    "J": [
+      "Joelho"
+    ],
+    "K": [],
+    "L": [
+      "Língua",
+      "Lábio"
+    ],
+    "M": [
+      "Mão",
+      "Maxilar",
+      "Músculo"
+    ],
+    "N": [
+      "Nariz",
+      "Nuca",
+      "Narina"
+    ],
+    "O": [
+      "Olho",
+      "Orelha",
+      "Ombro",
+      "Osso"
+    ],
+    "P": [
+      "Pé",
+      "Perna",
+      "Pescoço",
+      "Pulmão"
+    ],
+    "Q": [
+      "Queixo",
+      "Quadril"
+    ],
+    "R": [
+      "Rim",
+      "Rosto",
+      "Rótula"
+    ],
+    "S": [
+      "Sobrancelha",
+      "Sola do pé"
+    ],
+    "T": [
+      "Tornozelo",
+      "Testa",
+      "Tórax",
+      "Tíbia"
+    ],
+    "U": [
+      "Unha",
+      "Umbigo"
+    ],
+    "V": [
+      "Veia",
+      "Virilha"
+    ],
+    "W": [],
+    "X": [],
+    "Y": [],
+    "Z": []
+  },
+  "Minha sogra é…": {
+    "A": [
+      "Alegre",
+      "Amorosa",
+      "Atrevida",
+      "Animada"
+    ],
+    "B": [
+      "Bondosa",
+      "Bonita",
+      "Brava",
+      "Bagunceira"
+    ],
+    "C": [
+      "Carinhosa",
+      "Ciumenta",
+      "Cheirosa",
+      "Chique"
+    ],
+    "D": [
+      "Divertida",
+      "Dorminhoca",
+      "Doce",
+      "Dedicada"
+    ],
+    "E": [
+      "Elegante",
+      "Engraçada",
+      "Esperta",
+      "Exigente"
+    ],
+    "F": [
+      "Fofoqueira",
+      "Fofa",
+      "Faladeira",
+      "Festeira"
+    ],
+    "G": [
+      "Generosa",
+      "Gulosa",
+      "Gentil",
+      "Gritona"
+    ],
+    "H": [
+      "Honesta",
+      "Habilidosa",
+      "Humilde"
+    ],
+    "I": [
+      "Inteligente",
+      "Implicante",
+      "Incrível"
+    ],
+    "J": [
+      "Jovem",
+      "Justa",
+      "Jeitosa"
+    ],
+    "K": [],
+    "L": [
+      "Linda",
+      "Legal",
+      "Leal"
+    ],
+    "M": [
+      "Maravilhosa",
+      "Mandona",
+      "Meiga",
+      "Mimada"
+    ],
+    "N": [
+      "Nervosa",
+      "Namoradeira",
+      "Noveleira"
+    ],
+    "O": [
+      "Organizada",
+      "Otimista",
+      "Orgulhosa"
+    ],
+    "P": [
+      "Paciente",
+      "Preguiçosa",
+      "Perfeita",
+      "Poderosa"
+    ],
+    "Q": [
+      "Querida",
+      "Quieta"
+    ],
+    "R": [
+      "Romântica",
+      "Rabugenta",
+      "Risonha",
+      "Rica"
+    ],
+    "S": [
+      "Simpática",
+      "Sábia",
+      "Sincera",
+      "Sorridente"
+    ],
+    "T": [
+      "Teimosa",
+      "Tagarela",
+      "Tranquila",
+      "Trabalhadora"
+    ],
+    "U": [
+      "Única"
+    ],
+    "V": [
+      "Vaidosa",
+      "Valente",
+      "Vibrante"
+    ],
+    "W": [],
+    "X": [
+      "Xereta"
+    ],
+    "Y": [],
+    "Z": [
+      "Zelosa",
+      "Zangada"
+    ]
+  }
+}
