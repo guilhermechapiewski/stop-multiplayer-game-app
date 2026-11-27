@@ -743,6 +743,17 @@
         }
       }
     },
+    "Draws another letter for everyone and restarts the countdown." : {
+      "comment" : "VoiceOver hint of the host's New letter button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorteia outra letra para todo mundo e reinicia a contagem."
+          }
+        }
+      }
+    },
     "End game" : {
       "comment" : "Host action that ends the game for everyone.",
       "localizations" : {
@@ -1377,6 +1388,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Novo jogo"
+          }
+        }
+      }
+    },
+    "New letter" : {
+      "comment" : "Host button (dice icon) on the letter reveal and countdown screens: draws another letter for the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outra letra"
           }
         }
       }

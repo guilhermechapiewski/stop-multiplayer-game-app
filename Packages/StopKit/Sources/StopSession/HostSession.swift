@@ -166,12 +166,13 @@ public final class HostSession {
         mutate { GameEngine.setPresence(.away, for: player, in: &$0) }
     }
 
-    /// With `restartingTicks`, a phase change restarts the tick loop so the next tick is a full `timing.tick`
-    /// away: the reveal lasts exactly 2 ticks.
+    /// With `restartingTicks`, a phase change (or a new letter: a re-roll during the reveal keeps the phase)
+    /// restarts the tick loop so the next tick is a full `timing.tick` away: the reveal lasts exactly 2 ticks.
     private func commit(_ next: GameState, except: PlayerID? = nil, restartingTicks: Bool = false) {
         let old = state
         state = next
-        if restartingTicks, old.phase != next.phase, tickLoop != nil { startTickLoop() }
+        let newLetter = old.currentRound?.letter != next.currentRound?.letter
+        if restartingTicks, old.phase != next.phase || newLetter, tickLoop != nil { startTickLoop() }
         persist()
         broadcastSnapshots(except: except)
         updateAdvertisement()

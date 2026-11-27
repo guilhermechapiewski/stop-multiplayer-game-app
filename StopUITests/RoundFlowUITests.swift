@@ -18,8 +18,18 @@ final class RoundFlowUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: UITest.timeout))
         attachScreenshot(app, "1-countdown")
 
+        // The host re-rolls the letter during the countdown: the reveal starts over and lands on a new letter,
+        // which the writing header then shows.
+        waitFor(app.buttons["newLetterButton"], "hittable == true").tap()
+        let revealed = waitFor(app.descendants(matching: .any)["revealedLetter"], timeout: UITest.longTimeout)
+        let letterLabel = revealed.label
+        XCTAssertTrue(letterLabel.hasPrefix("Letter "), letterLabel)
+
         // Round 1: fill every category and STOP. Give up starts off.
         let count = game.waitForWriting()
+        XCTAssertTrue(game.element("writingHeader").staticTexts
+                          .containing(NSPredicate(format: "label CONTAINS %@", letterLabel)).firstMatch.exists,
+                      "the writing header shows the re-rolled \(letterLabel)")
         XCTAssertGreaterThan(count, 0)
         XCTAssertFalse(app.buttons["stopButton"].isEnabled)
         XCTAssertFalse(app.buttons["giveUpButton"].exists)

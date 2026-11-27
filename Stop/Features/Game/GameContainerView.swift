@@ -207,6 +207,12 @@ struct GameScreen: View {
         }
     }
 
+    /// Host only: swaps the round's letter during the reveal or countdown (nil for everyone else).
+    private func reroll(_ round: Round) -> (() -> Void)? {
+        guard client.isHost else { return nil }
+        return { client.send(.rerollLetter(round: round.number, letter: round.letter)) }
+    }
+
     @ViewBuilder private var content: some View {
         let state = client.state
         let round = state?.currentRound
@@ -218,10 +224,15 @@ struct GameScreen: View {
         case .lobby:
             if let state { LobbyView(client: client, state: state, networkDenied: networkDenied) }
         case .revealing:
-            if let state, let round { LetterRevealView(round: round, gameID: state.gameID) }
+            if let state, let round {
+                // A new letter (the host re-rolled) spins again from the start.
+                LetterRevealView(round: round, gameID: state.gameID, onReroll: reroll(round))
+                    .id("\(round.number)-\(round.letter)")
+            }
         case .countdown:
             if let state, let round, case .countdown(let seconds) = state.phase {
-                CountdownView(round: round, gameID: state.gameID, secondsRemaining: seconds)
+                CountdownView(round: round, gameID: state.gameID, secondsRemaining: seconds,
+                              onReroll: reroll(round))
             }
         case .writing:
             if let state, let round { WritingView(client: client, state: state, round: round) }

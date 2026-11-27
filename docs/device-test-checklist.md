@@ -34,6 +34,8 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 - [ ] Each player taps the game: they appear in the host's lobby and on everyone's lobby, and the count goes up.
 - [ ] The host taps **Start**: every phone shows the same letter, then the same 3-2-1 countdown, and the fields
       unlock together.
+- [ ] During the countdown the host taps **New letter**: every phone spins again to the same new letter (never
+      the old one) and the countdown restarts; VoiceOver announces the new letter. Guests have no button.
 - [ ] One player taps **STOP**: everyone sees the stop count ("Stops 1/2 — name"). When the required number is
       reached every phone shows **STOP!** and locks at the same moment.
 - [ ] Scoring shows the same answers and the same points on every phone, and a player's pick shows on the

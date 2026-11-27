@@ -273,7 +273,7 @@ Stop: Multiplayer Party Game is a free version of Stop (also called Adedanha), t
 No login, setup or sample files are needed. On first launch, enter any display name on each iPhone.
 1) iPhone A (host): tap Host a game, keep the default categories (or edit them) and tap Create game. The lobby opens.
 2) iPhone B: tap Join a game and tap iPhone A's game in the list. It appears in iPhone A's lobby.
-3) iPhone A: tap Start. Both phones show the letter, then a 3-2-1 countdown.
+3) iPhone A: tap Start. Both phones show the letter, then a 3-2-1 countdown. (During the letter and the countdown, iPhone A can tap New letter to draw another letter on both phones.)
 4) Both: type a word starting with that letter in every field, then tap STOP (by default one STOP ends the round). Every phone locks at once.
 5) Scoring, one category at a time: each player taps 10, 5 or 0 for their own answer. By default (read aloud) the other player's answer stays hidden until they score it, then shows with its points on both phones; with Silent mode on (in the rules, before starting) all answers show at once. When both have scored, iPhone A taps Next category (See results after the last one). To correct a score, iPhone A can tap Previous category, or Back to scoring on the round results.
 6) Round results: iPhone A taps Next round to play again, or End game to show the final standings on both phones.

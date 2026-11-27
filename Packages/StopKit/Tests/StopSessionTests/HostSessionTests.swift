@@ -365,6 +365,43 @@ struct HostSessionTests {
         await waitUntil("2 sleepers") { h.clock.sleeperCount >= 2 }
     }
 
+    @Test func rerollDuringCountdownRestartsTheRevealForEveryone() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        h.host.localClient.send(.startGame)
+        await h.advance(seconds: 3)
+        #expect(h.host.state.phase == .countdown(secondsRemaining: 2))
+        let old = try #require(h.host.state.currentRound?.letter)
+        // Ana can't; the host can, once per tap.
+        let id = ana.send(.rerollLetter(round: 1, letter: old))
+        #expect(await ana.ack(for: id) == .ack(id: id, error: .notHost))
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        let new = try #require(h.host.state.currentRound?.letter)
+        #expect(new != old)
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        #expect(await ana.nextSnapshot { $0.currentRound?.letter == new && $0.phase == .revealing(ticksRemaining: 2) }
+                != nil)
+        await h.advance(seconds: 5)
+        #expect(h.host.state.phase == .writing)
+        #expect(h.host.state.currentRound?.letter == new)
+    }
+
+    @Test func rerollDuringTheRevealGivesItTwoFullTicksAgain() async throws {
+        let h = try Harness()
+        _ = try await h.join("Ana")
+        h.host.localClient.send(.startGame)
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        let old = try #require(h.host.state.currentRound?.letter)
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        // Same phase, new letter: the tick loop restarts, so the next tick is a full tick away.
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        await step(h, .milliseconds(100))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 1))
+    }
+
     @Test func revealLastsTwoFullTicksFromStartGame() async throws {
         let h = try Harness()
         _ = try await h.join("Ana")

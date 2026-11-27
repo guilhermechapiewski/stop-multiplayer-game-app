@@ -9,6 +9,8 @@ struct LetterRevealView: View {
     let round: Round
     /// Keys the VoiceOver announcement, so a new game's round 1 is announced even with the same letter.
     let gameID: UUID
+    /// Host only: draws another letter.
+    var onReroll: (() -> Void)?
 
     @Environment(\.reduceMotion) private var reduceMotion
     @State private var shown: String?
@@ -40,6 +42,7 @@ struct LetterRevealView: View {
                 .accessibilityHidden(!landed)
                 .accessibilityLabel(Text("Letter \(round.letter)"))
                 .accessibilityIdentifier("revealedLetter")
+            if let onReroll { NewLetterButton(action: onReroll) }
         }
         .padding(.horizontal, Theme.Spacing.l)
         .centeredScrolling()
@@ -90,6 +93,22 @@ enum LetterAnnouncement {
         announced = key
         AccessibilityNotification.Announcement(AccessibilityText.letter(round.letter)).post()
         return true
+    }
+}
+
+/// Host only, on the letter reveal and the countdown: swaps the letter for another one.
+struct NewLetterButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("New letter", systemImage: "dice")
+        }
+        .font(Theme.Typography.headline)
+        .foregroundStyle(Theme.accent)
+        .frame(minHeight: 44)
+        .accessibilityHint(Text("Draws another letter for everyone and restarts the countdown."))
+        .accessibilityIdentifier("newLetterButton")
     }
 }
 

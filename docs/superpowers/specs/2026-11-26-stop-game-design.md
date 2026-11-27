@@ -76,6 +76,7 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 
 ### 5.4 Round flow
 1. **Letter reveal** — short animation. Letters are drawn without repetition within a game; when the set is exhausted it resets. All 26 letters A–Z are used in both languages (owner decision); if a hard letter comes up, players can all give up the round together.
+   - **New letter** (owner decision, 2026-11-27): during the reveal and the countdown the host has a **New letter** button (dice). It draws a letter that's neither the current one nor used yet this game (the rejected letter goes back to the pool; if no other letter is left, the pool starts over, still without the current one), and the reveal starts over on every phone with the full countdown. Unlimited; the request names the letter being replaced, so a repeated tap never rolls twice.
 2. **3-2-1 countdown**, then all fields unlock simultaneously.
 3. **Writing** — single scrolling form, one field per category, keyboard stays up, Return moves to next field. Autocorrect off, auto-capitalize words. Each keystroke is local only.
 4. **STOP** — big button, enabled only when every category is filled. If the host enabled "allow giving up", a secondary **Give up** button is always available and counts as a stop. Each player can stop at most once per round. **Tapping STOP or Give up immediately freezes that player's own answers** (owner decision); their answers are sent to the host right away and the screen shows "You stopped — waiting for others". Everyone sees the live count ("Stops 1/2 — Ana").
@@ -185,6 +186,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Practice with bots ships in the app (solo mode, also for App Review). Revised 2026-11-27: Debug builds only; App Review uses two iPhones.
 - Scoring never auto-advances: everyone sees all the points, and the host moves on to the next category (2026-11-27).
 - The host can go back to a previous category, or from the round results back to scoring, until the next round starts (2026-11-27).
+- The host can re-roll the letter during the reveal or countdown (2026-11-27).
 - Scoring is read aloud by default (answers revealed as each player scores), with a Silent mode toggle that shows every answer at once (2026-11-27).
   The `.nextCategory` intent replaced the tick auto-advance within protocolVersion 1 on 2026-11-27 (version not bumped): builds before build 2 still auto-advance, so every phone in a game needs build 2 or later.
 - The last hosted game's categories are preselected in setup (2026-11-27).

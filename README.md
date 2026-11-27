@@ -30,7 +30,8 @@ contribute improvements.
 
 1. One player taps **Host a game**, picks the categories and the rules, and waits in the lobby.
 2. Everyone else taps **Join a game** and picks the host's game from the list.
-3. The host taps **Start**. A letter appears, then a 3-2-1 countdown.
+3. The host taps **Start**. A letter appears, then a 3-2-1 countdown. Don't like the letter? Until the
+   countdown ends, the host can tap **New letter** to draw another one.
 4. Everyone fills in one word per category starting with that letter.
 5. When you've filled every category, tap **STOP**. Once enough players have stopped, every phone locks.
 6. Go through the categories together: each player reads their answer out loud and gives it 10 (nobody else

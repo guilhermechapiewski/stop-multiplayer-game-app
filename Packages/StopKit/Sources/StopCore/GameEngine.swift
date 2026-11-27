@@ -70,6 +70,8 @@ public enum GameEngine {
             return try nextCategory(round: round, category: category, sender: sender, state: &state)
         case .previousCategory(let round, let category):
             return try previousCategory(round: round, category: category, sender: sender, state: &state)
+        case .rerollLetter(let round, let letter):
+            return try rerollLetter(round: round, letter: letter, sender: sender, state: &state, using: &rng)
         case .nextRound:
             return try nextRound(sender: sender, state: &state, using: &rng)
         case .endGame:

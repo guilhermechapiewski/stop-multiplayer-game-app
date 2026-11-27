@@ -18,6 +18,26 @@ extension GameEngine {
         return true
     }
 
+    /// The host swaps the round's letter during the reveal or the countdown, as often as it likes: a new letter
+    /// that's neither `letter` nor used yet this game (`letter` goes back to the pool), and the reveal starts
+    /// over so everyone sees it land and gets the full countdown. `letter` is the one the host is replacing: a
+    /// stale or repeated request (the letter already changed) is rejected, so one tap never rolls twice.
+    static func rerollLetter(round number: Int, letter: String, sender: PlayerID, state: inout GameState,
+                             using rng: inout some RandomNumberGenerator) throws(GameError) -> Bool {
+        guard sender == state.hostID else { throw .notHost }
+        guard let round = state.currentRound else { throw .wrongPhase }
+        guard round.number == number, round.letter == letter else { throw .staleRound }
+        switch state.phase {
+        case .revealing, .countdown: break
+        default: throw .wrongPhase
+        }
+        let pick = LetterPicker.reroll(current: letter, used: state.usedLetters, using: &rng)
+        state.usedLetters = pick.used
+        state.rounds[state.rounds.count - 1].letter = pick.letter
+        state.phase = .revealing(ticksRemaining: 2)
+        return true
+    }
+
     static func stop(_ answers: [String], kind: StopKind, sender: PlayerID,
                      state: inout GameState) throws(GameError) -> Bool {
         guard state.phase == .writing, let round = state.currentRound else { throw .wrongPhase }
