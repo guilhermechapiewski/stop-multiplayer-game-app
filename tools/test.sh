@@ -8,16 +8,27 @@ run_package() {
 }
 
 run_app() {
-  local sim
-  local devices
+  local sim devices dd="build/DD"
   devices="$(xcrun simctl list devices available)"
-  if grep -q "iPhone 17 (" <<<"$devices"; then
+  if grep -qE '^ +iPhone 17 \(' <<<"$devices"; then
     sim="iPhone 17"
   else
-    sim="$(grep -oE 'iPhone[^(]*[^ (]' <<<"$devices" | head -n 1 | sed 's/ *$//')"
+    # Device lines look like "    iPhone 16 Pro (UDID) (Shutdown)"; runtime headers ("-- iOS 27.0 --") are skipped.
+    sim="$(grep -E '^ +iPhone' <<<"$devices" | head -n 1 | sed -E 's/^ +//; s/ \(.*$//')"
+  fi
+  if [ -z "$sim" ]; then
+    echo "error: no available iPhone simulator" >&2
+    exit 1
   fi
   xcodebuild test -project App/Stop.xcodeproj -scheme Stop \
-    -destination "platform=iOS Simulator,name=$sim"
+    -destination "platform=iOS Simulator,name=$sim" \
+    -derivedDataPath "$dd" -parallel-testing-enabled NO
+  local manifest="$dd/Build/Products/Debug-iphonesimulator/Stop.app/PrivacyInfo.xcprivacy"
+  if [ ! -f "$manifest" ]; then
+    echo "error: PrivacyInfo.xcprivacy is missing from the app bundle ($manifest)" >&2
+    exit 1
+  fi
+  echo "Privacy manifest present in app bundle."
 }
 
 case "${1:-all}" in

@@ -1,0 +1,1378 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ leaves the game. Their points so far stay in the standings." : {
+      "comment" : "Message when the host confirms removing a player. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ sai do jogo. Os pontos até agora continuam na classificação."
+          }
+        }
+      }
+    },
+    "%@ · In progress" : {
+      "comment" : "Join list detail for a game that already started. %@ is the player count, e.g. \"5 players\".",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Em andamento"
+          }
+        }
+      }
+    },
+    "%@’s game" : {
+      "comment" : "Name of a game in the Join list and the lobby title for guests. %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogo de %@"
+          }
+        }
+      }
+    },
+    "%lld players" : {
+      "comment" : "Player count of a nearby game.",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld player"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld players"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld jogador"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld jogadores"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "%lld. %@" : {
+      "comment" : "VoiceOver label for a selected category: its position and name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld. %@"
+          }
+        }
+      }
+    },
+    "About" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre"
+          }
+        }
+      },
+      "comment" : "Settings row that opens the About screen; also its title."
+    },
+    "Add" : {
+      "comment" : "Button that adds the typed custom category.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicionar"
+          }
+        }
+      }
+    },
+    "Add your own category" : {
+      "comment" : "Placeholder of the custom category field in game setup.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adicione sua própria categoria"
+          }
+        }
+      }
+    },
+    "Adds this category to the game." : {
+      "comment" : "VoiceOver hint for an unselected category in game setup.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adiciona esta categoria ao jogo."
+          }
+        }
+      }
+    },
+    "Allow giving up" : {
+      "comment" : "Toggle: whether giving up counts as a stop.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitir desistir"
+          }
+        }
+      }
+    },
+    "Allow Local Network access" : {
+      "comment" : "Title on Join when the Local Network permission was refused.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permita o acesso à rede local"
+          }
+        }
+      }
+    },
+    "Allowed" : {
+      "comment" : "Lobby rules (guest view): giving up is allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permitida"
+          }
+        }
+      }
+    },
+    "Ask a friend to host a game. It shows up here as soon as their phone is on the same Wi-Fi network as yours." : {
+      "comment" : "Join screen while no games have been found.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peça para um amigo criar um jogo. Ele aparece aqui assim que o celular dele estiver na mesma rede Wi-Fi que o seu."
+          }
+        }
+      }
+    },
+    "Asks to confirm removing this player." : {
+      "comment" : "VoiceOver hint for a player in the Remove a player sheet.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pede confirmação para remover este jogador."
+          }
+        }
+      }
+    },
+    "Back" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar"
+          }
+        }
+      },
+      "comment" : "Button that returns to the previous screen."
+    },
+    "Back to Home" : {
+      "comment" : "Button that leaves an ended game and returns to the start screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar ao início"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "comment" : "Cancels the current screen or confirmation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Categories (%lld)" : {
+      "comment" : "Section title with the number of categories in the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categorias (%lld)"
+          }
+        }
+      }
+    },
+    "Collecting answers…" : {
+      "comment" : "Placeholder title while the host collects everyone's answers.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recolhendo as respostas…"
+          }
+        }
+      }
+    },
+    "Coming soon." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em breve."
+          }
+        }
+      },
+      "comment" : "Placeholder text on screens not built yet."
+    },
+    "Continue" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      },
+      "comment" : "Onboarding button that saves the player's name."
+    },
+    "Create game" : {
+      "comment" : "Game setup button that creates the game and opens the lobby.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar jogo"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        }
+      },
+      "comment" : "Button that closes the Settings sheet."
+    },
+    "Don’t see your friend’s game? Make sure you’re both on the same Wi-Fi network." : {
+      "comment" : "Footer under the list of nearby games.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não está vendo o jogo do seu amigo? Confira se vocês estão na mesma rede Wi-Fi."
+          }
+        }
+      }
+    },
+    "End game" : {
+      "comment" : "Host action that ends the game for everyone.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar jogo"
+          }
+        }
+      }
+    },
+    "End round" : {
+      "comment" : "Confirm button for force-ending the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar rodada"
+          }
+        }
+      }
+    },
+    "End the game for everyone?" : {
+      "comment" : "Confirmation title when the host taps Leave game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar o jogo para todos?"
+          }
+        }
+      }
+    },
+    "End the game?" : {
+      "comment" : "Confirmation title for the host's End game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar o jogo?"
+          }
+        }
+      }
+    },
+    "End this round now?" : {
+      "comment" : "Confirmation title for Force end round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar esta rodada agora?"
+          }
+        }
+      }
+    },
+    "Everyone goes to the final standings." : {
+      "comment" : "Confirmation message for End game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos vão para a classificação final."
+          }
+        }
+      }
+    },
+    "Everyone needs the same app version" : {
+      "comment" : "Title when the host runs a different app version.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo mundo precisa da mesma versão do app"
+          }
+        }
+      }
+    },
+    "Everyone’s answers are locked as they are, even for players who haven’t stopped." : {
+      "comment" : "Confirmation message for Force end round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As respostas de todos ficam travadas como estão, mesmo de quem ainda não deu STOP."
+          }
+        }
+      }
+    },
+    "Find games hosted by friends on the same network." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontre jogos criados por amigos na mesma rede."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for the Join a game button on Home."
+    },
+    "Force end round" : {
+      "comment" : "Host menu action available while players are writing.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forçar fim da rodada"
+          }
+        }
+      }
+    },
+    "Forget" : {
+      "comment" : "Swipe action that deletes a remembered custom category.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esquecer"
+          }
+        }
+      }
+    },
+    "Free and open source. No ads, no accounts, no tracking." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratuito e de código aberto. Sem anúncios, sem contas, sem rastreamento."
+          }
+        }
+      },
+      "comment" : "About screen tagline."
+    },
+    "Friends nearby can join now from “Join a game”." : {
+      "comment" : "Lobby subtitle for the host. Quotes the Home button title.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os amigos por perto já podem entrar em “Entrar em um jogo”."
+          }
+        }
+      }
+    },
+    "Friends see this name when you play together." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus amigos veem esse nome quando vocês jogam juntos."
+          }
+        }
+      },
+      "comment" : "Explains what the player's name is used for."
+    },
+    "Game menu" : {
+      "comment" : "VoiceOver label of the in-game toolbar menu (ellipsis).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menu do jogo"
+          }
+        }
+      }
+    },
+    "Game over" : {
+      "comment" : "Placeholder title for the game over screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fim de jogo"
+          }
+        }
+      }
+    },
+    "Games are found over your Wi-Fi network, so the app needs Local Network access. Turn it on in Settings, then come back." : {
+      "comment" : "Join screen explanation when the Local Network permission was refused.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os jogos são encontrados pela sua rede Wi-Fi, então o app precisa de acesso à rede local. Ative nos Ajustes e volte aqui."
+          }
+        }
+      }
+    },
+    "Games nearby" : {
+      "comment" : "Header of the list of nearby games.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogos por perto"
+          }
+        }
+      }
+    },
+    "Get ready…" : {
+      "comment" : "Placeholder title during the 3-2-1 countdown.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prepare-se…"
+          }
+        }
+      }
+    },
+    "Giving up" : {
+      "comment" : "Lobby rules (guest view): label for whether giving up is allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desistência"
+          }
+        }
+      }
+    },
+    "Hi, %@! Ready to play?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oi, %@! Bora jogar?"
+          }
+        }
+      },
+      "comment" : "Home greeting. %@ is the player's name."
+    },
+    "Host" : {
+      "comment" : "VoiceOver: this player hosts the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem criou o jogo"
+          }
+        }
+      }
+    },
+    "Host a game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criar um jogo"
+          }
+        }
+      },
+      "comment" : "Home button that starts setting up a game on this phone."
+    },
+    "Join a game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrar em um jogo"
+          }
+        }
+      },
+      "comment" : "Home button that opens the list of nearby games."
+    },
+    "Joining the game…" : {
+      "comment" : "Shown after tapping a game until the host replies.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entrando no jogo…"
+          }
+        }
+      }
+    },
+    "Joins this game." : {
+      "comment" : "VoiceOver hint for a joinable game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entra neste jogo."
+          }
+        }
+      }
+    },
+    "Keep the app open. You’ll be back in the game as soon as the host’s phone is nearby." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha o app aberto. Você volta para o jogo assim que o celular de quem criou o jogo estiver por perto."
+          }
+        }
+      },
+      "comment" : "Shown while reconnecting to an interrupted game after a relaunch."
+    },
+    "Leave" : {
+      "comment" : "Confirm button for a guest leaving the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair"
+          }
+        }
+      }
+    },
+    "Leave game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do jogo"
+          }
+        }
+      },
+      "comment" : "Action that leaves the current game for good."
+    },
+    "Leave the game?" : {
+      "comment" : "Confirmation title when a guest taps Leave game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do jogo?"
+          }
+        }
+      }
+    },
+    "Leave this game" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair deste jogo"
+          }
+        }
+      },
+      "comment" : "Button that stops reconnecting to an interrupted game."
+    },
+    "Letter %@" : {
+      "comment" : "The round's letter. %@ is a single letter.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letra %@"
+          }
+        }
+      }
+    },
+    "Looking for games nearby…" : {
+      "comment" : "Join screen title while searching.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Procurando jogos por perto…"
+          }
+        }
+      }
+    },
+    "More categories" : {
+      "comment" : "Game setup section with categories not in the game yet.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mais categorias"
+          }
+        }
+      }
+    },
+    "Move down" : {
+      "comment" : "VoiceOver action that moves a category one place down.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover para baixo"
+          }
+        }
+      }
+    },
+    "Move up" : {
+      "comment" : "VoiceOver action that moves a category one place up.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover para cima"
+          }
+        }
+      }
+    },
+    "New game" : {
+      "comment" : "Title of the game setup screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novo jogo"
+          }
+        }
+      }
+    },
+    "Not allowed" : {
+      "comment" : "Lobby rules (guest view): giving up isn't allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não permitida"
+          }
+        }
+      }
+    },
+    "Open Settings" : {
+      "comment" : "Button that opens the app's page in the Settings app.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "Opens a new issue on GitHub." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre um novo chamado no GitHub."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for Report a problem in About."
+    },
+    "Opens the lobby, where friends nearby can join." : {
+      "comment" : "VoiceOver hint for Create game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre a sala de espera, onde os amigos por perto podem entrar."
+          }
+        }
+      }
+    },
+    "Opens the project on GitHub." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre o projeto no GitHub."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for Source code in About."
+    },
+    "Pick at least one category." : {
+      "comment" : "Game setup warning when no category is selected.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha pelo menos uma categoria."
+          }
+        }
+      }
+    },
+    "Picking a letter…" : {
+      "comment" : "Placeholder title while the round's letter is revealed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorteando a letra…"
+          }
+        }
+      }
+    },
+    "Play on your own against computer players." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogue contra jogadores controlados pelo computador."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for the Practice with bots button on Home."
+    },
+    "Played in this order. Touch and hold a category to move it; tap to remove it." : {
+      "comment" : "Game setup footer under the selected categories.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As categorias seguem esta ordem. Toque e segure para mover; toque para remover."
+          }
+        }
+      }
+    },
+    "Players (%lld)" : {
+      "comment" : "Lobby card title with the number of players.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogadores (%lld)"
+          }
+        }
+      }
+    },
+    "Practice with bots" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treinar com robôs"
+          }
+        }
+      },
+      "comment" : "Home button for a solo game against computer players."
+    },
+    "Privacy policy" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidade"
+          }
+        }
+      },
+      "comment" : "About link to the privacy policy web page."
+    },
+    "Reconnecting" : {
+      "comment" : "VoiceOver: this player's connection dropped.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconectando"
+          }
+        }
+      }
+    },
+    "Reconnecting to %@’s game…" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconectando ao jogo de %@…"
+          }
+        }
+      },
+      "comment" : "Title while rejoining an interrupted game. %@ is the host's name."
+    },
+    "reconnecting…" : {
+      "comment" : "Under a player's name while their connection is down.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reconectando…"
+          }
+        }
+      }
+    },
+    "Remove" : {
+      "comment" : "Confirm button for removing a player.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover"
+          }
+        }
+      }
+    },
+    "Remove %@?" : {
+      "comment" : "Confirmation title for removing a player. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover %@?"
+          }
+        }
+      }
+    },
+    "Remove a player" : {
+      "comment" : "Title of the sheet listing players the host can remove.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover um jogador"
+          }
+        }
+      }
+    },
+    "Remove player…" : {
+      "comment" : "Host menu action that opens the list of players to remove.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remover jogador…"
+          }
+        }
+      }
+    },
+    "Removes this category from the game." : {
+      "comment" : "VoiceOver hint for a selected category.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove esta categoria do jogo."
+          }
+        }
+      }
+    },
+    "Report a problem" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar um problema"
+          }
+        }
+      },
+      "comment" : "About link to report an issue on GitHub."
+    },
+    "Round %lld" : {
+      "comment" : "Round number.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rodada %lld"
+          }
+        }
+      }
+    },
+    "Round results" : {
+      "comment" : "Placeholder title for the round results screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultado da rodada"
+          }
+        }
+      }
+    },
+    "Rules" : {
+      "comment" : "Section title for stops required and giving up.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regras"
+          }
+        }
+      }
+    },
+    "Scoring" : {
+      "comment" : "Placeholder title for the scoring screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pontuação"
+          }
+        }
+      }
+    },
+    "Selected" : {
+      "comment" : "VoiceOver value of a category that's in the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selecionada"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes"
+          }
+        }
+      },
+      "comment" : "Title of the Settings sheet and the Home toolbar button that opens it."
+    },
+    "Sound effects never play while your phone is on silent." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os efeitos sonoros nunca tocam quando o celular está no silencioso."
+          }
+        }
+      },
+      "comment" : "Footer under the Sounds toggle in Settings."
+    },
+    "Sounds" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sons"
+          }
+        }
+      },
+      "comment" : "Settings toggle for sound effects."
+    },
+    "Source code" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código-fonte"
+          }
+        }
+      },
+      "comment" : "About link to the project's source code on GitHub."
+    },
+    "Start a game on this phone that friends nearby can join." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crie um jogo neste celular para os amigos por perto entrarem."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for the Host a game button on Home."
+    },
+    "Start game" : {
+      "comment" : "Lobby button (host only) that starts the first round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começar o jogo"
+          }
+        }
+      }
+    },
+    "Starts the first round for everyone." : {
+      "comment" : "VoiceOver hint for Start game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começa a primeira rodada para todos."
+          }
+        }
+      }
+    },
+    "Stops reconnecting and goes back to the start screen." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para de reconectar e volta para a tela inicial."
+          }
+        }
+      },
+      "comment" : "VoiceOver hint for Leave this game while reconnecting."
+    },
+    "Stops to end a round" : {
+      "comment" : "Stepper label: how many players must tap STOP before the round ends.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STOPs para encerrar a rodada"
+          }
+        }
+      }
+    },
+    "The classic word game, played with friends nearby." : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O clássico jogo de palavras, com os amigos por perto."
+          }
+        }
+      },
+      "comment" : "Onboarding subtitle."
+    },
+    "The game is no longer available. Start or join another one." : {
+      "comment" : "Message when the game closed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O jogo não está mais disponível. Crie ou entre em outro."
+          }
+        }
+      }
+    },
+    "The host removed you from the game." : {
+      "comment" : "Message when the host removed this player.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quem criou o jogo tirou você da partida."
+          }
+        }
+      }
+    },
+    "The round ends as soon as someone fills in every category and taps STOP." : {
+      "comment" : "Rules explanation: 1 stop, giving up not allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rodada termina assim que alguém preenche todas as categorias e toca em STOP."
+          }
+        }
+      }
+    },
+    "The round ends as soon as someone taps STOP or gives up." : {
+      "comment" : "Rules explanation: 1 stop, giving up allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rodada termina assim que alguém toca em STOP ou desiste."
+          }
+        }
+      }
+    },
+    "The round ends once %lld players have filled in every category and tapped STOP." : {
+      "comment" : "Rules explanation: several stops (always 2 or more), giving up not allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rodada termina quando %lld jogadores preenchem todas as categorias e tocam em STOP."
+          }
+        }
+      }
+    },
+    "The round ends once %lld players have tapped STOP or given up." : {
+      "comment" : "Rules explanation: several stops (always 2 or more), giving up allowed.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A rodada termina quando %lld jogadores tocam em STOP ou desistem."
+          }
+        }
+      }
+    },
+    "This game has ended" : {
+      "comment" : "Title when the game is no longer available.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este jogo terminou"
+          }
+        }
+      }
+    },
+    "Update the app" : {
+      "comment" : "Join list: this game needs a different app version.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualize o app"
+          }
+        }
+      }
+    },
+    "Update the app on every phone from the App Store, then try again." : {
+      "comment" : "Message for an app version mismatch.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualize o app em todos os celulares pela App Store e tente de novo."
+          }
+        }
+      }
+    },
+    "Version %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %@"
+          }
+        }
+      },
+      "comment" : "About screen version line. %@ is like 1.0 (1)."
+    },
+    "Waiting for %@ to start…" : {
+      "comment" : "Lobby bottom bar for guests. %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando %@ começar o jogo…"
+          }
+        }
+      }
+    },
+    "Waiting for players…" : {
+      "comment" : "Lobby hint under the disabled Start button (fewer than 2 players).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando jogadores…"
+          }
+        }
+      }
+    },
+    "Welcome to %@" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que bom ter você no %@"
+          }
+        }
+      },
+      "comment" : "Onboarding title. %@ is the app's name, which ends in an exclamation mark (\"Stop!\")."
+    },
+    "What’s your name?" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qual é o seu nome?"
+          }
+        }
+      },
+      "comment" : "Onboarding question above the name field."
+    },
+    "Write your answers" : {
+      "comment" : "Placeholder title for the writing screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escreva suas respostas"
+          }
+        }
+      }
+    },
+    "You" : {
+      "comment" : "VoiceOver: this chip is the local player.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você"
+          }
+        }
+      }
+    },
+    "you" : {
+      "comment" : "Under the local player's name in the lobby.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "você"
+          }
+        }
+      }
+    },
+    "You were removed from the game" : {
+      "comment" : "Title when the host removed this player.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você não está mais no jogo"
+          }
+        }
+      }
+    },
+    "Your categories are remembered on this phone for future games. Swipe left on one to forget it." : {
+      "comment" : "Game setup footer under the custom category field.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas categorias ficam guardadas neste celular para os próximos jogos. Deslize uma para a esquerda para esquecê-la."
+          }
+        }
+      }
+    },
+    "Your game" : {
+      "comment" : "Lobby title for the host.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu jogo"
+          }
+        }
+      }
+    },
+    "Your name" : {
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu nome"
+          }
+        }
+      },
+      "comment" : "Placeholder and label of the player's name field."
+    },
+    "Your points so far stay in the standings." : {
+      "comment" : "Confirmation message when a guest leaves the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus pontos até agora continuam na classificação."
+          }
+        }
+      }
+    },
+    "You’ll go back to the start screen." : {
+      "comment" : "Confirmation message when leaving a game that is already over.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você volta para a tela inicial."
+          }
+        }
+      }
+    },
+    "You’re in! The game starts when %@ is ready." : {
+      "comment" : "Lobby subtitle for guests. %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você entrou! O jogo começa quando %@ der a largada."
+          }
+        }
+      }
+    },
+    "You’re the host, so leaving ends the game on every phone." : {
+      "comment" : "Confirmation message when the host taps Leave game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você criou o jogo, então sair encerra o jogo em todos os celulares."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
