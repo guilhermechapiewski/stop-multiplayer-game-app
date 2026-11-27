@@ -242,8 +242,8 @@ struct HostSessionTests {
         let own = await ana.nextSnapshot { $0.currentRound?.stops.count == 1 }
         let other = await bea.nextSnapshot { $0.currentRound?.stops.count == 1 }
         #expect(own?.currentRound?.answers[ana.playerID] == ["Ana", "Anta"])
-        #expect(other?.currentRound?.answers[ana.playerID] == nil)
-        #expect(h.host.localClient.state?.currentRound?.answers[ana.playerID] == nil)
+        #expect(other?.currentRound?.answers[ana.playerID] == [])
+        #expect(h.host.localClient.state?.currentRound?.answers[ana.playerID] == [])
         #expect(h.host.state.currentRound?.answers[ana.playerID] == ["Ana", "Anta"])
     }
 
@@ -336,6 +336,44 @@ struct HostSessionTests {
                            .countdown(secondsRemaining: 3), .countdown(secondsRemaining: 2),
                            .countdown(secondsRemaining: 1), .writing])
         #expect(await ana.nextSnapshot { $0.phase == .writing } != nil)
+    }
+
+    /// Moves the clock by `duration` once both loops (heartbeat and tick) are sleeping.
+    private func step(_ h: Harness, _ duration: Duration) async {
+        await waitUntil("2 sleepers") { h.clock.sleeperCount >= 2 }
+        await h.clock.advance(by: duration)
+        await waitUntil("2 sleepers") { h.clock.sleeperCount >= 2 }
+    }
+
+    @Test func revealLastsTwoFullTicksFromStartGame() async throws {
+        let h = try Harness()
+        _ = try await h.join("Ana")
+        // Start mid-tick: without a restart, the first reveal tick would come 0.4 s later.
+        await step(h, .milliseconds(600))
+        h.host.localClient.send(.startGame)
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        await step(h, .milliseconds(100))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 1))
+        await step(h, .seconds(1))
+        #expect(h.host.state.phase == .countdown(secondsRemaining: 3))
+    }
+
+    @Test func completedCategoryStaysAFullTick() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        await h.toWriting()
+        ana.send(.stop(answers: ["Ana", "Anta"]))
+        await waitUntil("scoring") { h.host.state.phase == .scoring(categoryIndex: 0, completed: false) }
+        h.host.localClient.send(.setScore(round: 1, category: 0, points: 10, player: h.hostID))
+        await step(h, .milliseconds(600))
+        ana.send(.setScore(round: 1, category: 0, points: 10, player: ana.playerID))
+        await waitUntil("completed") { h.host.state.phase == .scoring(categoryIndex: 0, completed: true) }
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .scoring(categoryIndex: 0, completed: true))
+        await step(h, .milliseconds(100))
+        #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: false))
     }
 
     @Test func suspendStopsTicksSoCountdownPauses() async throws {

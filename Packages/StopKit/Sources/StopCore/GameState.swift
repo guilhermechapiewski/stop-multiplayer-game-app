@@ -57,13 +57,18 @@ public struct GameState: Codable, Sendable, Equatable {
 }
 
 extension GameState {
-    /// The snapshot `viewer` may see: before scoring, the current round's answers keep only the viewer's own entry.
+    /// The snapshot `viewer` may see: before scoring, the current round keeps the viewer's own answers; everyone
+    /// else's entry stays (so screens can show who has sent answers) but is emptied to `[]`, revealing nothing
+    /// about what, or how much, they wrote.
     public func redacted(for viewer: PlayerID) -> GameState {
         switch phase {
         case .revealing, .countdown, .writing, .collecting:
             guard !rounds.isEmpty else { return self }
             var copy = self
-            copy.rounds[rounds.count - 1].answers = copy.rounds[rounds.count - 1].answers.filter { $0.key == viewer }
+            let index = rounds.count - 1
+            copy.rounds[index].answers = Dictionary(uniqueKeysWithValues: rounds[index].answers.map { id, answers in
+                (id, id == viewer ? answers : [])
+            })
             return copy
         case .lobby, .scoring, .roundResults, .gameOver:
             return self

@@ -22,12 +22,25 @@ private func state(_ phase: Phase) -> GameState {
     for phase in hidden {
         let s = state(phase)
         let forB = s.redacted(for: b)
-        #expect(forB.currentRound?.answers == [b: ["Asno", "Abacate"]])
-        #expect(s.redacted(for: c).currentRound?.answers == [:])
+        // Own entry intact; others' keys kept (who has sent answers) with their values emptied.
+        #expect(forB.currentRound?.answers == [a: [], b: ["Asno", "Abacate"]])
+        // A viewer with no answers of their own sees only who has sent theirs.
+        #expect(s.redacted(for: c).currentRound?.answers == [a: [], b: []])
         // Everything else is untouched, including earlier rounds.
         var expected = s
-        expected.rounds[1].answers = [b: ["Asno", "Abacate"]]
+        expected.rounds[1].answers = [a: [], b: ["Asno", "Abacate"]]
         #expect(forB == expected)
+    }
+}
+
+@Test func redactionNeverRevealsBlankness() {
+    for phase in [Phase.writing, .collecting] {
+        var s = state(phase)
+        s.rounds[1].answers[c] = ["", "  "]
+        let forB = s.redacted(for: b)
+        #expect(forB.currentRound?.answers[a] == [])
+        #expect(forB.currentRound?.answers[c] == [])
+        #expect(s.redacted(for: c).currentRound?.answers[c] == ["", "  "])
     }
 }
 
