@@ -66,16 +66,22 @@ struct SessionFactories {
     var launchMockGame: LaunchMockGame
     var launchPractice: LaunchPractice
 
-    /// Production wiring. Mock mode's bots only sit in the game (UI tests drive the rounds); practice bots play.
+    /// Production wiring. Mock mode's bots play for real, and each waits for someone else's STOP before stopping
+    /// so the local player always gets to write. Practice bots play at the chosen speed.
     static let live = SessionFactories(
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
         launchMockGame: { profile, bots, settings, language, clock in
-            idleBotsMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
+            var behavior = BotPlayer.Behavior.practice(.normal)
+            behavior.stopWhenOthersStopped = true
+            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                               language: language, botBehavior: behavior, clock: clock)
+            return MockGame(host: game.host, retained: game.bots + [game.network]) { stop(game.bots) }
         },
         launchPractice: { profile, bots, settings, language, speed, store, clock in
-            // The launcher traps on invalid settings; refuse them here instead.
+            // `MockGameLauncher.launch` has a precondition that the settings are valid (it traps otherwise). The
+            // setup screen never offers invalid ones, but a trap would kill the app, so check first and refuse.
             guard (try? GameEngine.newGame(gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
                                            settings: settings, language: language)) != nil else {
                 Logger.app.error("practice: invalid settings")
@@ -84,15 +90,10 @@ struct SessionFactories {
             let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
                                                language: language, botSpeed: speed, practice: true, store: store,
                                                clock: clock)
-            return MockGame(host: game.host, retained: game.bots + [game.network]) {
-                for bot in game.bots {
-                    bot.cancel()
-                    bot.client.abandon()
-                }
-            }
+            return MockGame(host: game.host, retained: game.bots + [game.network]) { stop(game.bots) }
         })
 
-    /// A host on its own in-memory network, joined by bots that never play (stand-in for `MockGameLauncher`).
+    /// A host on its own in-memory network, joined by bots that never play (for tests).
     @MainActor
     static func idleBotsMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
                                  language: GameLanguage, clock: any Clock<Duration>) -> MockGame? {
@@ -115,5 +116,14 @@ struct SessionFactories {
             return bot
         }
         return MockGame(host: host, retained: [network] + bots)
+    }
+}
+
+/// Stops bots for good: they stop playing and drop the game (their in-memory store forgets it).
+@MainActor
+private func stop(_ bots: [BotPlayer]) {
+    for bot in bots {
+        bot.cancel()
+        bot.client.abandon()
     }
 }
