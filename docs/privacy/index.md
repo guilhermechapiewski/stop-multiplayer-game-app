@@ -22,6 +22,9 @@ During a game, your display name, your answers and your scores are sent only to 
 game, so everyone can play and score together. This game data never leaves your local network and is never
 sent to the developer or anyone else.
 
+While you host, your display name is shown to nearby phones that open **Join a game**, so friends can find
+your game. It's announced on your local network only (with Bonjour), and only until the game ends.
+
 ## Data kept on your iPhone
 
 To work, the app keeps a small amount of information in its private storage on your iPhone only:
