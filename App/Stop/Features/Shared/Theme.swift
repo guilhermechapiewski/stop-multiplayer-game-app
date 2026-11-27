@@ -166,6 +166,7 @@ struct PlayerInitial: View {
             .frame(width: size * scale, height: size * scale)
             .background(dimmed ? AnyShapeStyle(Color(.systemGray)) : AnyShapeStyle(Theme.accent.gradient), in: .circle)
             .accessibilityHidden(true)
+            .accessibilityIdentifier("playerInitial")
     }
 }
 

@@ -86,6 +86,7 @@ struct GameOptionsSections: View {
                     .foregroundStyle(Theme.accent)
             } else {
                 Text("Played in this order. Touch and hold a category to move it; tap to remove it.")
+                    .accessibilityIdentifier("categoriesFooter")
             }
         }
     }

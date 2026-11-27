@@ -54,11 +54,12 @@ struct SessionFactories {
         _ clock: any Clock<Duration>
     ) -> any RemoteGameSession
 
-    /// `-mockGame` only: returns a started host whose bots have been told to join. Practice games launch with
+    /// `-mockGame` only: returns a started host whose bots have been told to join. The game is saved in `store`
+    /// like a hosted one, so a relaunch restores it; `seed` makes it repeatable. Practice games launch with
     /// their own behavior (`BotPlayer.Behavior.practice(speed)`), not through this.
     typealias LaunchMockGame = @MainActor (
         _ hostProfile: Profile, _ botNames: [String], _ settings: GameSettings, _ language: GameLanguage,
-        _ clock: any Clock<Duration>
+        _ seed: UInt64?, _ store: any GameStore, _ clock: any Clock<Duration>
     ) -> MockGame?
 
     /// Returns a started practice host on its own in-memory network (never the app's transport), whose bots
@@ -78,9 +79,11 @@ struct SessionFactories {
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
-        launchMockGame: { profile, bots, settings, language, clock in
+        launchMockGame: { profile, bots, settings, language, seed, store, clock in
             let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-                                               language: language, botBehavior: mockGameBotBehavior, clock: clock)
+                                               language: language, practice: false,
+                                               botBehavior: mockGameBotBehavior(seeded: seed != nil), seed: seed,
+                                               store: store, clock: clock)
             return MockGame(bots: game.bots, host: game.host, network: game.network)
         },
         launchPractice: { profile, bots, settings, language, speed, store, clock in
@@ -98,9 +101,11 @@ struct SessionFactories {
         })
 
     /// `-mockGame` bots (screenshots, UI tests, development): normal speed, and each waits for someone else's
-    /// STOP before stopping, so the local player always gets to write. Not for practice games.
-    static var mockGameBotBehavior: BotPlayer.Behavior {
+    /// STOP before stopping, so the local player always gets to write. Seeded games (screenshots) have every
+    /// answer typed within a few seconds, so the scoring shots show them all. Not for practice games.
+    static func mockGameBotBehavior(seeded: Bool) -> BotPlayer.Behavior {
         var behavior = BotPlayer.Behavior.practice(.normal)
+        if seeded { behavior.stopAfter = .seconds(4) }
         behavior.stopWhenOthersStopped = true
         return behavior
     }

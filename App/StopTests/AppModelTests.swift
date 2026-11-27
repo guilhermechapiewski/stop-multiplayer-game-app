@@ -457,6 +457,45 @@ struct AppModelTests {
         model.leaveGame()
     }
 
+    @Test func mockGameIsSeededAndPersistedWithoutGiveUp() async throws {
+        let model = makeModel(arguments: ["-mockGame", "-mockSeed", "7", "-playerName", "Gui"])
+        await model.bootstrap()
+
+        let launch = try #require(sessions.mockLaunches.first)
+        #expect(launch.seed == 7)
+        // Persisted in the app's store, so a relaunch restores it (and its drafts).
+        #expect(launch.store as AnyObject === store as AnyObject)
+        // Give up starts off; the round results screen turns it on.
+        #expect(model.client?.state?.settings.allowGiveUp == false)
+        // Screenshots never show presence banners.
+        #expect(model.banners == nil)
+        #expect(LaunchOptions(arguments: ["-mockSeed", "x"]).mockSeed == nil)
+        #expect(LaunchOptions(arguments: []).mockSeed == nil)
+        // A relaunching UI test keeps the store; `-resetState` still wipes it.
+        #expect(LaunchOptions(arguments: ["-uiTesting"]).wipesStore)
+        #expect(!LaunchOptions(arguments: ["-uiTesting", "-keepState"]).wipesStore)
+        #expect(LaunchOptions(arguments: ["-keepState", "-resetState"]).wipesStore)
+        model.leaveGame()
+    }
+
+    /// A relaunch with `-mockGame` (and no wipe) comes back to the interrupted game instead of a new one.
+    @Test func mockGameRelaunchRestoresInterruptedGame() async throws {
+        let profile = await saveProfile()
+        let game = try GameEngine.newGame(
+            gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
+            settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
+        await store.saveHostGame(game)
+        await store.saveActiveGame(ActiveGameRef(gameID: game.gameID, role: .host, hostName: profile.name))
+
+        let model = makeModel(arguments: ["-mockGame"])
+        await model.bootstrap()
+
+        #expect(model.route == .game)
+        #expect(sessions.mockLaunches.isEmpty)
+        #expect(model.client?.state?.gameID == game.gameID)
+        model.leaveGame()
+    }
+
     // MARK: Practice
 
     func startPractice(_ model: AppModel, bots: Int = 3, speed: BotSpeed = .fast) {
@@ -739,6 +778,8 @@ final class SessionSpy {
     struct MockLaunch {
         let hostProfile: Profile
         let botNames: [String]
+        let seed: UInt64?
+        let store: any GameStore
     }
 
     private(set) var clients: [MadeClient] = []
@@ -765,8 +806,8 @@ final class SessionSpy {
                 clients.append(MadeClient(profile: profile, target: target, session: session))
                 return session
             },
-            launchMockGame: { [unowned self] profile, botNames, settings, language, clock in
-                mockLaunches.append(MockLaunch(hostProfile: profile, botNames: botNames))
+            launchMockGame: { [unowned self] profile, botNames, settings, language, seed, store, clock in
+                mockLaunches.append(MockLaunch(hostProfile: profile, botNames: botNames, seed: seed, store: store))
                 return SessionFactories.idleBotsMockGame(
                     hostProfile: profile, botNames: botNames, settings: settings, language: language, clock: clock)
             },

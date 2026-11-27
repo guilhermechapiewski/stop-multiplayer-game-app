@@ -75,14 +75,15 @@ struct GameMenu: View {
 
     @ViewBuilder private var gameItems: some View {
         if client.isHost && !isOver {
-            Section {
-                if isWriting { forceEndRoundItem }
-                Button("Remove player…", systemImage: "person.badge.minus") { showsRemoveSheet = true }
-                    .disabled(removable.isEmpty)
-                    .accessibilityIdentifier("removePlayerMenuItem")
-                Button("End game", systemImage: "flag.checkered") { confirmation = .endGame }
-                    .accessibilityIdentifier("endGameMenuItem")
-            }
+            // A divider rather than a `Section`: items inside a menu section lose their accessibility
+            // identifiers (UI tests can't find them).
+            if isWriting { forceEndRoundItem }
+            Button("Remove player…", systemImage: "person.badge.minus") { showsRemoveSheet = true }
+                .disabled(removable.isEmpty)
+                .accessibilityIdentifier("removePlayerMenuItem")
+            Button("End game", systemImage: "flag.checkered") { confirmation = .endGame }
+                .accessibilityIdentifier("endGameMenuItem")
+            Divider()
         }
         Button("Leave game", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
             confirmation = .leave

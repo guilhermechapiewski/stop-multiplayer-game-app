@@ -421,4 +421,22 @@ private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
         #expect(await store.loadActiveGame() == nil)
         host.shutdown()
     }
+
+    /// `seed` makes a mock game repeatable (screenshots): the same letters every time, and the bots plan the
+    /// same answers.
+    @Test func seededLaunchesPickTheSameLetters() async throws {
+        let clock = TestClock()
+        let profile = Profile(playerID: UUID(), name: "Gui", soundsEnabled: false)
+        let settings = GameSettings(categories: categories, stopsRequired: 1, allowGiveUp: false)
+        var letters: [String] = []
+        for _ in 0..<2 {
+            let (host, bots, _) = MockGameLauncher.launch(hostProfile: profile, botNames: ["Ana"], settings: settings,
+                                                          language: .en, seed: 42, clock: clock)
+            await waitUntil("bot in the lobby") { host.state.players.count == 2 && !bots.isEmpty }
+            host.localClient.send(.startGame)
+            letters.append(try #require(host.state.currentRound?.letter))
+            host.shutdown()
+        }
+        #expect(letters[0] == letters[1])
+    }
 }

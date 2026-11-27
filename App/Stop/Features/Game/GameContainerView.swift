@@ -69,7 +69,10 @@ struct GameScreen: View {
     @State private var stampedRound: Round?
     @State private var toast: ToastItem?
 
-    private static let stampDuration: Duration = .seconds(1.6)
+    /// Longer under `-uiTesting`: on a busy test machine one accessibility snapshot can take over a second, and
+    /// the tests check that the stamp shows up.
+    private static let stampDuration: Duration =
+        LaunchOptions(arguments: ProcessInfo.processInfo.arguments).uiTesting ? .seconds(4) : .seconds(1.6)
     private static let toastDuration: Duration = .seconds(3)
 
     private var stage: GameStage { GameStage(state: client.state, hostStatus: client.hostStatus) }

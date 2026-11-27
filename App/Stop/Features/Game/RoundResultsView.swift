@@ -204,6 +204,7 @@ struct StandingRow: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Rank \(entry.rank), \(name)"))
         .accessibilityValue(Text(verbatim: AccessibilityText.score(entry.points)))
+        .accessibilityIdentifier("standingRow")
     }
 
     private var rank: some View {

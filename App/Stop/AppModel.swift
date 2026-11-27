@@ -97,10 +97,11 @@ final class AppModel {
             route = .onboarding
             return
         }
-        if launch.mockGame {
-            startMockGame()
-        } else if let ref = await store.loadActiveGame() {
+        if let ref = await store.loadActiveGame() {
+            // A relaunch comes back to the interrupted game, in mock mode too (UI tests restore its draft).
             await restore(ref)
+        } else if launch.mockGame {
+            startMockGame()
         } else {
             route = .home
             if let destination = launch.openRoute { navigate(to: destination) }
@@ -313,9 +314,11 @@ final class AppModel {
 
     private func startMockGame() {
         guard let profile else { return }
+        // Give up starts off, like a new game; the round results screen turns it on.
         let settings = GameSettings(categories: DefaultCategories.list(for: gameLanguage), stopsRequired: 1,
-                                    allowGiveUp: true)
-        guard let game = sessions.launchMockGame(profile, Self.mockBotNames, settings, gameLanguage, clock) else {
+                                    allowGiveUp: false)
+        guard let game = sessions.launchMockGame(profile, Self.mockBotNames, settings, gameLanguage, launch.mockSeed,
+                                                 store, clock) else {
             route = .home
             return
         }
@@ -330,8 +333,9 @@ final class AppModel {
         resumeBots = game.resumeBots
         hostSession = game.host
         client = game.host.localClient
-        // Bots never go away, so a practice game has no presence banners.
-        if !isPractice { showBanners(for: game.host.localClient) }
+        // Bots never go away, so a practice game has no presence banners; nor does a seeded mock game (the
+        // screenshots), where a busy machine's late heartbeat must not put "Bia left the app" in the shot.
+        if !isPractice && launch.mockSeed == nil { showBanners(for: game.host.localClient) }
         route = .game
     }
 
@@ -430,8 +434,12 @@ struct LaunchOptions: Equatable {
     var uiTesting = false
     /// `-resetState`: wipe the store.
     var resetState = false
+    /// `-keepState`: keep the store even under `-uiTesting` (UI tests that relaunch the app).
+    var keepState = false
     /// `-mockGame`: start hosting straight away with bots on an in-memory network.
     var mockGame = false
+    /// `-mockSeed <n>`: a repeatable mock game (screenshots): fixed letters and bot answers, quick bots.
+    var mockSeed: UInt64?
     /// `-playerName <name>`: use this name and skip onboarding.
     var playerName: String?
     /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests).
@@ -440,7 +448,9 @@ struct LaunchOptions: Equatable {
     init(arguments: [String]) {
         uiTesting = arguments.contains("-uiTesting")
         resetState = arguments.contains("-resetState")
+        keepState = arguments.contains("-keepState")
         mockGame = arguments.contains("-mockGame")
+        mockSeed = Self.value(after: "-mockSeed", in: arguments).flatMap(UInt64.init)
         playerName = Self.value(after: "-playerName", in: arguments)
         openRoute = switch Self.value(after: "-openRoute", in: arguments) {
         case "hostSetup": .hostSetup
@@ -456,5 +466,5 @@ struct LaunchOptions: Equatable {
     }
 
     /// Whether the persisted store must be wiped before it's opened.
-    var wipesStore: Bool { uiTesting || resetState }
+    var wipesStore: Bool { (uiTesting && !keepState) || resetState }
 }

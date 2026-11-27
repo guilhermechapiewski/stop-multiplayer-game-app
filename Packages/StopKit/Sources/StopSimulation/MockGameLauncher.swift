@@ -8,10 +8,12 @@ import StopSession
 @MainActor public enum MockGameLauncher {
     /// `settings` must be valid and `hostProfile.name` non-blank (the setup screen guarantees both).
     /// `practice` keeps the game and its active-game reference out of `store`, so it is never restored after a
-    /// relaunch; `botBehavior` overrides the practice behavior derived from `botSpeed`.
+    /// relaunch; `botBehavior` overrides the practice behavior derived from `botSpeed`. A `seed` makes the game
+    /// repeatable (screenshots, UI tests): the host draws the same letters and the bots plan the same answers.
     public static func launch(hostProfile: Profile, botNames: [String], settings: GameSettings,
                               language: GameLanguage, botSpeed: BotSpeed = .normal, practice: Bool = true,
-                              botBehavior: BotPlayer.Behavior? = nil, store: any GameStore = InMemoryGameStore(),
+                              botBehavior: BotPlayer.Behavior? = nil, seed: UInt64? = nil,
+                              store: any GameStore = InMemoryGameStore(),
                               clock: any Clock<Duration> = ContinuousClock())
         -> (host: HostSession, bots: [BotPlayer], network: InMemoryNetwork) {
         let state: GameState
@@ -22,17 +24,20 @@ import StopSession
             preconditionFailure("MockGameLauncher: invalid settings or host name (\(error))")
         }
         let network = InMemoryNetwork()
+        let rng: any RandomNumberGenerator & Sendable = if let seed { SplitMix64(seed: seed) }
+                                                        else { SystemRandomNumberGenerator() }
         let host = HostSession(state: state, factory: network, store: practice ? PracticeStore(store) : store,
-                               clock: clock)
+                               clock: clock, rng: rng)
         host.start()
         let behavior = botBehavior ?? .practice(botSpeed)
-        let sharedSeed = UInt64.random(in: .min ... .max)
+        let sharedSeed = seed ?? .random(in: .min ... .max)
         let bots = botNames.enumerated().map { index, name in
             let profile = Profile(playerID: UUID(), name: name, soundsEnabled: false)
             let client = ClientSession(profile: profile, target: .rejoin(gameID: state.gameID), factory: network,
                                        store: InMemoryGameStore(), clock: clock)
-            let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock, index: index,
-                                sharedSeed: sharedSeed)
+            let botSeed = seed.map { $0 &+ UInt64(index + 1) } ?? .random(in: .min ... .max)
+            let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock, seed: botSeed,
+                                index: index, sharedSeed: sharedSeed)
             bot.run()
             client.start()
             return bot

@@ -1,80 +1,95 @@
 import XCTest
 
-/// A one-round game against the mock-game bots: start → letter → countdown → write → STOP → scoring →
-/// round results → end game → game over → Home.
+/// Games against the `-mockGame` bots (Ana, Bia and Caio), as the host: a full two-round game, a force-ended
+/// round, and a relaunch that restores the draft.
 final class RoundFlowUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
+    /// Lobby → letter → countdown → write → STOP → scoring → round results → Next round with Give up allowed →
+    /// give up → results → End game → game over → Home.
     @MainActor
-    func testPlayGameAgainstBots() {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTesting", "-mockGame", "-playerName", "Gui"]
-        app.launch()
+    func testFullGameTwoRounds() {
+        let app = launchApp(UITest.mockGame)
+        let game = GameSteps(app: app, test: self)
 
-        let start = app.buttons["startGameButton"]
-        XCTAssertTrue(start.waitForExistence(timeout: 10))
-        let ready = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: start)
-        wait(for: [ready], timeout: 10)
-        start.tap()
+        waitUntilEnabled(app.buttons["startGameButton"])
+        XCTAssertEqual(game.lobbyPlayers.sorted(), ["Ana", "Bia", "Caio", "Gui"])
+        game.startFromLobby()
+        XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: UITest.timeout))
+        attachScreenshot(app, "1-countdown")
 
-        XCTAssertTrue(app.staticTexts["revealedLetter"].waitForExistence(timeout: 5)
-                      || app.otherElements["revealedLetter"].exists)
-        snapshot(app, "1-reveal")
-        XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: 5))
-        snapshot(app, "2-countdown")
-
-        let stop = app.buttons["stopButton"]
-        XCTAssertTrue(stop.waitForExistence(timeout: 10))
-        XCTAssertFalse(stop.isEnabled)
-        let fields = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'answerField-'"))
-        XCTAssertTrue(fields.firstMatch.waitForExistence(timeout: 5))
-        let count = fields.count
+        // Round 1: fill every category and STOP. Give up starts off.
+        let count = game.waitForWriting()
         XCTAssertGreaterThan(count, 0)
-        // Focus the first field (it's focused on its own, but don't race the keyboard); Return moves on.
-        app.textFields["answerField-0"].tap()
-        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
-        for index in 0..<count {
-            app.typeText(index == count - 1 ? "Bento" : "Bento\n")
-        }
-        snapshot(app, "3-writing")
-        XCTAssertTrue(stop.isEnabled)
-        stop.tap()
+        XCTAssertFalse(app.buttons["stopButton"].isEnabled)
+        XCTAssertFalse(app.buttons["giveUpButton"].exists)
+        game.type(Array(repeating: "Bento", count: count))
+        attachScreenshot(app, "2-writing")
+        game.tapStop()
+        game.scoreEveryCategory(count) { self.attachScreenshot(app, "3-scoring") }
+        game.waitForRoundResults(rows: 4)
+        attachScreenshot(app, "4-round-results")
 
-        // Score every category 10; the bots score themselves.
-        for category in 1...count {
-            let header = app.descendants(matching: .any)["scoringCategory-\(category - 1)"]
-            XCTAssertTrue(header.waitForExistence(timeout: 15), "category \(category)")
-            let ten = app.buttons["score-10"]
-            let enabled = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: ten)
-            wait(for: [enabled], timeout: 10)
-            ten.tap()
-            if category == 1 { snapshot(app, "4-scoring") }
-            // The completed category shows for one host tick; catch it when we can.
-            if category == 1, app.staticTexts["categoryCompleted"].waitForExistence(timeout: 3) {
-                snapshot(app, "5-category-completed")
-            }
-        }
+        // Round 2: allow giving up, then give up with blank answers (they score 0 on their own).
+        // The rules card is at the bottom, under the Next round bar: scroll it into view first.
+        app.swipeUp()
+        let allowGiveUp = waitFor(app.switches["resultsAllowGiveUpToggle"], "hittable == true")
+        // The element spans the label; the switch itself is at the trailing edge.
+        allowGiveUp.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        waitFor(allowGiveUp, "value == '1'")
+        app.buttons["nextRoundButton"].tap()
+        game.waitForWriting()
+        waitFor(app.buttons["giveUpButton"], "hittable == true").tap()
+        // A confirmation dialog (an action sheet), not an alert.
+        waitFor(app.buttons["confirmGiveUpButton"].firstMatch).tap()
+        XCTAssertTrue(game.stopStamp.waitForExistence(timeout: 5))
+        game.waitForRoundResults(rows: 4)
 
-        let nextRound = app.buttons["nextRoundButton"]
-        XCTAssertTrue(nextRound.waitForExistence(timeout: 15))
-        snapshot(app, "6-round-results")
-        app.buttons["endGameButton"].tap()
-        let confirm = app.alerts.buttons["confirmEndGameButton"].firstMatch
-        XCTAssertTrue(confirm.waitForExistence(timeout: 5))
-        confirm.tap()
-
-        XCTAssertTrue(app.staticTexts["winnerTitle"].waitForExistence(timeout: 10)
-                      || app.otherElements["winnerTitle"].exists)
-        snapshot(app, "7-game-over")
+        game.endGameFromResults()
+        XCTAssertEqual(game.element("finalStandings").descendants(matching: .any)
+                           .matching(identifier: "standingRow").count, 4)
+        attachScreenshot(app, "5-game-over")
         app.buttons["backHomeButton"].tap()
-        XCTAssertTrue(app.buttons["hostGameButton"].waitForExistence(timeout: 10))
+        waitFor(app.buttons["hostGameButton"])
     }
 
+    /// The host ends the round from the game menu while everyone is still writing: scoring follows.
     @MainActor
-    private func snapshot(_ app: XCUIApplication, _ name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
+    func testForceEndRound() {
+        let app = launchApp(UITest.mockGame)
+        let game = GameSteps(app: app, test: self)
+        game.startFromLobby()
+        game.waitForWriting()
+        game.type(["Bento"], closeKeyboard: true)
+
+        game.menu("forceEndRoundMenuItem")
+        waitFor(game.element("scoringCategory-0"), timeout: UITest.longTimeout)
+        // The first answer is Gui's own; the rest are blank (scored 0 on their own).
+        waitUntilEnabled(app.buttons["score-10"])
+    }
+
+    /// The app is killed mid-writing: the relaunch comes back to the round with the typed answers in place.
+    @MainActor
+    func testRelaunchRestoresDraft() {
+        // `-keepState`: `-uiTesting` alone wipes the store on every launch. `-resetState` wipes only this first one.
+        let arguments = UITest.mockGame + ["-keepState"]
+        let app = launchApp(arguments + ["-resetState"])
+        let game = GameSteps(app: app, test: self)
+        game.startFromLobby()
+        game.waitForWriting()
+        game.type(["Bento", "Baleia"])
+        waitFor(app.textFields["answerField-1"], "value == 'Baleia'")
+
+        // Like swiping the app away: it goes to the background first (which saves), then it's killed.
+        XCUIDevice.shared.press(.home)
+        waitFor(app, "state == \(XCUIApplication.State.runningBackgroundSuspended.rawValue)"
+                    + " OR state == \(XCUIApplication.State.runningBackground.rawValue)")
+        app.terminate()
+
+        app.launchArguments = arguments
+        app.launch()
+        waitFor(app.textFields["answerField-0"], "value == 'Bento'")
+        waitFor(app.textFields["answerField-1"], "value == 'Baleia'")
+        XCTAssertTrue(app.buttons["stopButton"].exists)
     }
 }

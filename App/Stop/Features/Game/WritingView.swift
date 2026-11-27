@@ -76,6 +76,8 @@ struct WritingView: View {
                     .ignoresSafeArea(edges: .top)
                     .overlay(alignment: .bottom) { Divider() }
             }
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("writingHeader")
     }
 
     private var header: some View {

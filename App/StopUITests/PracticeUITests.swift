@@ -2,9 +2,6 @@ import XCTest
 
 /// Practice with bots: setup → lobby with the bots → End practice; and a full round against fast bots.
 final class PracticeUITests: XCTestCase {
-    /// One generous timeout for every wait: under load, accessibility snapshots can stall for seconds.
-    private let timeout: TimeInterval = 30
-
     override func setUp() { continueAfterFailure = false }
 
     @MainActor
@@ -12,20 +9,19 @@ final class PracticeUITests: XCTestCase {
         let app = launch()
 
         app.buttons["startPracticeButton"].tap()
-        let start = app.buttons["startGameButton"]
-        XCTAssertTrue(start.waitForExistence(timeout: timeout))
-        waitUntilEnabled(start)
+        waitUntilEnabled(app.buttons["startGameButton"])
 
         endPractice(app)
-        XCTAssertTrue(app.buttons["practiceButton"].waitForExistence(timeout: timeout))
+        waitFor(app.buttons["practiceButton"])
     }
 
+    /// Home → Practice with bots → 2 fast bots → a full round → End practice → Home.
     @MainActor
-    func testFullPracticeRoundEnglish() { playFullRound(languageArguments: []) }
+    func testFullPracticeRoundEnglish() { playFullRound(fromHome: true, languageArguments: [], botPrefix: "Robo ") }
 
     @MainActor
     func testFullPracticeRoundPortuguese() {
-        playFullRound(languageArguments: ["-AppleLanguages", "(pt-BR)", "-AppleLocale", "pt_BR"])
+        playFullRound(fromHome: false, languageArguments: UITest.portuguese, botPrefix: "Robô ")
     }
 
     // MARK: Full round
@@ -33,96 +29,62 @@ final class PracticeUITests: XCTestCase {
     /// Two stops end the round, so after the player's STOP a fast bot has to stop too: by then the bots have
     /// typed what they know, and scoring shows their real answers.
     @MainActor
-    private func playFullRound(languageArguments: [String]) {
-        let app = launch(languageArguments)
+    private func playFullRound(fromHome: Bool, languageArguments: [String], botPrefix: String) {
+        let app = launch(languageArguments, fromHome: fromHome)
+        let game = GameSteps(app: app, test: self)
+        app.steppers["botsStepper"].buttons.element(boundBy: 0).tap()
         app.segmentedControls["botSpeedPicker"].buttons.element(boundBy: 2).tap()
-        snapshot(app, "1-setup")
+        attachScreenshot(app, "1-setup")
         app.buttons["startPracticeButton"].tap()
 
-        let start = app.buttons["startGameButton"]
-        XCTAssertTrue(start.waitForExistence(timeout: timeout))
-        waitUntilEnabled(start)
+        let start = waitUntilEnabled(app.buttons["startGameButton"])
+        let players = game.lobbyPlayers
+        XCTAssertEqual(players.count, 3)
+        XCTAssertEqual(players.filter { $0.hasPrefix(botPrefix) }.count, 2, "\(players)")
         app.steppers["lobbyStopsStepper"].buttons.element(boundBy: 1).tap()
-        snapshot(app, "2-lobby")
+        attachScreenshot(app, "2-lobby")
         start.tap()
 
-        XCTAssertTrue(app.staticTexts["countdownNumber"].waitForExistence(timeout: timeout))
-        snapshot(app, "3-countdown")
-
-        let stop = app.buttons["stopButton"]
-        XCTAssertTrue(stop.waitForExistence(timeout: timeout))
-        let fields = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'answerField-'"))
-        XCTAssertTrue(fields.firstMatch.waitForExistence(timeout: timeout))
-        let count = fields.count
-        for index in 0..<count {
-            app.typeText(index == count - 1 ? "Bento" : "Bento\n")
+        let count = game.waitForWriting()
+        game.type(Array(repeating: "Bento", count: count))
+        attachScreenshot(app, "3-writing")
+        // Two stops end this round: the stamp comes once a bot stops too (scoring waits for it).
+        game.tapStop(locksRound: false)
+        if game.element("stoppedBanner").waitForExistence(timeout: 3) {
+            attachScreenshot(app, "4-stopped")
         }
-        snapshot(app, "4-writing")
-        stop.tap()
-        if app.descendants(matching: .any)["stoppedBanner"].waitForExistence(timeout: 3) {
-            snapshot(app, "5-stopped")
-        }
-
-        for category in 0..<count {
-            let header = app.descendants(matching: .any)["scoringCategory-\(category)"]
-            // The first category waits for a bot to stop too.
-            XCTAssertTrue(header.waitForExistence(timeout: 2 * timeout), "category \(category)")
-            // The STOP! stamp covers the screen for a moment as scoring opens; a tap then would be lost.
-            XCTAssertTrue(app.otherElements["stopStamp"].waitForNonExistence(timeout: timeout))
-            let ten = app.buttons["score-10"]
-            waitUntilEnabled(ten)
-            snapshot(app, "6-scoring-\(category)")
-            ten.tap()
-        }
-
-        XCTAssertTrue(app.buttons["nextRoundButton"].waitForExistence(timeout: timeout))
-        snapshot(app, "7-round-results")
+        game.scoreEveryCategory(count) { self.attachScreenshot(app, "5-scoring") }
+        game.waitForRoundResults(rows: 3)
+        attachScreenshot(app, "6-round-results")
         endPractice(app)
 
-        XCTAssertTrue(app.descendants(matching: .any)["winnerTitle"].waitForExistence(timeout: timeout))
-        snapshot(app, "8-standings")
+        waitFor(game.element("winnerTitle"))
+        attachScreenshot(app, "7-standings")
         app.buttons["backHomeButton"].tap()
-        XCTAssertTrue(app.buttons["practiceButton"].waitForExistence(timeout: timeout))
-        snapshot(app, "9-home")
+        waitFor(app.buttons["practiceButton"])
     }
 
     // MARK: Helpers
 
     @MainActor
-    private func launch(_ extraArguments: [String] = []) -> XCUIApplication {
-        let app = XCUIApplication()
-        app.launchArguments = ["-uiTesting", "-playerName", "Gui", "-openRoute", "practiceSetup"] + extraArguments
-        app.launch()
-        XCTAssertTrue(app.buttons["startPracticeButton"].waitForExistence(timeout: timeout))
+    private func launch(_ extraArguments: [String] = [], fromHome: Bool = false) -> XCUIApplication {
+        var arguments = ["-uiTesting", "-playerName", "Gui"] + extraArguments
+        if !fromHome { arguments += ["-openRoute", "practiceSetup"] }
+        let app = launchApp(arguments)
+        if fromHome { waitFor(app.buttons["practiceButton"]).tap() }
+        waitFor(app.buttons["startPracticeButton"])
         return app
     }
 
     @MainActor
     private func endPractice(_ app: XCUIApplication) {
-        app.buttons["gameMenu"].tap()
-        let item = app.buttons["endPracticeMenuItem"]
-        XCTAssertTrue(item.waitForExistence(timeout: timeout))
+        waitFor(app.buttons["gameMenu"], "hittable == true").tap()
+        let item = waitFor(app.buttons["endPracticeMenuItem"])
         // Practice replaces the multiplayer actions.
         XCTAssertFalse(app.buttons["leaveGameMenuItem"].exists)
         XCTAssertFalse(app.buttons["endGameMenuItem"].exists)
         XCTAssertFalse(app.buttons["removePlayerMenuItem"].exists)
         item.tap()
-        let confirm = app.alerts.buttons["confirmMenuActionButton"].firstMatch
-        XCTAssertTrue(confirm.waitForExistence(timeout: timeout))
-        confirm.tap()
-    }
-
-    @MainActor
-    private func waitUntilEnabled(_ element: XCUIElement) {
-        let enabled = expectation(for: NSPredicate(format: "isEnabled == true"), evaluatedWith: element)
-        wait(for: [enabled], timeout: timeout)
-    }
-
-    @MainActor
-    private func snapshot(_ app: XCUIApplication, _ name: String) {
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.name = name
-        attachment.lifetime = .keepAlways
-        add(attachment)
+        waitFor(app.alerts.buttons["confirmMenuActionButton"].firstMatch).tap()
     }
 }

@@ -15,5 +15,8 @@ struct BottomActionBar<Content: View>: View {
         .frame(maxWidth: .infinity)
         .background(.bar)
         .dynamicTypeSize(...DynamicTypeSize.accessibility2)
+        // A container, so the identifier doesn't replace its buttons' own (the accessibility audit test uses it).
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("bottomActionBar")
     }
 }

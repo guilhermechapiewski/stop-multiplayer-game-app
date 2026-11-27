@@ -31,9 +31,10 @@ struct PlayerChip: View {
                         .font(.system(.caption, design: .rounded))
                         .foregroundStyle(.secondary)
                 } else if isYou {
+                    // Primary, not secondary: grey on the accent-tinted capsule falls short of 4.5:1 contrast.
                     Text("you")
                         .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.primary)
                 }
             }
         }
@@ -49,6 +50,7 @@ struct PlayerChip: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: name))
         .accessibilityValue(accessibilityDetails)
+        .accessibilityIdentifier("playerChip")
     }
 
     private var accessibilityDetails: Text {
