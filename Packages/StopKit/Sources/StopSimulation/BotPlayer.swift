@@ -156,8 +156,8 @@ import StopSession
                 elapsed = item.at
                 guard !Task.isCancelled, let self, self.writingRound == number, !self.hasStopped else { return }
                 switch item.step {
-                case .type(let index):
-                    self.typed[index] = planned[index]
+                case .type(let slot):
+                    self.typed[slot] = planned[slot]
                     self.client.saveDraft(self.typed)
                 case .done:
                     self.doneTyping = true

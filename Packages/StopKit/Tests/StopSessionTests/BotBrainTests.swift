@@ -165,6 +165,25 @@ struct BotBrainTests {
         #expect(checked > 100)
     }
 
+    /// A custom category falls back to any bank word for the letter; bots spread across that pool too.
+    @Test(arguments: languages)
+    func botsSpreadGuessesForCustomCategories(_ language: GameLanguage) {
+        let bank = BotAnswerBank.load(language)
+        var seeds = SeededRNG(seed: 31)
+        var checked = 0
+        for letter in Self.letters where bank.anyCandidates(letter: letter).count >= 3 {
+            let shared = seeds.next()
+            let answers = (0..<3).map { index in
+                var brain = BotBrain(language: language, speed: .normal, seed: seeds.next(), index: index,
+                                     sharedSeed: shared)
+                return brain.plan(categories: ["Dinosaur"], letter: letter, round: 1).answers[0]
+            }
+            #expect(Set(answers).count == 3, "\(letter): \(answers)")
+            checked += 1
+        }
+        #expect(checked > 15)
+    }
+
     @Test func spreadIsDeterministicAndVariesByRound() {
         let categories = DefaultCategories.list(for: .ptBR)
         func plan(_ index: Int, round: Int) -> BotRoundPlan {
