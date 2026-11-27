@@ -21,8 +21,8 @@ private func waitUntil(_ what: String, _ condition: () async -> Bool) async {
 /// A host played by the test plus bot clients, all on one in-memory network and test clock.
 @MainActor
 private final class Scenario {
-    let net = InMemoryNetwork()
     let clock = TestClock()
+    let net: InMemoryNetwork
     let hostStore = InMemoryGameStore()
     var host: HostSession
     private(set) var clients: [ClientSession] = []
@@ -33,13 +33,15 @@ private final class Scenario {
     var hostAutoPlay = true
     /// With auto-play, the host also calls STOP with its typed answers as soon as writing starts.
     var hostStops = false
-    /// Real time given to in-flight messages after each clock step (only needed with network latency).
-    var realTimePerStep: Duration?
     private var hostDraftedRound = 0
+    /// Host sessions replaced by a restored one (still shut down at the end).
+    var retiredHosts: [HostSession] = []
 
     init(bots behaviors: [BotPlayer.Behavior], stopsRequired: Int = 1, allowGiveUp: Bool = true,
-         rounds: Int = 1) throws {
+         rounds: Int = 1, latency: Duration = .zero) throws {
         self.rounds = rounds
+        net = InMemoryNetwork(clock: clock)
+        net.setLatency(latency)
         let state = try GameEngine.newGame(
             gameID: UUID(), hostID: UUID(), hostName: "Gui",
             settings: GameSettings(categories: categories, stopsRequired: stopsRequired, allowGiveUp: allowGiveUp),
@@ -67,22 +69,25 @@ private final class Scenario {
             bot.run()
             client.start()
         }
-        await waitUntil("bots in the lobby") {
+        await run("bots in the lobby", seconds: 10) {
             clients.allSatisfy { host.state.player($0.localPlayerID)?.presence == .present && $0.state != nil }
         }
         host.localClient.send(.startGame)
         #expect(host.state.phase == .revealing(ticksRemaining: 2))
     }
 
+    /// Stops every bot, client and host (including replaced ones) so nothing outlives the test.
+    func tearDown() {
+        for bot in bots { bot.cancel() }
+        for client in clients { client.stop() }
+        for session in retiredHosts + [host] { session.shutdown() }
+    }
+
     /// Moves the clock 250 ms, lets messages flow, and plays the host's part.
     func step() async {
         await clock.advance(by: .milliseconds(250))
-        if let realTimePerStep {
-            try? await Task.sleep(for: realTimePerStep)
-        } else {
-            for _ in 0..<5 { await Task.yield() }
-            try? await Task.sleep(for: .milliseconds(1))
-        }
+        for _ in 0..<5 { await Task.yield() }
+        try? await Task.sleep(for: .milliseconds(1))
         if hostAutoPlay { playHost() }
     }
 
@@ -97,19 +102,30 @@ private final class Scenario {
 
     func runToGameOver(seconds: Int = 240) async {
         await run("game over", seconds: seconds) { host.state.phase == .gameOver }
-        await waitUntil("clients saw the game end") {
+        await run("clients saw the game end", seconds: 5) {
             clients.allSatisfy { $0.hostStatus == .ended(.gameOver) || $0.hostStatus == .ended(.leftGame) }
         }
     }
 
-    /// Every client that stayed to the end has the host's totals and rounds.
-    func expectConsistentEverywhere() {
+    /// Every client except the `leavers` (bot indices) reached game over with the host's totals and rounds.
+    func expectConsistentEverywhere(leavers: Set<Int> = []) {
         let totals = host.state.totals
-        for client in clients where client.hostStatus == .ended(.gameOver) {
+        for (index, client) in clients.enumerated() where !leavers.contains(index) {
+            #expect(client.hostStatus == .ended(.gameOver), "\(client.profile.name)")
             #expect(client.state?.totals == totals, "\(client.profile.name)")
             #expect(client.state?.rounds == host.state.rounds, "\(client.profile.name)")
             #expect(client.state?.phase == .gameOver)
         }
+    }
+
+    /// The host's answers for `round` (what `playHost` types).
+    func hostAnswers(_ round: Round) -> [String] { categories.map { round.letter + $0.prefix(3) } }
+
+    /// Bot `index`'s answers recorded by the host for round `round` (1-based) equal what it typed, all filled.
+    func expectBotAnswersSurvived(_ index: Int, round: Int = 1) {
+        let recorded = host.state.rounds[round - 1].answers[id(index)]
+        #expect(recorded == bots[index].typed, "\(bots[index].name)")
+        #expect(recorded?.contains(where: AnswerText.isBlank) == false, "\(bots[index].name): \(recorded ?? [])")
     }
 
     /// The host (a human here) types placeholder answers, scores itself 10 and plays `rounds` rounds.
@@ -119,7 +135,7 @@ private final class Scenario {
         switch state.phase {
         case .writing where hostDraftedRound != round.number:
             hostDraftedRound = round.number
-            let answers = state.settings.categories.map { round.letter + $0.prefix(3) }
+            let answers = hostAnswers(round)
             host.localClient.saveDraft(answers)
             if hostStops { host.localClient.send(.stop(answers: answers)) }
         case .scoring(let category, false) where round.participants.contains(hostID):
@@ -139,13 +155,14 @@ private func bot(stopAfter: Duration? = .seconds(2), giveUpAfter: Duration? = ni
                        stopWhenOthersStopped: stopWhenOthersStopped)
 }
 
-/// Effectively never stops on its own.
-private let slowBot = bot(stopAfter: .seconds(1000))
+/// Types everything within 2 s, then only stops once someone else has.
+private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
 
 @MainActor
-@Suite struct ResilienceScenarioTests {
+@Suite(.serialized) struct ResilienceScenarioTests {
     @Test func fullGameThreeRoundsReachesGameOverWithConsistentStateEverywhere() async throws {
         let s = try Scenario(bots: [.default, .default, .default], stopsRequired: 2, rounds: 3)
+        defer { s.tearDown() }
         await s.start()
         await s.runToGameOver(seconds: 240)
         #expect(s.host.state.rounds.count == 3)
@@ -160,8 +177,10 @@ private let slowBot = bot(stopAfter: .seconds(1000))
     }
 
     @Test func playerDropsDuringWritingAndReturns() async throws {
-        // Bot 1 is the only one who stops; it drops before its STOP and returns 2 s later.
-        let s = try Scenario(bots: [bot(stopAfter: .seconds(3)), slowBot, slowBot])
+        // Bot 1 drops before its STOP (at 3 s) and comes back later; the others type everything within 2 s and
+        // wait for someone else to stop. No giving up, so every bot fills every category.
+        let s = try Scenario(bots: [bot(stopAfter: .seconds(3)), waiter, waiter], allowGiveUp: false)
+        defer { s.tearDown() }
         await s.start()
         await s.run("writing") { s.host.state.phase == .writing }
         await s.step()
@@ -175,14 +194,16 @@ private let slowBot = bot(stopAfter: .seconds(1000))
         await s.run("bot 1 back") { s.presence(0) == .present }
         await s.run("round locked by bot 1's stop") { s.host.state.phase != .writing }
         #expect(s.host.state.rounds[0].stops.map(\.playerID) == [s.id(0)])
-        // The others' typed drafts were submitted at the lock.
-        #expect(s.host.state.rounds[0].answers.count == 4)
+        await s.run("all answers in") { s.host.state.rounds[0].answers.count == 4 }
+        // Bot 1's answers came with its queued STOP; the others' typed drafts were submitted at the lock.
+        for index in 0..<3 { s.expectBotAnswersSurvived(index) }
         await s.runToGameOver()
         s.expectConsistentEverywhere()
     }
 
     @Test func playerDropsDuringScoringHostScoresForThem() async throws {
         let s = try Scenario(bots: [bot(), bot(), bot()], stopsRequired: 1, rounds: 2)
+        defer { s.tearDown() }
         await s.start()
         await s.run("scoring") {
             if case .scoring = s.host.state.phase { true } else { false }
@@ -214,12 +235,15 @@ private let slowBot = bot(stopAfter: .seconds(1000))
 
     @Test func hostSuspendsDuringCountdownEveryonePausesThenResumes() async throws {
         let s = try Scenario(bots: [bot(), bot(), bot()])
+        defer { s.tearDown() }
         await s.start()
         await s.run("countdown") { s.host.state.phase == .countdown(secondsRemaining: 3) }
         s.host.suspend()
         await waitUntil("clients see the host away") { s.clients.allSatisfy { $0.hostStatus == .away } }
         let paused = s.host.state
-        // 4 s: less than the 6 s of silence after which clients recycle the connection.
+        // 4 s: less than the 6 s of silence after which clients recycle the connection. Specific to the fake:
+        // the in-memory host still answers while suspended, so a reconnect would look like a resume; a really
+        // suspended app wouldn't answer.
         for _ in 0..<(4 * 4) { await s.step() }
         #expect(s.host.state.phase == paused.phase)
         #expect(s.host.state.version == paused.version)
@@ -233,12 +257,18 @@ private let slowBot = bot(stopAfter: .seconds(1000))
     }
 
     @Test func hostAppKilledAndRestoredMidRound() async throws {
-        let s = try Scenario(bots: [bot(stopAfter: .seconds(4)), slowBot, slowBot], rounds: 2)
+        // Bot 1 STOPs at 2 s, while the host is dead; the others type within 2 s and wait for a stop.
+        let s = try Scenario(bots: [bot(stopAfter: .seconds(2)), waiter, waiter], allowGiveUp: false, rounds: 2)
+        defer { s.tearDown() }
         await s.start()
         await s.run("writing") { s.host.state.phase == .writing }
-        await s.step()
-        // The host app dies: no goodbye, its listener and every connection vanish.
+        // Long enough for the host's typed draft to pass its 300 ms debounce and be saved.
+        for _ in 0..<2 { await s.step() }
+        let hostDraft = s.hostAnswers(try #require(s.host.state.currentRound))
+        // The host app is backgrounded and then killed: suspend persists and stops its loops, then its listener
+        // and every connection vanish without a goodbye reaching anyone.
         let dead = s.host
+        s.retiredHosts.append(dead)
         dead.listener?.stop()
         s.net.dropAllConnections()
         dead.suspend()
@@ -249,8 +279,10 @@ private let slowBot = bot(stopAfter: .seconds(1000))
             return saved?.phase == .writing
         }
         let persisted = try #require(saved)
-        // Bots keep typing (and bot 1 stops) while the host is gone.
+        // While the host is gone the bots keep typing and bot 1 STOPs: the STOP waits in its queue.
         for _ in 0..<(3 * 4) { await s.step() }
+        #expect(s.clients[0].frozenAnswers != nil)
+        #expect(s.clients[0].pendingIntentCount >= 1)
         // Relaunch: restore the persisted game in a new session on a new listener.
         let restored = HostSession(state: persisted, factory: s.net, store: s.hostStore, clock: s.clock,
                                    rng: SeededRNG(seed: 11))
@@ -262,6 +294,10 @@ private let slowBot = bot(stopAfter: .seconds(1000))
         }
         await s.run("round locked by bot 1's queued stop") { restored.state.phase != .writing }
         #expect(restored.state.rounds[0].stops.map(\.playerID) == [s.id(0)])
+        await s.run("all answers in") { restored.state.rounds[0].answers.count == 4 }
+        // The host's own draft was restored from disk and submitted at the lock by the new session.
+        #expect(restored.state.rounds[0].answers[s.hostID] == hostDraft)
+        for index in 0..<3 { s.expectBotAnswersSurvived(index) }
         await s.runToGameOver()
         #expect(restored.state.rounds.count == 2)
         s.expectConsistentEverywhere()
@@ -270,6 +306,7 @@ private let slowBot = bot(stopAfter: .seconds(1000))
     @Test func everyoneGivesUpTogether() async throws {
         let giveUp = bot(stopAfter: .seconds(1000), giveUpAfter: .seconds(2))
         let s = try Scenario(bots: [giveUp, giveUp, giveUp], stopsRequired: 4, allowGiveUp: true)
+        defer { s.tearDown() }
         await s.start()
         await s.run("writing") { s.host.state.phase == .writing }
         s.host.localClient.send(.giveUp(answers: ["", "", ""]))
@@ -285,6 +322,7 @@ private let slowBot = bot(stopAfter: .seconds(1000))
     @Test func playerLeavesForGoodAndStaysInStandings() async throws {
         // Everyone must stop; bot 3 leaves early in round 2, which lowers the cap to the three still playing.
         let s = try Scenario(bots: [bot(), bot(), bot()], stopsRequired: 4, rounds: 2)
+        defer { s.tearDown() }
         s.hostStops = true
         await s.start()
         await s.run("round 1 results") { s.host.state.phase == .roundResults || s.host.state.rounds.count == 2 }
@@ -305,11 +343,12 @@ private let slowBot = bot(stopAfter: .seconds(1000))
         #expect(state.player(leaver)?.presence == .left)
         let standings = Standings.rank(state.totals, players: state.players)
         #expect(standings.contains { $0.playerID == leaver && $0.points == roundOnePoints })
-        s.expectConsistentEverywhere()
+        s.expectConsistentEverywhere(leavers: [2])
     }
 
     @Test func botWaitingForOthersStopsOnlyAfterSomeoneElseDoes() async throws {
         let s = try Scenario(bots: [bot(stopAfter: .seconds(1), stopWhenOthersStopped: true)], stopsRequired: 2)
+        defer { s.tearDown() }
         s.hostAutoPlay = false
         await s.start()
         await s.run("writing") { s.host.state.phase == .writing }
@@ -321,14 +360,14 @@ private let slowBot = bot(stopAfter: .seconds(1000))
     }
 
     @Test func latency500msStillConverges() async throws {
+        // Every message, from the lobby join on, takes 500 ms of game time each way.
         let s = try Scenario(bots: [bot(scoreDelay: .milliseconds(300)), bot(scoreDelay: .milliseconds(300))],
-                             stopsRequired: 2)
+                             stopsRequired: 2, latency: .milliseconds(500))
+        defer { s.tearDown() }
         await s.start()
-        s.net.setLatency(.milliseconds(500))
-        // In-memory latency is real time: give each 250 ms game-time step 100 ms of real time.
-        s.realTimePerStep = .milliseconds(100)
         await s.runToGameOver(seconds: 60)
         #expect(s.host.state.rounds[0].stops.count == 2)
+        #expect(s.host.state.rounds[0].scores.values.allSatisfy { $0.allSatisfy { $0 != nil } })
         s.expectConsistentEverywhere()
     }
 

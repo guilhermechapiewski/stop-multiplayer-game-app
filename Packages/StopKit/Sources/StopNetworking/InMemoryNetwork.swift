@@ -4,15 +4,27 @@ import Synchronization
 /// An in-process `TransportFactory` for tests and simulations, with fault injection.
 ///
 /// Delivery is asynchronous and ordered per connection end: every end has a serial inbox drained by its
-/// own task, which waits until each message's delivery time (send time + latency, real time) before
+/// own task, which waits until each message's delivery time (send time + latency, on the network's clock) before
 /// emitting it. Both ends of a link share the same connection `id`.
 ///
 /// A connection's sends are dropped until `start()` has been called on it; the incoming end accepts
 /// messages as soon as the dialing end has started, buffering them until the listener side starts it.
 public final class InMemoryNetwork: TransportFactory, Sendable {
     private let state = Mutex(State())
+    /// Time since the network was created, on its clock; delivery deadlines are measured in it.
+    private let elapsed: @Sendable () -> Duration
+    private let sleep: @Sendable (Duration) async throws -> Void
 
-    public init() {}
+    /// `clock` times latency; tests pass their test clock so latency costs no real time.
+    public init(clock: any Clock<Duration> = ContinuousClock()) {
+        (elapsed, sleep) = Self.timeSource(clock)
+    }
+
+    private static func timeSource<C: Clock<Duration>>(_ clock: C)
+        -> (@Sendable () -> Duration, @Sendable (Duration) async throws -> Void) {
+        let start = clock.now
+        return ({ start.duration(to: clock.now) }, { try await clock.sleep(for: $0) })
+    }
 
     // MARK: TransportFactory
 
@@ -106,11 +118,11 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
     private func deliveryTask(_ inbox: AsyncStream<Delivery>, _ linkID: UUID, _ side: Side) -> Task<Void, Never> {
         // Weak: an end nobody closes must not keep the network alive. When the network goes away its state
         // (and so the inbox continuation) is released, which finishes the inbox and ends this task.
-        Task { [weak self] in
+        let elapsed = elapsed, sleep = sleep
+        return Task { [weak self] in
             for await delivery in inbox {
-                if delivery.deadline > .now {
-                    try? await Task.sleep(until: delivery.deadline, clock: .continuous)
-                }
+                let wait = delivery.deadline - elapsed()
+                if wait > .zero { try? await sleep(wait) }
                 guard !Task.isCancelled, let self else { return }
                 deliver(delivery.event, linkID, side)
             }
@@ -121,7 +133,7 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
         state.withLock { state in
             guard let link = state.links[linkID], link.isOpen,
                   link[side]?.started == true, let peer = link[side.peer] else { return }
-            let delivery = Delivery(event: .message(data), deadline: .now + state.latency)
+            let delivery = Delivery(event: .message(data), deadline: elapsed() + state.latency)
             peer.inbox.yield(delivery)
             if state.duplicateNext {
                 state.duplicateNext = false
@@ -138,7 +150,7 @@ public final class InMemoryNetwork: TransportFactory, Sendable {
             link[side]?.finish()
             if let peer = link[side.peer], !peer.closed {
                 if peer.started {
-                    peer.inbox.yield(Delivery(event: .closed, deadline: .now + state.latency))
+                    peer.inbox.yield(Delivery(event: .closed, deadline: elapsed() + state.latency))
                 } else {
                     link[side.peer]?.finish()
                 }
@@ -221,7 +233,8 @@ fileprivate enum Side: Sendable {
 
 fileprivate struct Delivery: Sendable {
     var event: ConnectionEvent
-    var deadline: ContinuousClock.Instant
+    /// Since the network was created, on its clock.
+    var deadline: Duration
 }
 
 /// One end of a link.

@@ -1,4 +1,5 @@
 import Foundation
+import StopTestSupport
 import Testing
 @testable import StopNetworking
 
@@ -123,6 +124,21 @@ extension ListenerEvent {
     client.send(Data("x".utf8))
     #expect(await serverEvents.next() == .message(Data("x".utf8)))
     #expect(clock.now - sentAt >= .milliseconds(50))
+}
+
+@Test(.timeLimit(.minutes(1))) func latencyRunsOnTheInjectedClock() async throws {
+    let clock = TestClock()
+    let net = InMemoryNetwork(clock: clock)
+    let (client, server, _) = try await connectedPair(on: net)
+    var serverEvents = server.events.makeAsyncIterator()
+    #expect(await serverEvents.next() == .ready)
+    net.setLatency(.seconds(30))
+    client.send(Data("x".utf8))
+    while clock.sleeperCount == 0 { await Task.yield() }
+    await clock.advance(by: .seconds(29))
+    #expect(clock.sleeperCount == 1)
+    await clock.advance(by: .seconds(1))
+    #expect(await serverEvents.next() == .message(Data("x".utf8)))
 }
 
 @Test(.timeLimit(.minutes(1))) func severClosesBothEnds() async throws {
