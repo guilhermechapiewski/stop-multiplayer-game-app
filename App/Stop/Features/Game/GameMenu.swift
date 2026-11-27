@@ -3,19 +3,23 @@ import StopSession
 import SwiftUI
 
 /// The in-game toolbar menu. Everyone can leave; the host can also end the game, force-end a round that's
-/// being written, and remove players. Every action asks for confirmation.
+/// being written, and remove players. In practice the player can force-end a round or end the practice (to the
+/// final standings mid-game, else to Home). Every action asks for confirmation.
 struct GameMenu: View {
     let client: any GameClient
     let state: GameState?
     let onLeave: () -> Void
 
+    @Environment(\.isPracticeGame) private var isPractice
+
     private enum Confirmation: Identifiable {
-        case leave, endGame, forceEndRound, remove(PlayerID)
+        case leave, endGame, forceEndRound, remove(PlayerID), endPractice
 
         var id: String {
             switch self {
             case .leave: "leave"
             case .endGame: "endGame"
+            case .endPractice: "endPractice"
             case .forceEndRound: "forceEndRound"
             case .remove(let id): "remove-\(id)"
             }
@@ -30,6 +34,8 @@ struct GameMenu: View {
     private var names: [PlayerID: String] { state?.displayNames ?? [:] }
     private var isWriting: Bool { state?.phase == .writing }
     private var isOver: Bool { state?.phase == .gameOver }
+    /// Ending a practice that has rounds shows its final standings; otherwise it just closes.
+    private var endingPracticeShowsStandings: Bool { !isOver && state?.phase != .lobby }
     /// The host leaving before game over ends the game on every phone.
     private var endsGameForEveryone: Bool { client.isHost && !isOver }
     /// Players the host may remove: everyone else still in the game.
@@ -40,23 +46,11 @@ struct GameMenu: View {
 
     var body: some View {
         Menu {
-            if client.isHost && !isOver {
-                Section {
-                    if isWriting {
-                        Button("Force end round", systemImage: "forward.end.fill") { confirmation = .forceEndRound }
-                            .accessibilityIdentifier("forceEndRoundMenuItem")
-                    }
-                    Button("Remove player…", systemImage: "person.badge.minus") { showsRemoveSheet = true }
-                        .disabled(removable.isEmpty)
-                        .accessibilityIdentifier("removePlayerMenuItem")
-                    Button("End game", systemImage: "flag.checkered") { confirmation = .endGame }
-                        .accessibilityIdentifier("endGameMenuItem")
-                }
+            if isPractice {
+                practiceItems
+            } else {
+                gameItems
             }
-            Button("Leave game", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
-                confirmation = .leave
-            }
-            .accessibilityIdentifier("leaveGameMenuItem")
         } label: {
             Label("Game menu", systemImage: "ellipsis")
         }
@@ -79,6 +73,34 @@ struct GameMenu: View {
         }
     }
 
+    @ViewBuilder private var gameItems: some View {
+        if client.isHost && !isOver {
+            Section {
+                if isWriting { forceEndRoundItem }
+                Button("Remove player…", systemImage: "person.badge.minus") { showsRemoveSheet = true }
+                    .disabled(removable.isEmpty)
+                    .accessibilityIdentifier("removePlayerMenuItem")
+                Button("End game", systemImage: "flag.checkered") { confirmation = .endGame }
+                    .accessibilityIdentifier("endGameMenuItem")
+            }
+        }
+        Button("Leave game", systemImage: "rectangle.portrait.and.arrow.right", role: .destructive) {
+            confirmation = .leave
+        }
+        .accessibilityIdentifier("leaveGameMenuItem")
+    }
+
+    @ViewBuilder private var practiceItems: some View {
+        if isWriting { forceEndRoundItem }
+        Button("End practice", systemImage: "flag.checkered", role: .destructive) { confirmation = .endPractice }
+            .accessibilityIdentifier("endPracticeMenuItem")
+    }
+
+    private var forceEndRoundItem: some View {
+        Button("Force end round", systemImage: "forward.end.fill") { confirmation = .forceEndRound }
+            .accessibilityIdentifier("forceEndRoundMenuItem")
+    }
+
     // MARK: Confirmations
 
     private var isConfirming: Binding<Bool> {
@@ -89,6 +111,7 @@ struct GameMenu: View {
         switch confirmation {
         case .leave: endsGameForEveryone ? Text("End the game for everyone?") : Text("Leave the game?")
         case .endGame: Text("End the game?")
+        case .endPractice: Text("End the practice?")
         case .forceEndRound: Text("End this round now?")
         case .remove(let id): Text("Remove \(names[id] ?? "")?")
         case nil: Text(verbatim: "")
@@ -107,6 +130,8 @@ struct GameMenu: View {
             }
         case .endGame:
             "Everyone goes to the final standings."
+        case .endPractice:
+            endingPracticeShowsStandings ? "You’ll see the final standings." : "You’ll go back to the start screen."
         case .forceEndRound:
             "Everyone’s answers are locked as they are, even for players who haven’t stopped."
         case .remove(let id):
@@ -118,6 +143,7 @@ struct GameMenu: View {
         switch pending {
         case .leave: endsGameForEveryone ? "End game" : "Leave"
         case .endGame: "End game"
+        case .endPractice: "End practice"
         case .forceEndRound: "End round"
         case .remove: "Remove"
         }
@@ -127,6 +153,7 @@ struct GameMenu: View {
         switch pending {
         case .leave: onLeave()
         case .endGame: client.send(.endGame)
+        case .endPractice: if endingPracticeShowsStandings { client.send(.endGame) } else { onLeave() }
         case .forceEndRound: client.send(.forceEndRound)
         case .remove(let id): client.send(.removePlayer(id))
         }
@@ -176,6 +203,19 @@ private struct RemovePlayerSheet: View {
         }
         .fontDesign(.rounded)
     }
+}
+
+#Preview("Game menu – practice") {
+    let client = PreviewData.client(isHost: true, phase: .writing)
+    NavigationStack {
+        Color.clear
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    GameMenu(client: client, state: client.state, onLeave: {})
+                }
+            }
+    }
+    .environment(\.isPracticeGame, true)
 }
 
 #Preview("Game menu – host") {

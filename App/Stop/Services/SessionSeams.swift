@@ -3,16 +3,10 @@ import os
 import StopCore
 import StopNetworking
 import StopSession
+import StopSimulation
 
-// App-side seams for the session types: `ClientSession` and `MockGameLauncher` / `BotPlayer` (Task 12).
-// `AppModel` only talks to these, so tests can stub them. When `MockGameLauncher` lands, wire it in
-// `SessionFactories.live`:
-//
-//     launchMockGame: { profile, bots, settings, language, clock in
-//         let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-//                                            language: language, clock: clock)
-//         return MockGame(host: game.host, retained: game.bots + [game.network])
-//     }
+// App-side seams for the session types: `ClientSession`, the `-mockGame` host and `MockGameLauncher` (practice).
+// `AppModel` only talks to these, so tests can stub them.
 
 /// A game client that talks to a host over a transport: `ClientSession`'s lifecycle on top of `GameClient`.
 @MainActor protocol RemoteGameSession: GameClient {
@@ -40,10 +34,13 @@ enum ClientTarget: Equatable, Sendable {
     }
 }
 
-/// A running mock game (`-mockGame`): the host plus whatever must stay alive with it (bots, their network).
+/// A running game against bots (`-mockGame` or practice): the host plus whatever must stay alive with it (bots,
+/// their network).
 struct MockGame {
     let host: HostSession
     let retained: [AnyObject]
+    /// Stops the bots when the game is closed.
+    var stopBots: @MainActor () -> Void = {}
 }
 
 struct SessionFactories {
@@ -58,16 +55,41 @@ struct SessionFactories {
         _ clock: any Clock<Duration>
     ) -> MockGame?
 
+    /// Returns a started practice host on its own in-memory network (never the app's transport), whose bots
+    /// have been told to join. `store` only lends the profile and custom categories: the game isn't persisted.
+    typealias LaunchPractice = @MainActor (
+        _ hostProfile: Profile, _ botNames: [String], _ settings: GameSettings, _ language: GameLanguage,
+        _ speed: BotSpeed, _ store: any GameStore, _ clock: any Clock<Duration>
+    ) -> MockGame?
+
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
+    var launchPractice: LaunchPractice
 
-    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode's bots only sit in the game.
+    /// Production wiring. Mock mode's bots only sit in the game (UI tests drive the rounds); practice bots play.
     static let live = SessionFactories(
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
         launchMockGame: { profile, bots, settings, language, clock in
             idleBotsMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
+        },
+        launchPractice: { profile, bots, settings, language, speed, store, clock in
+            // The launcher traps on invalid settings; refuse them here instead.
+            guard (try? GameEngine.newGame(gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
+                                           settings: settings, language: language)) != nil else {
+                Logger.app.error("practice: invalid settings")
+                return nil
+            }
+            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                               language: language, botSpeed: speed, practice: true, store: store,
+                                               clock: clock)
+            return MockGame(host: game.host, retained: game.bots + [game.network]) {
+                for bot in game.bots {
+                    bot.cancel()
+                    bot.client.abandon()
+                }
+            }
         })
 
     /// A host on its own in-memory network, joined by bots that never play (stand-in for `MockGameLauncher`).

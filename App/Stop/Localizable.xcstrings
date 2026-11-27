@@ -86,6 +86,17 @@
         }
       }
     },
+    "A solo game on this phone. No network needed." : {
+      "comment" : "Footer on practice setup explaining practice mode.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogue sozinho neste celular. Não precisa de rede."
+          }
+        }
+      }
+    },
     "About" : {
       "localizations" : {
         "pt-BR" : {
@@ -207,6 +218,72 @@
         }
       }
     },
+    "Bot speed" : {
+      "comment" : "Section header and picker label on practice setup.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velocidade dos robôs"
+          }
+        }
+      }
+    },
+    "Bots" : {
+      "comment" : "Stepper label on practice setup: how many computer players join (1 to 5).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Robôs"
+          }
+        }
+      }
+    },
+    "Bots call STOP after 20 to 35 seconds. Think fast!" : {
+      "comment" : "Description of the Fast bot speed. Keep the word STOP as is.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os robôs pedem STOP depois de 20 a 35 segundos. Pense rápido!"
+          }
+        }
+      }
+    },
+    "Bots call STOP after about 35 to 60 seconds." : {
+      "comment" : "Description of the Normal bot speed. Keep the word STOP as is.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os robôs pedem STOP depois de uns 35 a 60 segundos."
+          }
+        }
+      }
+    },
+    "Bots only know the built-in categories, so they leave yours blank." : {
+      "comment" : "Footer on practice setup when a custom category is selected.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os robôs só conhecem as categorias prontas, então deixam as suas em branco."
+          }
+        }
+      }
+    },
+    "Bots take their time and call STOP after a minute or more. Good for learning." : {
+      "comment" : "Description of the Relaxed bot speed. Keep the word STOP as is.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os robôs vão com calma e pedem STOP depois de um minuto ou mais. Bom para aprender."
+          }
+        }
+      }
+    },
     "Cancel" : {
       "comment" : "Cancels the current screen or confirmation.",
       "localizations" : {
@@ -306,6 +383,17 @@
         }
       }
     },
+    "End practice" : {
+      "comment" : "Game menu item and confirm button that ends a practice game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar treino"
+          }
+        }
+      }
+    },
     "End round" : {
       "comment" : "Confirm button for force-ending the round.",
       "localizations" : {
@@ -335,6 +423,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Encerrar o jogo?"
+          }
+        }
+      }
+    },
+    "End the practice?" : {
+      "comment" : "Title of the alert confirming ending a practice game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar o treino?"
           }
         }
       }
@@ -379,6 +478,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "As respostas de todos ficam travadas como estão, mesmo de quem ainda não deu STOP."
+          }
+        }
+      }
+    },
+    "Fast" : {
+      "comment" : "Bot speed option: bots call STOP quickly.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rápido"
           }
         }
       }
@@ -702,6 +812,17 @@
         }
       }
     },
+    "Normal" : {
+      "comment" : "Bot speed option: bots call STOP at an average pace.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Normal"
+          }
+        }
+      }
+    },
     "Not allowed" : {
       "comment" : "Lobby rules (guest view): giving up isn't allowed.",
       "localizations" : {
@@ -735,6 +856,17 @@
       },
       "comment" : "VoiceOver hint for Report a problem in About."
     },
+    "Opens the lobby with your bots. Start the first round from there." : {
+      "comment" : "VoiceOver hint for the Start practice button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre a sala de espera com seus robôs. Comece a primeira rodada por lá."
+          }
+        }
+      }
+    },
     "Opens the lobby, where friends nearby can join." : {
       "comment" : "VoiceOver hint for Create game.",
       "localizations" : {
@@ -756,6 +888,17 @@
         }
       },
       "comment" : "VoiceOver hint for Source code in About."
+    },
+    "Opponents" : {
+      "comment" : "Section header on practice setup for the bots.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adversários"
+          }
+        }
+      }
     },
     "Pick at least one category." : {
       "comment" : "Game setup warning when no category is selected.",
@@ -812,6 +955,28 @@
         }
       }
     },
+    "Playing against" : {
+      "comment" : "VoiceOver label for the list of bot names on practice setup.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogando contra"
+          }
+        }
+      }
+    },
+    "Practice" : {
+      "comment" : "Title of the practice setup screen (a solo game against bots).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Treino"
+          }
+        }
+      }
+    },
     "Practice with bots" : {
       "localizations" : {
         "pt-BR" : {
@@ -863,6 +1028,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "reconectando…"
+          }
+        }
+      }
+    },
+    "Relaxed" : {
+      "comment" : "Bot speed option: bots call STOP slowly.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tranquilo"
           }
         }
       }
@@ -1050,6 +1226,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Começar o jogo"
+          }
+        }
+      }
+    },
+    "Start practice" : {
+      "comment" : "Button on practice setup that opens the lobby with the bots in it.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Começar treino"
           }
         }
       }
@@ -1347,6 +1534,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Você volta para a tela inicial."
+          }
+        }
+      }
+    },
+    "You’ll see the final standings." : {
+      "comment" : "Message when ending a practice game that has rounds.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você vê a classificação final."
           }
         }
       }

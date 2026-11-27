@@ -3,7 +3,9 @@ import Observation
 import StopCore
 import StopNetworking
 import StopSession
+import StopSimulation
 import StopTestSupport
+import Synchronization
 import Testing
 @testable import Stop
 
@@ -455,6 +457,101 @@ struct AppModelTests {
         model.leaveGame()
     }
 
+    // MARK: Practice
+
+    func startPractice(_ model: AppModel, bots: Int = 3, speed: BotSpeed = .fast) {
+        model.startPractice(settings: GameSettings(categories: ["Animal", "Fruit"], stopsRequired: 1,
+                                                   allowGiveUp: true),
+                            botNames: Array(PracticeSetupModel.botNames(for: .en).prefix(bots)), speed: speed)
+    }
+
+    @Test func practiceStartsInTheLobbyWithBotsJoined() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+
+        startPractice(model, bots: 2, speed: .relaxed)
+
+        #expect(model.route == .game)
+        #expect(model.isPractice)
+        let launch = try #require(sessions.practiceLaunches.first)
+        #expect(launch.botNames == ["Robo Ana", "Robo Ben"])
+        #expect(launch.speed == .relaxed)
+        let client = try #require(model.client)
+        #expect(client.isHost)
+        try await waitUntil {
+            client.state?.players.map(\.name).sorted() == ["Gui", "Robo Ana", "Robo Ben"]
+                && client.state?.players.allSatisfy { $0.presence == .present } == true
+        }
+        #expect(client.state?.phase == .lobby)
+        model.leaveGame()
+        #expect(model.route == .home)
+        #expect(!model.isPractice)
+    }
+
+    @Test func practiceNotRestoredAfterKill() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        startPractice(model)
+        let client = try #require(model.client)
+        try await waitUntil { client.state?.players.count == 4 }
+        client.send(.startGame)
+        try await waitUntil { client.state?.phase != .lobby }
+        // A hosted game would be saved by now (see `hostGameStartsHostSessionAndPersistsIt`); practice never is.
+        #expect(await store.loadActiveGame() == nil)
+        #expect(await store.loadHostGame() == nil)
+
+        // The app is killed mid-round: a fresh launch on the same store goes Home.
+        let relaunched = makeModel()
+        await relaunched.bootstrap()
+        #expect(relaunched.route == .home)
+        #expect(relaunched.client == nil)
+        #expect(!relaunched.isPractice)
+        model.leaveGame()
+    }
+
+    @Test func practiceGameNeverUsesRealNetwork() async throws {
+        _ = await saveProfile()
+        let realNetwork = FactorySpy()
+        let model = AppModel(store: store, factory: realNetwork, launchArguments: [], sessions: sessions.factories)
+        await model.bootstrap()
+
+        startPractice(model, bots: 5)
+
+        let client = try #require(model.client)
+        try await waitUntil { client.state?.players.count == 6 }
+        client.send(.startGame)
+        try await waitUntil { client.state?.phase != .lobby }
+        model.leaveGame()
+        #expect(realNetwork.uses == 0)
+    }
+
+    @Test func endingPracticeStopsTheBots() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        startPractice(model, bots: 1)
+        let client = try #require(model.client)
+        try await waitUntil { client.state?.players.count == 2 }
+        let bot = try #require(sessions.practiceLaunches.first?.game?.retained.compactMap { $0 as? BotPlayer }.first)
+
+        model.leaveGame()
+
+        try await waitUntil { bot.client.hostStatus.isEnded }
+    }
+
+    @Test func practiceIsIgnoredWhileInAGame() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.hostGame(settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true))
+        startPractice(model)
+        #expect(sessions.practiceLaunches.isEmpty)
+        #expect(!model.isPractice)
+        model.leaveGame()
+    }
+
     @Test func navigationBetweenMenuRoutes() async {
         _ = await saveProfile()
         let model = makeModel()
@@ -624,6 +721,14 @@ final class SessionSpy {
     func forgetClients() { clients = [] }
     private(set) var mockLaunches: [MockLaunch] = []
 
+    struct PracticeLaunch {
+        let botNames: [String]
+        let speed: BotSpeed
+        let game: MockGame?
+    }
+
+    private(set) var practiceLaunches: [PracticeLaunch] = []
+
     var factories: SessionFactories {
         SessionFactories(
             makeClient: { [unowned self] profile, target, _, _, _ in
@@ -635,6 +740,36 @@ final class SessionSpy {
                 mockLaunches.append(MockLaunch(hostProfile: profile, botNames: botNames))
                 return SessionFactories.idleBotsMockGame(
                     hostProfile: profile, botNames: botNames, settings: settings, language: language, clock: clock)
+            },
+            launchPractice: { [unowned self] profile, botNames, settings, language, speed, store, clock in
+                // The real launcher: practice games must really run on their own in-memory network.
+                let game = SessionFactories.live.launchPractice(profile, botNames, settings, language, speed, store,
+                                                                clock)
+                practiceLaunches.append(PracticeLaunch(botNames: botNames, speed: speed, game: game))
+                return game
             })
+    }
+}
+
+/// A transport factory that counts every use (practice must never touch the app's real network).
+final class FactorySpy: TransportFactory {
+    private let network = InMemoryNetwork()
+    private let count = Mutex(0)
+
+    var uses: Int { count.withLock { $0 } }
+
+    func makeListener() -> any Listener {
+        count.withLock { $0 += 1 }
+        return network.makeListener()
+    }
+
+    func makeBrowser() -> any Browser {
+        count.withLock { $0 += 1 }
+        return network.makeBrowser()
+    }
+
+    func connect(to endpoint: EndpointRef) -> any Connection {
+        count.withLock { $0 += 1 }
+        return network.connect(to: endpoint)
     }
 }
