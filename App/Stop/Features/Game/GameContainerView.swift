@@ -9,7 +9,9 @@ struct GameContainerView: View {
 
     var body: some View {
         if let client = model.client {
-            GameScreen(client: client, onLeave: model.leaveGame)
+            GameScreen(client: client, banner: model.banners?.current, networkDenied: model.isLocalNetworkDenied,
+                       onLeave: model.leaveGame)
+                .id(ObjectIdentifier(client))
         } else {
             Theme.background.ignoresSafeArea()
         }
@@ -46,10 +48,24 @@ enum GameStage: Equatable {
 }
 
 struct GameScreen: View {
-    let client: any GameClient
+    /// The presence banner showing now ("Ana left the app").
+    let banner: Banner?
+    /// Local network access is off, so the host can't be reached.
+    let networkDenied: Bool
     let onLeave: () -> Void
 
+    /// The session, wrapped to number its errors (see `ErrorEventClient`).
+    @State private var client: ErrorEventClient
+
+    init(client: any GameClient, banner: Banner? = nil, networkDenied: Bool = false, onLeave: @escaping () -> Void) {
+        _client = State(initialValue: ErrorEventClient(client))
+        self.banner = banner
+        self.networkDenied = networkDenied
+        self.onLeave = onLeave
+    }
+
     @Environment(\.reduceMotion) private var reduceMotion
+    @Environment(\.isPracticeGame) private var isPractice
     /// The round whose lock is being stamped "STOP!" over the screen.
     @State private var stampedRound: Round?
     @State private var toast: ToastItem?
@@ -66,8 +82,22 @@ struct GameScreen: View {
                 content
                     .transition(.opacity)
                     .id(String(describing: stage))
+                if hostAway == .fullScreen {
+                    hostAwayOverlay(.fullScreen)
+                        .transition(.opacity)
+                }
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                // While writing it's a banner that pushes the form down, so typing carries on.
+                if hostAway == .banner {
+                    hostAwayOverlay(.banner)
+                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                }
             }
             .animation(reduceMotion ? nil : .smooth(duration: 0.35), value: stage)
+            .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.3), value: hostAway)
+            .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.3),
+                       value: client.hostStatus == .mayBeGone)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if showsMenu {
@@ -85,12 +115,21 @@ struct GameScreen: View {
             }
         }
         .overlay(alignment: .top) {
-            if let toast {
-                ErrorToast(error: toast.error)
-                    .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
-                    .onTapGesture { self.toast = nil }
+            VStack(spacing: 0) {
+                if let banner {
+                    PresenceBannerView(banner: banner)
+                        .id(banner.id)
+                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                        .allowsHitTesting(false)
+                }
+                if let toast {
+                    ErrorToast(error: toast.error)
+                        .transition(reduceMotion ? .opacity : .move(edge: .top).combined(with: .opacity))
+                        .onTapGesture { self.toast = nil }
+                }
             }
         }
+        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.35), value: banner)
         .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.3), value: stampedRound?.number)
         .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.35), value: toast)
         .onChange(of: stage) { old, new in
@@ -106,15 +145,34 @@ struct GameScreen: View {
             do { try await Task.sleep(for: Self.stampDuration) } catch { return }
             stampedRound = nil
         }
-        .onChange(of: client.lastError) { _, error in
-            // A fresh item each time, so a repeated error shows again and restarts the timer.
-            if let error, ErrorToast.shows(error) { toast = ToastItem(error: error) }
+        .task { await client.watchErrors() }
+        .onChange(of: client.lastEvent) { _, event in
+            // A fresh item for every event, so a repeated error shows again and restarts the timer.
+            if let error = event?.error, ErrorToast.shows(error) { toast = ToastItem(error: error) }
         }
         .task(id: toast) {
             guard toast != nil else { return }
             do { try await Task.sleep(for: Self.toastDuration) } catch { return }
             toast = nil
         }
+    }
+
+    /// How the host-away overlay shows, if it does: never for the host itself (or in practice, where this phone
+    /// is the host), nor once the game has ended.
+    private var hostAway: HostAwayOverlay.Presentation? {
+        guard !client.isHost, !isPractice, HostAwayOverlay.shows(for: client.hostStatus) else { return nil }
+        switch stage {
+        case .ended, .gameOver: return nil
+        case .writing: return .banner
+        default: return .fullScreen
+        }
+    }
+
+    private func hostAwayOverlay(_ presentation: HostAwayOverlay.Presentation) -> some View {
+        let state = client.state
+        return HostAwayOverlay(hostName: state.flatMap { $0.displayNames[$0.hostID] },
+                               mayBeGone: client.hostStatus == .mayBeGone, networkDenied: networkDenied,
+                               presentation: presentation, onLeave: onLeave)
     }
 
     private var showsMenu: Bool {
@@ -135,10 +193,10 @@ struct GameScreen: View {
         case .lobby:
             if let state { LobbyView(client: client, state: state) }
         case .revealing:
-            if let round { LetterRevealView(round: round) }
+            if let state, let round { LetterRevealView(round: round, gameID: state.gameID) }
         case .countdown:
-            if let round, case .countdown(let seconds)? = state?.phase {
-                CountdownView(round: round, secondsRemaining: seconds)
+            if let state, let round, case .countdown(let seconds) = state.phase {
+                CountdownView(round: round, gameID: state.gameID, secondsRemaining: seconds)
             }
         case .writing:
             if let state, let round { WritingView(client: client, state: state, round: round) }
@@ -212,19 +270,8 @@ struct ErrorToast: View {
 /// Joined, waiting for the host's first snapshot.
 private struct ConnectingView: View {
     var body: some View {
-        VStack(spacing: Theme.Spacing.m) {
-            ProgressView()
-                .controlSize(.large)
-                .tint(Theme.accent)
-                .accessibilityHidden(true)
-            Text("Joining the game…")
-                .font(Theme.Typography.title)
-                .multilineTextAlignment(.center)
-                .accessibilityAddTraits(.isHeader)
-        }
-        .padding(.horizontal, Theme.Spacing.l)
-        .centeredScrolling()
-        .accessibilityIdentifier("joiningGame")
+        StatusMessageView(icon: .progress, title: Text("Joining the game…"))
+            .accessibilityIdentifier("joiningGame")
     }
 }
 
@@ -234,50 +281,42 @@ struct GameEndedView: View {
     let onClose: () -> Void
 
     var body: some View {
-        VStack(spacing: Theme.Spacing.xl) {
-            VStack(spacing: Theme.Spacing.m) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 56, weight: .bold))
-                    .foregroundStyle(Theme.accent)
-                    .accessibilityHidden(true)
-                Text(title)
-                    .font(Theme.Typography.title)
-                    .multilineTextAlignment(.center)
-                    .accessibilityAddTraits(.isHeader)
-                Text(message)
-                    .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-            }
+        let copy = EndReasonCopy(reason)
+        StatusMessageView(icon: .symbol(copy.systemImage), title: Text(copy.title), message: Text(copy.message)) {
             Button("Back to Home", action: onClose)
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("backHomeButton")
         }
-        .padding(.horizontal, Theme.Spacing.l)
-        .centeredScrolling()
     }
+}
 
-    private var systemImage: String {
-        switch reason {
-        case .versionMismatch: "arrow.down.app.fill"
-        case .removed: "person.fill.xmark"
-        case .gameOver, .leftGame, .gameClosed: "flag.checkered"
-        }
-    }
+/// How a game that ended is explained: on the game screen and in Home's alert.
+struct EndReasonCopy {
+    let systemImage: String
+    let title: LocalizedStringResource
+    let message: LocalizedStringResource
 
-    private var title: LocalizedStringKey {
+    init(_ reason: EndReason) {
         switch reason {
-        case .versionMismatch: "Everyone needs the same app version"
-        case .removed: "You were removed from the game"
-        case .gameOver, .leftGame, .gameClosed: "This game has ended"
-        }
-    }
-
-    private var message: LocalizedStringKey {
-        switch reason {
-        case .versionMismatch: "Update the app on every phone from the App Store, then try again."
-        case .removed: "The host removed you from the game."
-        case .gameOver, .leftGame, .gameClosed: "The game is no longer available. Start or join another one."
+        case .versionMismatch:
+            systemImage = "arrow.down.app.fill"
+            title = "Everyone needs the same app version"
+            message = "Update the app on every phone from the App Store, then try again."
+        case .removed:
+            systemImage = "person.fill.xmark"
+            title = "You were removed from the game"
+            message = "The host removed you from the game."
+        case .gameClosed:
+            systemImage = "lock.fill"
+            title = LocalizedStringResource("This game has already started",
+                                            comment: "Alert title: the game can't be joined, it's past its lobby.")
+            message = LocalizedStringResource(
+                "New players can join only in the lobby. Ask the host to start a new game.",
+                comment: "Alert message: why a game that already started can't be joined.")
+        case .gameOver, .leftGame:
+            systemImage = "flag.checkered"
+            title = "This game has ended"
+            message = "The game is no longer available. Start or join another one."
         }
     }
 }
@@ -292,4 +331,16 @@ struct GameEndedView: View {
 
 #Preview("Game – removed") {
     GameEndedView(reason: .removed, onClose: {})
+}
+
+#Preview("Game – host away") {
+    let client = PreviewData.client(isHost: false, phase: .roundResults)
+    client.hostStatus = .away
+    return GameScreen(client: client, onLeave: {})
+}
+
+#Preview("Game – host may be gone while writing") {
+    let client = PreviewData.client(isHost: false, phase: .writing)
+    client.hostStatus = .mayBeGone
+    return GameScreen(client: client, onLeave: {})
 }

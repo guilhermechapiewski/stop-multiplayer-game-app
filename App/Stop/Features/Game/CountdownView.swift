@@ -1,12 +1,19 @@
+import Foundation
 import StopCore
 import SwiftUI
 
 /// 3, 2, 1 under the round's letter. Each number is a host tick, so the count pauses while the host is away.
 struct CountdownView: View {
     let round: Round
+    let gameID: UUID
     let secondsRemaining: Int
 
     @Environment(\.reduceMotion) private var reduceMotion
+    /// The first number waits a moment so it doesn't cut off "Letter B" (spoken as the letter lands, or as this
+    /// view appears).
+    @State private var announcedANumber = false
+
+    static let firstAnnouncementDelay: Duration = .milliseconds(800)
 
     var body: some View {
         VStack(spacing: Theme.Spacing.l) {
@@ -44,17 +51,24 @@ struct CountdownView: View {
                    value: secondsRemaining)
         .padding(.horizontal, Theme.Spacing.l)
         .centeredScrolling()
-        .onAppear { LetterAnnouncement.announce(round) }
+        .onAppear { LetterAnnouncement.announce(round, gameID: gameID) }
         .onChange(of: secondsRemaining, initial: true) { _, seconds in
             GameFeedback.play(.countdownTick(seconds))
-            AccessibilityNotification.Announcement(seconds.formatted()).post()
+        }
+        .task(id: secondsRemaining) {
+            if !announcedANumber {
+                // Cancelled if the next tick comes first; that number is then announced at once.
+                do { try await Task.sleep(for: Self.firstAnnouncementDelay) } catch { return }
+            }
+            announcedANumber = true
+            AccessibilityNotification.Announcement(secondsRemaining.formatted()).post()
         }
     }
 }
 
 #Preview("Countdown") {
     @Previewable @State var seconds = 3
-    CountdownView(round: Round(number: 1, letter: "B", participants: []), secondsRemaining: seconds)
+    CountdownView(round: Round(number: 1, letter: "B", participants: []), gameID: UUID(), secondsRemaining: seconds)
         .background(Theme.background)
         .task {
             while true {

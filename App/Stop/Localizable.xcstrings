@@ -23,6 +23,17 @@
         }
       }
     },
+    "%@ is back" : {
+      "comment" : "Banner when a player who was away reconnects. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ voltou"
+          }
+        }
+      }
+    },
     "%@ leaves the game. Their points so far stay in the standings." : {
       "comment" : "Message when the host confirms removing a player. %@ is the player's name.",
       "localizations" : {
@@ -34,6 +45,28 @@
         }
       }
     },
+    "%@ left the app" : {
+      "comment" : "Banner when another player puts the app in the background or drops off. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saiu do app"
+          }
+        }
+      }
+    },
+    "%@ left the game" : {
+      "comment" : "Banner when a player taps Leave game. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ saiu do jogo"
+          }
+        }
+      }
+    },
     "%@ tie!" : {
       "comment" : "Game over title when several other players share first place. %@ is a list of names, e.g. \"Ana and Bia\".",
       "localizations" : {
@@ -41,6 +74,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Empate: %@!"
+          }
+        }
+      }
+    },
+    "%@ was removed" : {
+      "comment" : "Banner when the host removes a player. %@ is the player's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ foi removido(a)"
           }
         }
       }
@@ -1124,6 +1168,17 @@
         }
       }
     },
+    "Keep writing. The round goes on when the host is back." : {
+      "comment" : "Host away during writing: typing continues.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue escrevendo. A rodada segue quando quem criou o jogo voltar."
+          }
+        }
+      }
+    },
     "Leave" : {
       "comment" : "Confirm button for a guest leaving the game.",
       "localizations" : {
@@ -1186,6 +1241,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Letra %@"
+          }
+        }
+      }
+    },
+    "Local Network access is off, so this phone can’t reach the game. Turn it on in Settings." : {
+      "comment" : "Host away / rejoining: this app was denied Local Network access.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso à rede local está desativado, então este celular não consegue chegar ao jogo. Ative nos Ajustes."
           }
         }
       }
@@ -1256,6 +1322,17 @@
         }
       }
     },
+    "New players can join only in the lobby. Ask the host to start a new game." : {
+      "comment" : "Alert message: why a game that already started can't be joined.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Novos jogadores só entram na sala de espera. Peça para quem criou o jogo começar um novo."
+          }
+        }
+      }
+    },
     "Next round" : {
       "comment" : "Host button on round results that starts the next round; also the heading of the next round's rules.",
       "localizations" : {
@@ -1296,6 +1373,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não permitida"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "comment" : "Button that dismisses an alert.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
@@ -1516,6 +1604,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reconectando…"
+          }
+        }
+      }
+    },
+    "Rejoining game…" : {
+      "comment" : "Reconnecting to an interrupted game whose host's name isn't known.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltando ao jogo…"
           }
         }
       }
@@ -1905,6 +2004,17 @@
         }
       }
     },
+    "The game picks up right where it left off." : {
+      "comment" : "Host away outside writing: nothing is lost.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O jogo continua exatamente de onde parou."
+          }
+        }
+      }
+    },
     "The host ended the round" : {
       "comment" : "Caption under the full-screen STOP! stamp when the host force-ended the round.",
       "localizations" : {
@@ -1923,6 +2033,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quem criou o jogo encerrou a rodada."
+          }
+        }
+      }
+    },
+    "The host may be gone" : {
+      "comment" : "Shown when the host's phone has been unreachable for about 2 minutes.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O anfitrião pode ter saído"
           }
         }
       }
@@ -2000,6 +2121,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este jogo não reconhece mais você. Saia e entre de novo."
+          }
+        }
+      }
+    },
+    "This game has already started" : {
+      "comment" : "Alert title: the game can't be joined, it's past its lobby.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este jogo já começou"
           }
         }
       }
@@ -2114,6 +2246,17 @@
         }
       }
     },
+    "Waiting for %@ to come back" : {
+      "comment" : "Shown while the host's phone is away (app in the background or out of range). %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando %@ voltar"
+          }
+        }
+      }
+    },
     "Waiting for %@ to start…" : {
       "comment" : "Lobby bottom bar for guests. %@ is the host's name.",
       "localizations" : {
@@ -2143,6 +2286,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esperando jogadores…"
+          }
+        }
+      }
+    },
+    "Waiting for the host to come back" : {
+      "comment" : "Shown while the host's phone is away, before the host's name is known.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando quem criou o jogo voltar"
           }
         }
       }
@@ -2187,6 +2341,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Foi você que deu STOP!"
+          }
+        }
+      }
+    },
+    "You can keep waiting, or leave the game. Your points so far stay in the standings." : {
+      "comment" : "Host away for a long time: what the player can do.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pode continuar esperando ou sair do jogo. Seus pontos até agora continuam na classificação."
           }
         }
       }

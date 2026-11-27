@@ -672,9 +672,12 @@ final class FakeRemoteSession: RemoteGameSession {
     var isHost: Bool { false }
     var state: GameState?
     var hostStatus: HostStatus = .connecting
-    let presenceChanges = AsyncStream<PresenceChange> { _ in }
+    let presenceChanges: AsyncStream<PresenceChange>
+    /// Feeds `presenceChanges`.
+    let presenceEvents: AsyncStream<PresenceChange>.Continuation
     var lastError: GameError?
     var frozenAnswers: [String]?
+    var isLocalNetworkDenied = false
 
     private(set) var started = false
     private(set) var stopped = false
@@ -684,7 +687,10 @@ final class FakeRemoteSession: RemoteGameSession {
     private(set) var suspendCount = 0
     private(set) var resumeCount = 0
 
-    init(playerID: PlayerID) { localPlayerID = playerID }
+    init(playerID: PlayerID) {
+        localPlayerID = playerID
+        (presenceChanges, presenceEvents) = AsyncStream.makeStream(of: PresenceChange.self)
+    }
 
     private(set) var sent: [Intent] = []
 

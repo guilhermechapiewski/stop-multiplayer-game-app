@@ -10,6 +10,8 @@ import StopSimulation
 
 /// A game client that talks to a host over a transport: `ClientSession`'s lifecycle on top of `GameClient`.
 @MainActor protocol RemoteGameSession: GameClient {
+    /// The browser was refused local network access (the UI points to Settings).
+    var isLocalNetworkDenied: Bool { get }
     func start()
     func suspend()
     func resume()

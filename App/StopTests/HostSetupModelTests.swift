@@ -86,6 +86,17 @@ struct HostSetupModelTests {
         #expect(await store.loadCustomCategories().isEmpty)
     }
 
+    @Test func deletingBeforeLoadKeepsOtherRememberedCategories() async {
+        await store.saveCustomCategories(["Cartoons", "Bands"])
+        let model = HostSetupModel(store: store, language: .en)
+
+        await model.deleteCustom("Cartoons")
+
+        #expect(model.isCustom("Bands"))
+        #expect(!model.available.contains("Cartoons"))
+        #expect(await store.loadCustomCategories() == ["Bands"])
+    }
+
     @Test func toggleAppendsAndRemoves() async {
         let model = await makeModel()
         model.toggle("Job")

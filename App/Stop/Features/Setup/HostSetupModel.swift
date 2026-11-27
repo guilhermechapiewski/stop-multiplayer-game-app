@@ -80,6 +80,8 @@ final class HostSetupModel {
 
     /// Forgets a remembered custom category.
     func deleteCustom(_ name: String) async {
+        // Never save over the remembered list before it has been read (it may hold `name` too).
+        if !isLoaded { await load() }
         guard let index = custom.firstIndex(of: name) else { return }
         custom.remove(at: index)
         selected.removeAll { $0 == name }
