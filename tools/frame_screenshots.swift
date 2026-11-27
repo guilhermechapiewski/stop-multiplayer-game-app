@@ -131,7 +131,8 @@ func frame(shot: CGImage, caption: String, size: CGSize) -> CGImage {
     // Background gradient (CoreGraphics' origin is bottom-left).
     let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [gradientTop, gradientBottom] as CFArray,
                               locations: [0, 1])!
-    context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: height), end: CGPoint(x: width, y: 0), options: [])
+    // Vertical, so every row is one color: smaller PNGs than a diagonal.
+    context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: height), end: CGPoint(x: 0, y: 0), options: [])
 
     // Caption band: the top 19% of the canvas.
     let margin = width * 0.08

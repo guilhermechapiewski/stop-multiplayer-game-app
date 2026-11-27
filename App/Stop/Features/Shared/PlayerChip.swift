@@ -22,7 +22,7 @@ struct PlayerChip: View {
                     if isHost {
                         Image(systemName: "crown.fill")
                             .font(.caption)
-                            .foregroundStyle(.yellow)
+                            .foregroundStyle(Theme.crown)
                             .accessibilityHidden(true)
                     }
                 }

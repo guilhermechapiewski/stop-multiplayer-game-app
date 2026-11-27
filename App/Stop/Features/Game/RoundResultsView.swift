@@ -219,13 +219,23 @@ struct StandingRow: View {
             .font(Theme.Typography.headline.monospacedDigit())
     }
 
-    /// "Gui 👑 (you) · left" as one Text, so it wraps as a sentence instead of splitting into columns.
+    /// "Gui (you) · left" as one Text, so it wraps as a sentence instead of splitting into columns, then the
+    /// leader's crown. (The crown inside the Text, as an image glyph, was reported clipped by the accessibility
+    /// audit.)
     private var nameLine: some View {
-        var parts = [Text(verbatim: name).font(Theme.Typography.body.weight(isMe ? .bold : .semibold))]
-        if crowned {
-            parts.append(Text(verbatim: " "))
-            parts.append(Text(Image(systemName: "crown.fill")).font(.caption).foregroundStyle(.yellow))
+        HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.xs) {
+            nameText
+            if crowned {
+                Image(systemName: "crown.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.crown)
+                    .accessibilityHidden(true)
+            }
         }
+    }
+
+    private var nameText: some View {
+        var parts = [Text(verbatim: name).font(Theme.Typography.body.weight(isMe ? .bold : .semibold))]
         if isMe {
             parts.append(Text(verbatim: " "))
             parts.append(Text("(you)").font(Theme.Typography.caption).foregroundStyle(.secondary))

@@ -22,6 +22,8 @@ public final class HostSession {
     let clock: any Clock<Duration>
     let timing: SessionTiming
     @ObservationIgnored var rng: any RandomNumberGenerator & Sendable
+    /// A mock game against bots: its saved `ActiveGameRef` says so (see `ActiveGameRef.isMock`).
+    public let isMock: Bool
 
     @ObservationIgnored var listener: (any Listener)?
     @ObservationIgnored var listenerFailed = false
@@ -49,7 +51,8 @@ public final class HostSession {
 
     public init(state: GameState, factory: any TransportFactory, store: any GameStore, clock: any Clock<Duration>,
                 timing: SessionTiming = .standard,
-                rng: any RandomNumberGenerator & Sendable = SystemRandomNumberGenerator()) {
+                rng: any RandomNumberGenerator & Sendable = SystemRandomNumberGenerator(), isMock: Bool = false) {
+        self.isMock = isMock
         // Restored games: nobody but the host is connected yet.
         var restored = state
         for player in state.players where player.id != state.hostID && player.presence == .present {
@@ -74,7 +77,7 @@ public final class HostSession {
         startListener()
         startPermissionBrowser()
         startLoops()
-        let ref = ActiveGameRef(gameID: state.gameID, role: .host, hostName: hostName)
+        let ref = ActiveGameRef(gameID: state.gameID, role: .host, hostName: hostName, isMock: isMock)
         enqueueStore { await $0.saveActiveGame(ref) }
         persist()
         localClient.hostStateDidChange(from: nil)

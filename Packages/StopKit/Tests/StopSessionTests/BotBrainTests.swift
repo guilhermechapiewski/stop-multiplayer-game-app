@@ -26,6 +26,25 @@ struct BotBrainTests {
         }
     }
 
+    /// A bot never answers a player's name (any category, ignoring case and accents).
+    @Test(arguments: languages)
+    func neverAnswersAPlayersName(_ language: GameLanguage) {
+        let bank = BotAnswerBank.load(language)
+        let nameCategory = DefaultCategories.list(for: language)[0]
+        for letter in Self.letters {
+            let players = bank.candidates(category: nameCategory, letter: letter).map { $0.uppercased() }
+            guard !players.isEmpty else { continue }
+            for seed in UInt64(1)...5 {
+                var brain = BotBrain(language: language, speed: .fast, seed: seed)
+                let plan = brain.plan(categories: DefaultCategories.list(for: language), letter: letter,
+                                      avoiding: players)
+                for answer in plan.answers {
+                    #expect(!players.map(fold).contains(fold(answer)), "\(language) \(letter): \(answer)")
+                }
+            }
+        }
+    }
+
     @Test func answerBankMatchesCategoryIgnoringCaseAndAccents() {
         let pt = BotAnswerBank.load(.ptBR)
         let exact = pt.candidates(category: "Profissão", letter: "M")

@@ -130,7 +130,9 @@ import StopSession
         typed = Array(repeating: "", count: categories.count)
         var brain = brain ?? BotBrain(language: state.language, speed: behavior.speed, seed: seed,
                                          index: index, sharedSeed: sharedSeed)
-        let roundPlan = brain.plan(categories: categories, letter: round.letter, round: round.number)
+        let names = state.players.map(\.name)
+        let roundPlan = brain.plan(categories: categories, letter: round.letter, round: round.number,
+                                   avoiding: names)
         let stopAt = behavior.stopAfter ?? brain.stopDelay()
         self.brain = brain
         let planned = roundPlan.answers

@@ -515,14 +515,22 @@ struct AppModelTests {
         model.leaveGame()
     }
 
-    /// A relaunch with `-mockGame` (and no wipe) comes back to the interrupted game instead of a new one.
-    @Test func mockGameRelaunchRestoresInterruptedGame() async throws {
+    /// Saves an interrupted hosted game; `isMock` marks it as a `-mockGame` game.
+    private func saveInterruptedGame(isMock: Bool) async throws -> GameState {
         let profile = await saveProfile()
         let game = try GameEngine.newGame(
             gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
             settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true), language: .en)
         await store.saveHostGame(game)
-        await store.saveActiveGame(ActiveGameRef(gameID: game.gameID, role: .host, hostName: profile.name))
+        await store.saveActiveGame(ActiveGameRef(gameID: game.gameID, role: .host, hostName: profile.name,
+                                                 isMock: isMock))
+        await store.saveDraft(["Ant"], gameID: game.gameID, round: 1)
+        return game
+    }
+
+    /// A relaunch with `-mockGame` (and no wipe) comes back to the interrupted mock game instead of a new one.
+    @Test func mockGameRelaunchRestoresInterruptedMockGame() async throws {
+        let game = try await saveInterruptedGame(isMock: true)
 
         let model = makeModel(arguments: ["-mockGame"])
         await model.bootstrap()
@@ -530,6 +538,31 @@ struct AppModelTests {
         #expect(model.route == .game)
         #expect(sessions.mockLaunches.isEmpty)
         #expect(model.client?.state?.gameID == game.gameID)
+        // Still marked as a mock game once restored (the host saves its reference again).
+        try await waitUntil { await self.store.loadActiveGame()?.isMock == true }
+        model.leaveGame()
+    }
+
+    /// A real launch never restores a mock game: it's forgotten, with its drafts, and Home shows.
+    @Test func realLaunchDiscardsInterruptedMockGame() async throws {
+        let game = try await saveInterruptedGame(isMock: true)
+
+        let model = makeModel()
+        await model.bootstrap()
+
+        #expect(model.route == .home)
+        #expect(model.client == nil)
+        #expect(await store.loadActiveGame() == nil)
+        #expect(await store.loadHostGame() == nil)
+        #expect(await store.loadDraft(gameID: game.gameID, round: 1) == nil)
+    }
+
+    /// Mock mode doesn't restore a real game: it starts its own.
+    @Test func mockLaunchStartsNewGameOverRealOne() async throws {
+        _ = try await saveInterruptedGame(isMock: false)
+        let model = makeModel(arguments: ["-mockGame"])
+        await model.bootstrap()
+        #expect(sessions.mockLaunches.count == 1)
         model.leaveGame()
     }
 

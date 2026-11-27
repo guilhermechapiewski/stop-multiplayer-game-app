@@ -48,11 +48,12 @@ final class PracticeUITests: XCTestCase {
         let count = game.waitForWriting()
         game.type(Array(repeating: "Bento", count: count))
         attachScreenshot(app, "3-writing")
-        // Two stops end this round: the stamp comes once a bot stops too (scoring waits for it).
-        game.tapStop(locksRound: false)
+        // Two stops end this round: it locks once a bot stops too.
+        game.tapStop(lockingRound: nil)
         if game.element("stoppedBanner").waitForExistence(timeout: 3) {
             attachScreenshot(app, "4-stopped")
         }
+        game.expectRoundLocked(1, timeout: UITest.longTimeout)
         game.scoreEveryCategory(count) { self.attachScreenshot(app, "5-scoring") }
         game.waitForRoundResults(rows: 3)
         attachScreenshot(app, "6-round-results")

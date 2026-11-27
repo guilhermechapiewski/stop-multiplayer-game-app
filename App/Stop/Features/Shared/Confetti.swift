@@ -37,7 +37,8 @@ struct ConfettiView: View {
         }
     }
 
-    /// `time` nil draws the still version: pieces scattered across the top third.
+    /// `time` nil draws the still version: pieces scattered across the top fifth, around the trophy and clear
+    /// of the title below it.
     private func canvas(time: Double?) -> some View {
         Canvas { context, size in
             for piece in pieces {
@@ -49,7 +50,7 @@ struct ConfettiView: View {
                     opacity = progress > 1 ? 0 : min(1, (Self.duration - time) / 0.8)
                     if t == 0 { continue }
                 } else {
-                    progress = piece.delay / 1.2 * 0.3
+                    progress = piece.delay / 1.2 * 0.18
                     opacity = 0.9
                 }
                 guard opacity > 0 else { continue }

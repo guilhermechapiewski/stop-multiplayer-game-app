@@ -32,17 +32,18 @@ final class RoundFlowUITests: XCTestCase {
 
         // Round 2: allow giving up, then give up with blank answers (they score 0 on their own).
         // The rules card is at the bottom, under the Next round bar: scroll it into view first.
-        app.swipeUp()
-        let allowGiveUp = waitFor(app.switches["resultsAllowGiveUpToggle"], "hittable == true")
-        // The element spans the label; the switch itself is at the trailing edge.
-        allowGiveUp.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        let allowGiveUp = waitFor(app.switches["resultsAllowGiveUpToggle"])
+        game.scrollAboveBottomBar(allowGiveUp)
+        waitFor(allowGiveUp, "hittable == true")
+        // The element spans the label too; its inner switch is the control.
+        allowGiveUp.switches.firstMatch.tap()
         waitFor(allowGiveUp, "value == '1'")
         app.buttons["nextRoundButton"].tap()
         game.waitForWriting()
         waitFor(app.buttons["giveUpButton"], "hittable == true").tap()
         // A confirmation dialog (an action sheet), not an alert.
         waitFor(app.buttons["confirmGiveUpButton"].firstMatch).tap()
-        XCTAssertTrue(game.stopStamp.waitForExistence(timeout: 5))
+        game.expectRoundLocked(2)
         game.waitForRoundResults(rows: 4)
 
         game.endGameFromResults()

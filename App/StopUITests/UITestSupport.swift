@@ -96,13 +96,27 @@ struct GameSteps {
     /// The full-screen STOP! stamp shown as a round locks.
     var stopStamp: XCUIElement { app.otherElements["stopStamp"] }
 
-    /// Taps STOP. When this stop locks the round (`locksRound`), the STOP! stamp must show up, so a later wait
-    /// for it to go away can't pass without it ever having appeared.
-    func tapStop(locksRound: Bool = true, file: StaticString = #filePath, line: UInt = #line) {
+    /// Under `-uiTesting` the game screen keeps an invisible marker whose value is the last locked round.
+    var roundLockedMarker: XCUIElement { app.otherElements["roundLockedMarker"] }
+
+    /// Checks that `round` locked (the STOP! stamp was shown for it), so a later wait for the stamp to go away
+    /// can't pass without it ever having appeared.
+    func expectRoundLocked(_ round: Int, timeout: TimeInterval = UITest.timeout,
+                           file: StaticString = #filePath, line: UInt = #line) {
+        test.waitFor(roundLockedMarker, "value == '\(round)'", timeout: timeout, file: file, line: line)
+    }
+
+    /// Taps STOP; when this stop locks the round (`lockingRound`), checks that it did.
+    func tapStop(lockingRound round: Int? = 1, file: StaticString = #filePath, line: UInt = #line) {
         test.waitUntilEnabled(app.buttons["stopButton"], file: file, line: line).tap()
-        if locksRound {
-            XCTAssertTrue(stopStamp.waitForExistence(timeout: 5), "no STOP! stamp", file: file, line: line)
-        }
+        if let round { expectRoundLocked(round, file: file, line: line) }
+    }
+
+    /// Scrolls up until `element` is clear of the bottom action bar (which covers the end of a scrolled screen).
+    func scrollAboveBottomBar(_ element: XCUIElement) {
+        let bar = app.otherElements["bottomActionBar"]
+        for _ in 0..<4 where element.frame.maxY > bar.frame.minY - 8 { app.swipeUp() }
+        XCTAssertLessThanOrEqual(element.frame.maxY, bar.frame.minY, "\(element) is under the bottom bar")
     }
 
     /// Scores every category with `points`, waiting for each to come up. The STOP! stamp covers the screen for

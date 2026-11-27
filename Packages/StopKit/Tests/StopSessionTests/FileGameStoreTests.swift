@@ -34,6 +34,17 @@ struct FileGameStoreTests {
         #expect(await FileGameStore(directory: dir).loadActiveGame() == nil)
     }
 
+    /// A reference saved before `isMock` existed is a real game; a mock one round-trips its flag.
+    @Test func activeGameRefMockFlag() throws {
+        let id = UUID()
+        let old = #"{"gameID":"\#(id.uuidString)","role":"host","hostName":"Ana"}"#
+        let decoded = try JSONDecoder().decode(ActiveGameRef.self, from: Data(old.utf8))
+        #expect(decoded == ActiveGameRef(gameID: id, role: .host, hostName: "Ana"))
+        #expect(!decoded.isMock)
+        let mock = ActiveGameRef(gameID: id, role: .host, hostName: "Ana", isMock: true)
+        #expect(try JSONDecoder().decode(ActiveGameRef.self, from: JSONEncoder().encode(mock)) == mock)
+    }
+
     @Test(arguments: [true, false])
     func draftsKeyedByGameAndRound(file: Bool) async {
         let dir = tempDir()

@@ -100,8 +100,16 @@ final class AppModel {
             route = .onboarding
             return
         }
-        if let ref = await store.loadActiveGame() {
-            // A relaunch comes back to the interrupted game, in mock mode too (UI tests restore its draft).
+        let active = await store.loadActiveGame()
+        if let ref = active, ref.isMock, !launch.mockGame {
+            // A mock game (UI tests, screenshots) never comes back in a real launch: forget it.
+            await store.saveActiveGame(nil)
+            await store.saveHostGame(nil)
+            await store.clearDrafts(gameID: ref.gameID)
+        }
+        if let ref = active, ref.isMock == launch.mockGame {
+            // A relaunch comes back to the interrupted game: a real one, or a mock one in mock mode (the
+            // UI tests restore its draft).
             await restore(ref)
         } else if launch.mockGame {
             startMockGame()
@@ -122,7 +130,7 @@ final class AppModel {
                 route = .home
                 return
             }
-            startHost(HostSession(state: saved, factory: factory, store: store, clock: clock))
+            startHost(HostSession(state: saved, factory: factory, store: store, clock: clock, isMock: ref.isMock))
         case .client:
             startClient(target: .rejoin(gameID: ref.gameID), route: .rejoining(ref))
         }

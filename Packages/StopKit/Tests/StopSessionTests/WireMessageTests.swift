@@ -28,4 +28,15 @@ struct WireMessageTests {
         #expect(throws: (any Error).self) { try WireMessage.decode(Data("nope".utf8)) }
         #expect(throws: (any Error).self) { try WireMessage.decode(Data("{\"protocolVersion\":1}".utf8)) }
     }
+
+    /// A hello from a build before `explicitRejoin` existed still decodes (as false), so the host can answer
+    /// with a version check instead of dropping it.
+    @Test func helloWithoutExplicitRejoinDecodesAsFalse() throws {
+        let id = UUID()
+        let json = #"{"protocolVersion":0,"body":{"hello":{"playerID":"\#(id.uuidString)","name":"Ana","#
+            + #""lastVersion":3}}}"#
+        let message = try WireMessage.decode(Data(json.utf8))
+        #expect(message.protocolVersion == 0)
+        #expect(message.body == .hello(playerID: id, name: "Ana", gameID: nil, lastVersion: 3, explicitRejoin: false))
+    }
 }

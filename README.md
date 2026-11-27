@@ -78,7 +78,8 @@ characters) and an accessibility audit of every main screen.
 
 `tools/screenshots.sh` makes the App Store and website screenshots: it runs `ScreenshotTests` on temporary
 iPhone 17 Pro Max and iPhone 17 simulators in English and Portuguese, then `tools/frame_screenshots.swift`
-captions them into `appstore/screenshots/` and `docs/images/screens/`.
+captions them into `appstore/screenshots/` and `docs/images/screens/`. Regenerate them only when the UI they
+show changes: the PNGs are large, and every run adds them to the repository's history again.
 
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).

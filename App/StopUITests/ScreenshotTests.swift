@@ -56,10 +56,13 @@ final class ScreenshotTests: XCTestCase {
         attachScreenshot(app, "03-writing")
 
         game.tapStop()
+        waitFor(game.stopStamp)
         attachScreenshot(app, "04-stop")
 
         game.scoreEveryCategory(count) { self.attachScreenshot(app, "05-scoring") }
         game.waitForRoundResults(rows: 4)
+        // Taken at the top. Scrolling the host's rules card into view was worse: both standings cards then
+        // run under the status bar, and the menu button covers the points.
         attachScreenshot(app, "06-results")
 
         game.endGameFromResults()

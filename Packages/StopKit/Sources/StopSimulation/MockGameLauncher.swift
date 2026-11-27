@@ -27,7 +27,7 @@ import StopSession
         let rng: any RandomNumberGenerator & Sendable = if let seed { SplitMix64(seed: seed) }
                                                         else { SystemRandomNumberGenerator() }
         let host = HostSession(state: state, factory: network, store: practice ? PracticeStore(store) : store,
-                               clock: clock, rng: rng)
+                               clock: clock, rng: rng, isMock: !practice)
         host.start()
         let behavior = botBehavior ?? .practice(botSpeed)
         let sharedSeed = seed ?? .random(in: .min ... .max)
@@ -39,8 +39,18 @@ import StopSession
             let bot = BotPlayer(name: name, client: client, behavior: behavior, clock: clock, seed: botSeed,
                                 index: index, sharedSeed: sharedSeed)
             bot.run()
-            client.start()
+            if seed == nil { client.start() }
             return bot
+        }
+        // A seeded game (screenshots) has its bots join one after another, so the lobby lists them in order.
+        if seed != nil {
+            Task { @MainActor [weak host] in
+                for (index, bot) in bots.enumerated() {
+                    bot.client.start()
+                    guard let host else { return }
+                    for await joined in Observations({ host.state.players.count > index + 1 }) where joined { break }
+                }
+            }
         }
         return (host, bots, network)
     }

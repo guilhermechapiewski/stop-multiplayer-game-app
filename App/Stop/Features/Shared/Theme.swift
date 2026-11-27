@@ -6,6 +6,11 @@ enum Theme {
     static let accent = Color.accentColor
     static let background = Color(.systemGroupedBackground)
     static let surface = Color(.secondarySystemGroupedBackground)
+    /// The leader's crown: a deep gold in light mode (plain yellow is under 2:1 on the light, accent-tinted
+    /// rows), system yellow in dark mode.
+    static let crown = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? .systemYellow : UIColor(red: 0.54, green: 0.35, blue: 0, alpha: 1)
+    })
 
     enum Spacing {
         static let xs: CGFloat = 4

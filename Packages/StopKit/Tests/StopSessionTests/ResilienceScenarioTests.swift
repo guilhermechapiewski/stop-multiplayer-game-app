@@ -423,18 +423,21 @@ private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
     }
 
     /// `seed` makes a mock game repeatable (screenshots): the same letters every time, and the bots plan the
-    /// same answers.
-    @Test func seededLaunchesPickTheSameLetters() async throws {
+    /// same answers, and the bots join in order. It's a mock game (`isMock`), so only mock mode restores it.
+    @Test func seededLaunchesAreRepeatable() async throws {
         let clock = TestClock()
         let profile = Profile(playerID: UUID(), name: "Gui", soundsEnabled: false)
         let settings = GameSettings(categories: categories, stopsRequired: 1, allowGiveUp: false)
         var letters: [String] = []
         for _ in 0..<2 {
-            let (host, bots, _) = MockGameLauncher.launch(hostProfile: profile, botNames: ["Ana"], settings: settings,
-                                                          language: .en, seed: 42, clock: clock)
-            await waitUntil("bot in the lobby") { host.state.players.count == 2 && !bots.isEmpty }
+            let (host, bots, _) = MockGameLauncher.launch(hostProfile: profile, botNames: ["Ana", "Bia", "Caio"],
+                                                          settings: settings, language: .en, practice: false,
+                                                          seed: 42, clock: clock)
+            await waitUntil("bots in the lobby") { host.state.players.count == 4 && !bots.isEmpty }
+            #expect(host.state.players.map(\.name) == ["Gui", "Ana", "Bia", "Caio"])
             host.localClient.send(.startGame)
             letters.append(try #require(host.state.currentRound?.letter))
+            #expect(host.isMock)
             host.shutdown()
         }
         #expect(letters[0] == letters[1])

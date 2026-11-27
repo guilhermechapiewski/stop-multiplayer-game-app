@@ -68,14 +68,35 @@ struct GameScreen: View {
     /// The round whose lock is being stamped "STOP!" over the screen.
     @State private var stampedRound: Round?
     @State private var toast: ToastItem?
+    /// The last round that locked while this screen was up (the UI tests' "round locked" marker).
+    @State private var lockedRound: Int?
 
-    /// Longer under `-uiTesting`: on a busy test machine one accessibility snapshot can take over a second, and
-    /// the tests check that the stamp shows up.
-    private static let stampDuration: Duration =
-        LaunchOptions(arguments: ProcessInfo.processInfo.arguments).uiTesting ? .seconds(4) : .seconds(1.6)
+    #if DEBUG
+    /// `-uiTesting` (DEBUG builds only).
+    private static let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+    /// Longer under `-uiTesting`, so the screenshot of the stamp isn't a race on a busy machine.
+    private static let stampDuration: Duration = isUITesting ? .seconds(4) : .seconds(1.6)
+    #else
+    private static let stampDuration: Duration = .seconds(1.6)
+    #endif
     private static let toastDuration: Duration = .seconds(3)
 
     private var stage: GameStage { GameStage(state: client.state, hostStatus: client.hostStatus) }
+
+    /// Under `-uiTesting` (DEBUG builds only): an invisible element whose value is the last locked round, so a UI
+    /// test can check that its STOP locked the round without racing the stamp, which comes and goes.
+    @ViewBuilder private var roundLockedMarker: some View {
+        #if DEBUG
+        if Self.isUITesting, let lockedRound {
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel(Text(verbatim: "Round locked"))
+                .accessibilityValue(Text(verbatim: "\(lockedRound)"))
+                .accessibilityIdentifier("roundLockedMarker")
+        }
+        #endif
+    }
 
     var body: some View {
         NavigationStack {
@@ -109,6 +130,7 @@ struct GameScreen: View {
                 }
             }
         }
+        .overlay(alignment: .bottomLeading) { roundLockedMarker }
         .overlay {
             if let stampedRound, let state = client.state {
                 StopStampOverlay(state: state, round: stampedRound, viewer: client.localPlayerID)
@@ -138,6 +160,7 @@ struct GameScreen: View {
             // The round just locked: stamp it, whether the host is still collecting or already scoring.
             if old == .writing, new == .collecting || new == .scoring {
                 stampedRound = client.state?.currentRound
+                lockedRound = stampedRound?.number
             }
             // Only the live countdown-to-writing transition, not a reconnect or relaunch into writing.
             if old == .countdown, new == .writing { GameFeedback.play(.writingStarted) }

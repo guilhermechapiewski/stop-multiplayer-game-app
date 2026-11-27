@@ -58,9 +58,8 @@ struct GameOverView: View {
 
     private var confetti: some View {
         ConfettiView(isAnimated: !reduceMotion)
-            // Falling confetti (drawn over the content) starts below the navigation bar, so it never covers
-            // the menu button; the still scatter sits behind everything and may use the whole screen.
-            .ignoresSafeArea(edges: reduceMotion ? .all : .bottom)
+            // Starts below the navigation bar, so it never covers the status bar or the menu button.
+            .ignoresSafeArea(edges: .bottom)
             .allowsHitTesting(false)
             .accessibilityHidden(true)
     }

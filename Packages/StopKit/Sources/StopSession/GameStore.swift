@@ -17,10 +17,25 @@ public struct ActiveGameRef: Codable, Sendable, Equatable {
     public var gameID: UUID
     public var role: Role
     public var hostName: String
-    public init(gameID: UUID, role: Role, hostName: String) {
+    /// A `-mockGame` game against bots (UI tests, screenshots): only a mock-mode launch may restore it.
+    public var isMock: Bool
+
+    public init(gameID: UUID, role: Role, hostName: String, isMock: Bool = false) {
         self.gameID = gameID
         self.role = role
         self.hostName = hostName
+        self.isMock = isMock
+    }
+
+    private enum CodingKeys: String, CodingKey { case gameID, role, hostName, isMock }
+
+    /// References saved before `isMock` existed decode as real games.
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        gameID = try container.decode(UUID.self, forKey: .gameID)
+        role = try container.decode(Role.self, forKey: .role)
+        hostName = try container.decode(String.self, forKey: .hostName)
+        isMock = try container.decodeIfPresent(Bool.self, forKey: .isMock) ?? false
     }
 }
 

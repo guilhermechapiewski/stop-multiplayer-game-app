@@ -63,14 +63,19 @@ public struct BotBrain: Sendable {
     /// bank or, when the category has nothing for the letter (custom categories), with any bank word starting
     /// with it. A struggler blanks unknown categories and each known one with `blankProbability` (at least one).
     /// Bots of one game spread across each candidate list (see `pick`), so they collide only when it is short.
-    public mutating func plan(categories: [String], letter: String, round: Int = 0) -> BotRoundPlan {
-        let fallback = bank.anyCandidates(letter: letter)
+    /// Never answers one of `avoiding` (the players' names: "Ana" for Name when Ana is playing reads like a
+    /// joke at her expense), compared ignoring case and accents.
+    public mutating func plan(categories: [String], letter: String, round: Int = 0,
+                              avoiding: [String] = []) -> BotRoundPlan {
+        let avoided = Set(avoiding.map(BotAnswerBank.fold))
+        let allowed = { (word: String) in !avoided.contains(BotAnswerBank.fold(word)) }
+        let fallback = bank.anyCandidates(letter: letter).filter(allowed)
         let finishes = Double.random(in: 0..<1, using: &rng) < speed.finishProbability
         var answers: [String] = []
         var late: [Int] = []
         var guessed: Set<Int> = []
         for (position, category) in categories.enumerated() {
-            let candidates = bank.candidates(category: category, letter: letter)
+            let candidates = bank.candidates(category: category, letter: letter).filter(allowed)
             if !finishes, candidates.isEmpty || Double.random(in: 0..<1, using: &rng) < Self.blankProbability {
                 late.append(position)
             }

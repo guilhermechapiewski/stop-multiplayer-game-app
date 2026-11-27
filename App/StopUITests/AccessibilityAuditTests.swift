@@ -60,18 +60,17 @@ final class AccessibilityAuditTests: XCTestCase {
     /// - Dynamic Type on player initials: decorative avatars, hidden from VoiceOver (the name is read instead).
     /// - Dynamic Type on host setup's categories footer: a system `Form` section footer, sized by UIKit (it does
     ///   grow and wrap; giving it our own font or `fixedSize` didn't change the finding).
-    /// - Contrast of anything under the bottom action bar: content scrolled beneath the translucent bar, where
-    ///   the audit samples the blur, not the text's real background.
-    /// - "Contrast nearly passed": text in the system's secondary label color, Apple's standard for secondary
-    ///   text, a hair under 4.5:1 on the grouped background; these are warnings, not failures.
-    /// - Contrast and clipping findings the audit can't attach to an element: nothing to locate or fix; they're
-    ///   kept in the attachment, and the screens were checked by eye at the default and largest text sizes.
+    /// - Contrast of content scrolled beneath the translucent bottom action bar (elements overlapping the bar
+    ///   that aren't part of it): the audit samples the blur, not the text's real background. The bar's own
+    ///   buttons and texts are checked like everything else.
+    /// - "Contrast nearly passed": a warning-level finding (the audit's own "nearly"), excluded as a warning, not
+    ///   a failure; it's on text in the system's secondary label color on the grouped background.
+    /// - Contrast findings the audit can't attach to an element (nothing to locate); they're kept in the
+    ///   attachment. Element-less clipping findings still fail.
     @MainActor
     private func isKnownFalsePositive(_ issue: XCUIAccessibilityAuditIssue, in app: XCUIApplication) -> Bool {
         if issue.auditType == .contrast, issue.compactDescription.contains("nearly passed") { return true }
-        guard let element = issue.element else {
-            return issue.auditType == .contrast || issue.auditType == .textClipped
-        }
+        guard let element = issue.element else { return issue.auditType == .contrast }
         let frame = element.frame
         func within(_ container: XCUIElement) -> Bool { container.exists && container.frame.intersects(frame) }
         let navigationBar = app.navigationBars.firstMatch
@@ -85,14 +84,23 @@ final class AccessibilityAuditTests: XCTestCase {
             return within(bottomBar) || within(app.otherElements["writingHeader"])
                 || ["playerInitial", "categoriesFooter"].contains(element.identifier)
         case .contrast:
-            return within(bottomBar)
+            return within(bottomBar) && !isPart(element, of: bottomBar)
         default:
             return false
         }
     }
 
+    /// Whether `element` is one of `container`'s own descendants (same label and frame).
+    @MainActor
+    private func isPart(_ element: XCUIElement, of container: XCUIElement) -> Bool {
+        let label = element.label, frame = element.frame
+        return container.descendants(matching: .any).allElementsBoundByIndex
+            .contains { $0.label == label && $0.frame == frame }
+    }
+
     @MainActor
     private func audit(_ app: XCUIApplication, _ screen: String) throws {
+        if reportOnly { attachScreenshot(app, "screen-\(screen)") }
         var lines: [String] = []
         try app.performAccessibilityAudit { issue in
             let element = issue.element.map { "\($0.elementType.rawValue) '\($0.identifier)' '\($0.label)' \($0.frame)" } ?? "-"
