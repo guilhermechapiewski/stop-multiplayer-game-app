@@ -1,4 +1,5 @@
 import Foundation
+import Network
 
 /// What a host publishes about its game; carried in the Bonjour TXT record.
 public struct Advertisement: Codable, Sendable, Equatable {
@@ -46,6 +47,7 @@ public struct EndpointRef: Sendable, Hashable, CustomStringConvertible {
     /// Each transport adds its own case (the Network.framework transport adds an `NWEndpoint` case).
     enum Storage: Sendable, Hashable {
         case inMemory(UUID)
+        case network(NWEndpoint)
     }
 
     let storage: Storage
@@ -57,6 +59,7 @@ public struct EndpointRef: Sendable, Hashable, CustomStringConvertible {
     public var description: String {
         switch storage {
         case .inMemory(let id): "inmemory:\(id.uuidString)"
+        case .network(let endpoint): "nw:\(endpoint.debugDescription)"
         }
     }
 }
