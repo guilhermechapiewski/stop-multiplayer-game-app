@@ -25,6 +25,8 @@ final class HostSetupModel {
     @ObservationIgnored private let defaults: [String]
     private var custom: [String] = []
     @ObservationIgnored private var isLoaded = false
+    /// The player changed the selection: loading must not replace it with the last game's categories.
+    @ObservationIgnored private var hasEditedSelection = false
 
     init(store: any GameStore, language: GameLanguage) {
         self.store = store
@@ -33,9 +35,12 @@ final class HostSetupModel {
         selected = Array(defaults.prefix(Self.defaultSelectionCount))
     }
 
-    /// Adds the custom categories remembered on this device, keeping any added while they were loading.
+    /// Adds the custom categories remembered on this device, keeping any added while they were loading, and
+    /// selects the last hosted game's categories (in their order) that are still on offer, unless the
+    /// selection was already changed. With none of them left, the defaults stay selected.
     func load() async {
         let saved = await store.loadCustomCategories()
+        let last = await store.loadLastCategories()
         var merged: [String] = []
         for name in saved + custom where !(defaults + merged).contains(where: { Self.same($0, name) }) {
             merged.append(name)
@@ -43,6 +48,15 @@ final class HostSetupModel {
         custom = merged
         isLoaded = true
         rebuildAvailable()
+        guard !hasEditedSelection else { return }
+        var remembered: [String] = []
+        for name in last {
+            guard let match = available.first(where: { Self.same($0, name) }), !remembered.contains(match) else {
+                continue
+            }
+            remembered.append(match)
+        }
+        if !remembered.isEmpty { selected = remembered }
     }
 
     var canCreate: Bool { !selected.isEmpty }
@@ -53,6 +67,7 @@ final class HostSetupModel {
 
     /// Selects a category (appending it to the play order) or deselects it.
     func toggle(_ category: String) {
+        hasEditedSelection = true
         if let index = selected.firstIndex(of: category) {
             selected.remove(at: index)
         } else if available.contains(category) {
@@ -66,6 +81,7 @@ final class HostSetupModel {
         let trimmed = String(name.trimmingCharacters(in: .whitespacesAndNewlines).prefix(Self.maxCategoryLength))
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
+        hasEditedSelection = true
         if let existing = available.first(where: { Self.same($0, trimmed) }) {
             if !isSelected(existing) { selected.append(existing) }
             return
@@ -91,6 +107,7 @@ final class HostSetupModel {
 
     /// Reorders the selected categories.
     func move(from source: IndexSet, to destination: Int) {
+        hasEditedSelection = true
         selected.move(fromOffsets: source, toOffset: destination)
     }
 

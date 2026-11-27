@@ -78,6 +78,15 @@ struct PracticeSetupModelTests {
         #expect(model.hasCustomCategories)
     }
 
+    @Test func practiceStartsWithTheLastHostedCategories() async {
+        await store.saveLastCategories(["City", "Animal"])
+        let model = makeModel()
+        await model.setup.load()
+        #expect(model.setup.selected == ["City", "Animal"])
+        #expect(model.setup.stopsRequired == 1)
+        #expect(!model.setup.allowGiveUp)
+    }
+
     @Test func settingsComeFromTheSharedOptions() {
         let model = makeModel()
         model.setup.allowGiveUp = true

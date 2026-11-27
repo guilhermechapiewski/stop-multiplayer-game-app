@@ -44,6 +44,8 @@ public actor FileGameStore: GameStore {
     public func saveProfile(_ p: Profile) { write(p, "profile") }
     public func loadCustomCategories() -> [String] { read("categories") ?? [] }
     public func saveCustomCategories(_ c: [String]) { write(c, "categories") }
+    public func loadLastCategories() -> [String] { read("lastCategories") ?? [] }
+    public func saveLastCategories(_ c: [String]) { write(c, "lastCategories") }
     public func loadHostGame() -> GameState? { read("hostGame") }
     public func saveHostGame(_ s: GameState?) { writeOptional(s, "hostGame") }
     public func loadActiveGame() -> ActiveGameRef? { read("activeGame") }

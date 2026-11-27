@@ -44,6 +44,9 @@ public protocol GameStore: Sendable {
     func saveProfile(_ p: Profile) async
     func loadCustomCategories() async -> [String]
     func saveCustomCategories(_ c: [String]) async
+    /// The categories of the last game this device hosted, in play order; empty when none was saved.
+    func loadLastCategories() async -> [String]
+    func saveLastCategories(_ c: [String]) async
     func loadHostGame() async -> GameState?
     func saveHostGame(_ s: GameState?) async
     func loadActiveGame() async -> ActiveGameRef?
@@ -56,6 +59,7 @@ public protocol GameStore: Sendable {
 public actor InMemoryGameStore: GameStore {
     private var profile: Profile?
     private var categories: [String] = []
+    private var lastCategories: [String] = []
     private var hostGame: GameState?
     private var activeGame: ActiveGameRef?
     private var drafts: [String: [String]] = [:]
@@ -66,6 +70,8 @@ public actor InMemoryGameStore: GameStore {
     public func saveProfile(_ p: Profile) { profile = p }
     public func loadCustomCategories() -> [String] { categories }
     public func saveCustomCategories(_ c: [String]) { categories = c }
+    public func loadLastCategories() -> [String] { lastCategories }
+    public func saveLastCategories(_ c: [String]) { lastCategories = c }
     public func loadHostGame() -> GameState? { hostGame }
     public func saveHostGame(_ s: GameState?) { hostGame = s }
     public func loadActiveGame() -> ActiveGameRef? { activeGame }

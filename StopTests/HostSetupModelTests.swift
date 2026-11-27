@@ -29,6 +29,40 @@ struct HostSetupModelTests {
         #expect(model.selected == Array(DefaultCategories.list(for: .ptBR).prefix(6)))
     }
 
+    // MARK: The last hosted game's categories
+
+    @Test func lastHostedCategoriesArePreselectedInOrder() async {
+        await store.saveCustomCategories(["Cartoons"])
+        await store.saveLastCategories(["Fruit", "Cartoons", "Name"])
+        let model = await makeModel()
+        #expect(model.selected == ["Fruit", "Cartoons", "Name"])
+        // Only the categories are remembered: the rules start from their defaults.
+        #expect(model.stopsRequired == 1)
+        #expect(!model.allowGiveUp)
+        #expect(model.available == DefaultCategories.list(for: .en) + ["Cartoons"])
+    }
+
+    @Test func lastCategoriesNoLongerOfferedAreDropped() async {
+        // "Dinosaur" was a custom category since forgotten; "Fruta" is a Portuguese default; "name" differs in case.
+        await store.saveLastCategories(["Dinosaur", "Fruta", "name", "Animal", "Animal"])
+        let model = await makeModel()
+        #expect(model.selected == ["Name", "Animal"])
+    }
+
+    @Test func noLastCategoryStillOfferedFallsBackToDefaults() async {
+        await store.saveLastCategories(["Fruta", "Dinosaur"])
+        let model = await makeModel()
+        #expect(model.selected == Array(DefaultCategories.list(for: .en).prefix(6)))
+    }
+
+    @Test func choicesMadeBeforeLoadingAreKept() async {
+        await store.saveLastCategories(["Fruit"])
+        let model = HostSetupModel(store: store, language: .en)
+        model.toggle("Job")
+        await model.load()
+        #expect(model.selected == Array(DefaultCategories.list(for: .en).prefix(6)) + ["Job"])
+    }
+
     @Test func customCategoryPersistedAndSelected() async {
         let model = await makeModel()
 

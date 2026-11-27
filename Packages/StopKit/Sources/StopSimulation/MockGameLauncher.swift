@@ -56,8 +56,8 @@ import StopSession
     }
 }
 
-/// Reads and writes the profile and custom categories through to `base`; keeps the game, the active-game
-/// reference and drafts in memory only.
+/// Reads and writes the profile and the custom and last categories through to `base`; keeps the game, the
+/// active-game reference and drafts in memory only.
 actor PracticeStore: GameStore {
     private let base: any GameStore
     private let memory = InMemoryGameStore()
@@ -68,6 +68,8 @@ actor PracticeStore: GameStore {
     func saveProfile(_ p: Profile) async { await base.saveProfile(p) }
     func loadCustomCategories() async -> [String] { await base.loadCustomCategories() }
     func saveCustomCategories(_ c: [String]) async { await base.saveCustomCategories(c) }
+    func loadLastCategories() async -> [String] { await base.loadLastCategories() }
+    func saveLastCategories(_ c: [String]) async { await base.saveLastCategories(c) }
     func loadHostGame() async -> GameState? { await memory.loadHostGame() }
     func saveHostGame(_ s: GameState?) async { await memory.saveHostGame(s) }
     func loadActiveGame() async -> ActiveGameRef? { await memory.loadActiveGame() }

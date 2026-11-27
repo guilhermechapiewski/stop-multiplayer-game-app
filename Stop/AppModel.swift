@@ -206,6 +206,7 @@ final class AppModel {
             let state = try GameEngine.newGame(gameID: UUID(), hostID: profile.playerID, hostName: profile.name,
                                                settings: settings, language: gameLanguage)
             startHost(HostSession(state: state, factory: factory, store: store, clock: clock))
+            rememberCategories(of: settings)
         } catch {
             Logger.app.error("hostGame: \(String(describing: error), privacy: .public)")
         }
@@ -222,6 +223,12 @@ final class AppModel {
         // Before the route changes, so the game screen never renders as a hosted game.
         isPractice = true
         start(game)
+        rememberCategories(of: settings)
+    }
+
+    /// The next host or practice setup starts with this game's categories, in this order.
+    private func rememberCategories(of settings: GameSettings) {
+        Task { [store] in await store.saveLastCategories(settings.categories) }
     }
 
     func join(_ game: DiscoveredGame) {

@@ -62,6 +62,20 @@ struct FileGameStoreTests {
         #expect(await store.loadDraft(gameID: g2, round: 2) == ["other"])
     }
 
+    /// The last hosted game's categories, in order; nothing saved reads as empty.
+    @Test(arguments: [true, false])
+    func lastCategoriesRoundTrip(file: Bool) async {
+        let dir = tempDir()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let store: any GameStore = file ? FileGameStore(directory: dir) : InMemoryGameStore()
+        #expect(await store.loadLastCategories().isEmpty)
+        await store.saveLastCategories(["Fruta", "Cartoons", "Nome"])
+        #expect(await store.loadLastCategories() == ["Fruta", "Cartoons", "Nome"])
+        await store.saveLastCategories(["Animal"])
+        #expect(await store.loadLastCategories() == ["Animal"])
+        if file { #expect(await FileGameStore(directory: dir).loadLastCategories() == ["Animal"]) }
+    }
+
     @Test func corruptFileLoadsAsNil() async throws {
         let dir = tempDir()
         defer { try? FileManager.default.removeItem(at: dir) }

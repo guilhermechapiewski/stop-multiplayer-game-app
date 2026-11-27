@@ -246,6 +246,16 @@ struct AppModelTests {
         model.leaveGame()
     }
 
+    @Test func hostingRemembersTheGamesCategoriesInOrder() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.hostGame(settings: GameSettings(categories: ["Fruit", "Animal", "Cartoons"], stopsRequired: 2,
+                                              allowGiveUp: true))
+        try await waitUntil { await store.loadLastCategories() == ["Fruit", "Animal", "Cartoons"] }
+        model.leaveGame()
+    }
+
     @Test func leavingHostIsKeptAliveThroughItsShutdownGrace() async throws {
         _ = await saveProfile()
         let clock = TestClock()
@@ -596,6 +606,15 @@ struct AppModelTests {
         model.leaveGame()
         #expect(model.route == .home)
         #expect(!model.isPractice)
+    }
+
+    @Test func practiceRemembersItsCategories() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        startPractice(model)
+        try await waitUntil { await store.loadLastCategories() == ["Animal", "Fruit"] }
+        model.leaveGame()
     }
 
     @Test func practiceNotRestoredAfterKill() async throws {
