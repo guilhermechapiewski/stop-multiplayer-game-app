@@ -3,16 +3,10 @@ import os
 import StopCore
 import StopNetworking
 import StopSession
+import StopSimulation
 
 // App-side seams for the session types: `ClientSession` and `MockGameLauncher` / `BotPlayer` (Task 12).
-// `AppModel` only talks to these, so tests can stub them. When `MockGameLauncher` lands, wire it in
-// `SessionFactories.live`:
-//
-//     launchMockGame: { profile, bots, settings, language, clock in
-//         let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-//                                            language: language, clock: clock)
-//         return MockGame(host: game.host, retained: game.bots + [game.network])
-//     }
+// `AppModel` only talks to these, so tests can stub them.
 
 /// A game client that talks to a host over a transport: `ClientSession`'s lifecycle on top of `GameClient`.
 @MainActor protocol RemoteGameSession: GameClient {
@@ -61,16 +55,21 @@ struct SessionFactories {
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
 
-    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode's bots only sit in the game.
+    /// Production wiring. Mock mode's bots play for real, and each waits for someone else's STOP before stopping
+    /// so the local player always gets to write.
     static let live = SessionFactories(
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
         launchMockGame: { profile, bots, settings, language, clock in
-            idleBotsMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
+            var behavior = BotPlayer.Behavior.practice(.normal)
+            behavior.stopWhenOthersStopped = true
+            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                               language: language, botBehavior: behavior, clock: clock)
+            return MockGame(host: game.host, retained: game.bots + [game.network])
         })
 
-    /// A host on its own in-memory network, joined by bots that never play (stand-in for `MockGameLauncher`).
+    /// A host on its own in-memory network, joined by bots that never play (for tests).
     @MainActor
     static func idleBotsMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
                                  language: GameLanguage, clock: any Clock<Duration>) -> MockGame? {
