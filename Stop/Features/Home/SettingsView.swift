@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// Name, sounds and About. Presented as a sheet from Home.
+/// Name, sounds, Tell a friend and About. Presented as a sheet from Home.
 struct SettingsView: View {
     let model: AppModel
 
@@ -42,6 +42,17 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    NavigationLink {
+                        TellAFriendView()
+                    } label: {
+                        Label {
+                            Text("Tell a friend",
+                                 comment: "Settings row and screen title: shows a QR code and a share link so friends can get the app.")
+                        } icon: {
+                            Image(systemName: "qrcode")
+                        }
+                    }
+                    .accessibilityIdentifier("tellAFriendLink")
                     NavigationLink {
                         AboutView()
                     } label: {

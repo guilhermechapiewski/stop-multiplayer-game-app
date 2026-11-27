@@ -4,6 +4,12 @@ import Foundation
 /// (and `INFOPLIST_KEY_CFBundleDisplayName`, `InfoPlist.xcstrings`).
 enum AppInfo {
     static let name = "Stop!"
+
+    /// The App Store ID, from App Store Connect.
+    static let appStoreID = "6840139205"
+    /// The app's App Store page (Tell a friend's QR code and share link). Region-neutral: the App Store opens the
+    /// visitor's own storefront.
+    static let appStoreURL = URL(string: "https://apps.apple.com/app/id\(appStoreID)")!
 }
 
 /// The version shown in About, e.g. "1.0 (1)" (`MARKETING_VERSION (CURRENT_PROJECT_VERSION)`).

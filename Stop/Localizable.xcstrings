@@ -941,6 +941,17 @@
       },
       "comment" : "About screen tagline."
     },
+    "Friends can point their iPhone camera at this code to open %@ on the App Store." : {
+      "comment" : "Tell a friend screen subtitle. The argument is the app's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seus amigos podem apontar a câmera do iPhone para este código e abrir o %@ na App Store."
+          }
+        }
+      }
+    },
     "Friends nearby can join now from “Join a game”." : {
       "comment" : "Lobby subtitle for the host. Quotes the Home button title.",
       "localizations" : {
@@ -1612,6 +1623,17 @@
       },
       "comment" : "About link to the privacy policy web page."
     },
+    "QR code for the App Store page" : {
+      "comment" : "VoiceOver label of the Tell a friend QR code.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code da página do app na App Store"
+          }
+        }
+      }
+    },
     "Rank %lld, %@" : {
       "comment" : "VoiceOver label of a standings row. %lld is the rank, %@ the player's name.",
       "localizations" : {
@@ -1810,6 +1832,17 @@
         }
       }
     },
+    "Scan to get Stop" : {
+      "comment" : "Tell a friend screen title, above a QR code that opens the app's App Store page.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aponte a câmera para baixar o Stop"
+          }
+        }
+      }
+    },
     "See results" : {
       "comment" : "Host button at the bottom of scoring, on the round's last category: shows the round results.",
       "localizations" : {
@@ -1817,6 +1850,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ver resultados"
+          }
+        }
+      }
+    },
+    "Share link" : {
+      "comment" : "Tell a friend button that shares the App Store link.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar link"
           }
         }
       }
@@ -2037,6 +2081,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "STOPs para encerrar a rodada"
+          }
+        }
+      }
+    },
+    "Tell a friend" : {
+      "comment" : "Settings row and screen title: shows a QR code and a share link so friends can get the app.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conte para um amigo"
           }
         }
       }
