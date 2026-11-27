@@ -34,12 +34,24 @@ Run each step during a real game, starting from the lobby. "Everyone" means ever
 - [ ] Each player taps the game: they appear in the host's lobby and on everyone's lobby, and the count goes up.
 - [ ] The host taps **Start**: every phone shows the same letter, then the same 3-2-1 countdown, and the fields
       unlock together.
+- [ ] During the countdown the host taps **New letter**: every phone spins again to the same new letter (never
+      the old one) and the countdown restarts; VoiceOver announces the new letter. Guests have no button.
 - [ ] One player taps **STOP**: everyone sees the stop count ("Stops 1/2 — name"). When the required number is
       reached every phone shows **STOP!** and locks at the same moment.
 - [ ] Scoring shows the same answers and the same points on every phone, and a player's pick shows on the
       other phones as soon as it's made. A player can change their pick after everyone has scored. Only the
       host has **Next category** (**See results** on the last); the others see "Waiting for (host) to
       continue…". Results and totals match on every phone.
+- [ ] Read aloud (default): when a category opens, each phone shows only its own answer; the others show "…"
+      until that player scores, then their answer and points appear on every phone at once. The host sees an
+      away player's answer and scoring for them reveals it. With **Silent mode** on (setup, lobby or round
+      results; the lobby shows the mode to everyone), all answers show as soon as the category opens. The ⓘ
+      beside Silent mode explains both, and VoiceOver reads it.
+- [ ] The host taps **Previous category** on the second category, and later **Back to scoring** on the round
+      results: every phone goes back together, a player changes their pick, and after moving on again the
+      round totals on every phone show the change. Guests have neither button.
+- [ ] Known limit: a pick changed at the same moment the host taps **Next category** is dropped (the host has
+      moved on); the player's phone then shows the host's score for that category, and results agree.
 
 ### Lock and unlock a player mid-writing
 

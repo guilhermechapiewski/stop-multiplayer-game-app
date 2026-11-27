@@ -121,7 +121,12 @@ struct SessionFactories {
     /// answer typed within a few seconds, so the scoring shots show them all. Not for practice games.
     static func mockGameBotBehavior(seeded: Bool) -> BotPlayer.Behavior {
         var behavior = BotPlayer.Behavior.practice(.normal)
-        if seeded { behavior.stopAfter = .seconds(4) }
+        if seeded {
+            behavior.stopAfter = .seconds(4)
+            // One after another (Ana, then Bia 3 s later, then Caio): the scoring screenshot catches Ana's and
+            // Bia's answers revealed and Caio's still hidden, in read-aloud mode.
+            behavior.scoreStagger = .seconds(3)
+        }
         behavior.stopWhenOthersStopped = true
         return behavior
     }

@@ -154,10 +154,14 @@ struct GameOptionsSections: View {
             .accessibilityIdentifier("stopsStepper")
             Toggle("Allow giving up", isOn: $setup.allowGiveUp)
                 .accessibilityIdentifier("allowGiveUpToggle")
+            SilentModeToggle(isOn: $setup.silentScoring)
         } header: {
             Text("Rules")
         } footer: {
-            Text(RulesText.footer(stopsRequired: setup.stopsRequired, allowGiveUp: setup.allowGiveUp))
+            VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                Text(RulesText.footer(stopsRequired: setup.stopsRequired, allowGiveUp: setup.allowGiveUp))
+                Text(RulesText.scoring(silent: setup.silentScoring))
+            }
         }
     }
 

@@ -14,4 +14,10 @@ enum RulesText {
             "The round ends once \(stopsRequired) players have tapped STOP or given up."
         }
     }
+
+    /// How answers show during scoring: read aloud (the default) or silent.
+    static func scoring(silent: Bool) -> LocalizedStringKey {
+        silent ? "Silent mode: everyone’s answers show as soon as a category opens."
+            : "Read aloud: each answer shows once its player scores it, so read yours out loud first."
+    }
 }

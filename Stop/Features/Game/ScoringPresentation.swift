@@ -11,6 +11,8 @@ struct ScoringPresentation: Equatable {
         let isBlank: Bool
         let score: Int?
         let presence: Presence
+        /// Read-aloud scoring: another player's answer that stays hidden until they score it ("" in `answer`).
+        var isHidden = false
 
         var id: PlayerID { playerID }
     }
@@ -22,6 +24,8 @@ struct ScoringPresentation: Equatable {
     let rows: [Row]
     let myScore: Int?
     let myAnswerIsBlank: Bool
+    /// Read-aloud scoring (the default): answers show as their players score them.
+    let isReadAloud: Bool
     /// Away or left participants the host may still score for (empty for everyone but the host).
     let canHostScore: Set<PlayerID>
     /// Every active participant has a score; picks stay editable until the host moves on.
@@ -35,6 +39,9 @@ struct ScoringPresentation: Equatable {
 
     /// The host can move on now.
     var canAdvance: Bool { showsAdvanceButton && isCompleted }
+
+    /// The host can go back to the category before, to review or correct it (any time, complete or not).
+    var showsPreviousButton: Bool { showsAdvanceButton && categoryIndex > 0 }
 
     static let blankAnswer = "—"
 
@@ -67,11 +74,22 @@ struct ScoringPresentation: Equatable {
             guard let scores = round?.scores[id], scores.indices.contains(index) else { return nil }
             return scores[index]
         }
+        isReadAloud = !state.settings.silentScoring
+        // The host's snapshot withholds unscored answers (`GameState.redacted(for:)`); a nil score means hidden,
+        // except that the host sees the players it may score for (away or gone).
+        let readAloud = isReadAloud
+        let viewerIsHost = viewer == state.hostID
         rows = state.players.filter { participants.contains($0.id) }.map { player in
+            let points = score(player.id)
+            let shownToHost = viewerIsHost && player.presence != .present
+            if readAloud, player.id != viewer, points == nil, !shownToHost {
+                return Row(playerID: player.id, name: names[player.id] ?? player.name, answer: "", isBlank: false,
+                           score: nil, presence: player.presence, isHidden: true)
+            }
             let blank = isBlank(player.id)
             return Row(playerID: player.id, name: names[player.id] ?? player.name,
                        answer: blank ? Self.blankAnswer : answer(player.id) ?? "", isBlank: blank,
-                       score: score(player.id), presence: player.presence)
+                       score: points, presence: player.presence)
         }
         myScore = participants.contains(viewer) ? score(viewer) : nil
         myAnswerIsBlank = isBlank(viewer)

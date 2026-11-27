@@ -69,12 +69,14 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 - **Categories are fixed for the whole game** once it starts (owner decision).
 - **Stops required to end a round:** integer, minimum 1, maximum = number of players who haven't left (clamped automatically if players leave). Editable between rounds.
 - **Allow giving up:** toggle (default off), editable between rounds. See §5.4.
+- **Silent mode** (owner decision, 2026-11-27): toggle (default off = read-aloud scoring), editable in the lobby and between rounds, in host and practice setup; an ⓘ button beside it explains the two modes. The lobby shows which mode is on. See §5.5.
 - Lobby shows players as they join; host taps **Start** (needs ≥ 2 players including host). Host can remove a player at any time (confirm).
 - Players have a **Leave game** action (confirm). See §5.7 for presence states.
 - **New players can only join in the lobby.** Once the game starts it is closed to newcomers; adding someone means starting a new game (owner decision). Existing players (known UUID) can always reconnect or rejoin.
 
 ### 5.4 Round flow
 1. **Letter reveal** — short animation. Letters are drawn without repetition within a game; when the set is exhausted it resets. All 26 letters A–Z are used in both languages (owner decision); if a hard letter comes up, players can all give up the round together.
+   - **New letter** (owner decision, 2026-11-27): during the reveal and the countdown the host has a **New letter** button (dice). It draws a letter that's neither the current one nor used yet this game (the rejected letter goes back to the pool; if no other letter is left, the pool starts over, still without the current one), and the reveal starts over on every phone with the full countdown. Unlimited; the request names the letter being replaced, so a repeated tap never rolls twice.
 2. **3-2-1 countdown**, then all fields unlock simultaneously.
 3. **Writing** — single scrolling form, one field per category, keyboard stays up, Return moves to next field. Autocorrect off, auto-capitalize words. Each keystroke is local only.
 4. **STOP** — big button, enabled only when every category is filled. If the host enabled "allow giving up", a secondary **Give up** button is always available and counts as a stop. Each player can stop at most once per round. **Tapping STOP or Give up immediately freezes that player's own answers** (owner decision); their answers are sent to the host right away and the screen shows "You stopped — waiting for others". Everyone sees the live count ("Stops 1/2 — Ana").
@@ -82,10 +84,13 @@ An iPhone app for playing **Stop** (a.k.a. Adedanha / Scattergories-style word g
 6. Host has a **Force end round** action (in a menu, confirm) to unstick a round, e.g. when required stops can't be reached because players are away.
 
 ### 5.5 Scoring (manual)
-- One category at a time, in setup order. Everyone sees all players' answers for that category read-only.
+- One category at a time, in setup order. Answers are read-only.
+- **Read aloud** (default, owner decision 2026-11-27): another player's answer stays hidden ("…") until that player's score for the category is in; then their answer and points show on every phone at once, so everyone reads theirs out loud and scores it. Your own answer and picker are always visible. The host enforces it: snapshots withhold an unscored answer (sent as "", its nil score meaning "hidden", since blank answers start at 0); the host also sees the answers of away or gone players, as it may score for them, and scoring for one reveals it to all. Going back to a scored category shows its answers. The round results and game over show everything. Practice bots, which can't hear answers read out, read the host's full round in-process for their duplicate check only.
+- **Silent mode:** everyone sees all answers as soon as the category opens (for playing without talking).
 - Each player scores **only their own** answer: 10 / 5 / 0. A blank answer is fixed at 0.
 - **Everyone sees everyone's points** as they are picked: each row shows a 10 / 5 / 0 badge, or "…" while that player hasn't scored.
 - Category completes when all present and away players have scored (left/removed players count 0). Nothing advances on its own (owner decision, 2026-11-27): the **host** taps **Next category** (**See results** after the last), enabled only once the category is complete; the others see "Waiting for (host) to continue…". Until the host moves on, players can still change their pick, so a wrong tap can be fixed. A stale or repeated Next is ignored, so a category is never skipped. In practice the local player is the host.
+- **Going back** (owner decision, 2026-11-27): from the second category on, the host also has **Previous category**, and on the round results **Back to scoring** (reopens the last category), so a score can be reviewed or corrected; everyone follows. Scores there stay editable as usual, and totals follow. It's guarded by the category index like Next, so a repeated tap never moves twice. Once the next round starts, earlier rounds are final. Late answers still fill only categories scoring hasn't reached yet.
 - If a player is away during scoring, the host can score on their behalf after they've been away a few seconds (host sees an "Away — score for Ana" control).
 - The app never judges answers.
 
@@ -180,6 +185,10 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - Bundle ID `com.gchapiewski.stopapp`; app name decided later.
 - Practice with bots ships in the app (solo mode, also for App Review). Revised 2026-11-27: Debug builds only; App Review uses two iPhones.
 - Scoring never auto-advances: everyone sees all the points, and the host moves on to the next category (2026-11-27).
+- The host can go back to a previous category, or from the round results back to scoring, until the next round starts (2026-11-27).
+- The host can re-roll the letter during the reveal or countdown (2026-11-27).
+- Scoring is read aloud by default (answers revealed as each player scores), with a Silent mode toggle that shows every answer at once (2026-11-27).
+  The `.nextCategory` intent replaced the tick auto-advance within protocolVersion 1 on 2026-11-27 (version not bumped): builds before build 2 still auto-advance, so every phone in a game needs build 2 or later.
 - The last hosted game's categories are preselected in setup (2026-11-27).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.

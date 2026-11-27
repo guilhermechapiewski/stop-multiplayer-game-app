@@ -31,9 +31,9 @@ No internet, no accounts, no ads. Free, with no in-app purchases and no tracking
 2. **A letter appears**, then a 3-2-1 countdown.
 3. **Everyone writes at once**, one word per category starting with that letter.
 4. **STOP!** When enough players have stopped, every phone locks at the same moment.
-5. **Score together.** Everyone sees all the answers and gives their own 10, 5 or 0, and everyone's points
-   show on every phone. When all have scored, the host moves on to the next category. The app never judges:
-   that's up to the table.
+5. **Score together.** Each player reads their answer out loud and gives it 10, 5 or 0; it shows with its
+   points on every phone as it's scored (or turn on Silent mode to see every answer at once). When all have
+   scored, the host moves on to the next category. The app never judges: that's up to the table.
 
 After each round you see the ranking and the totals. Play as many rounds as you like.
 

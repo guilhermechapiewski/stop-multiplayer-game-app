@@ -32,9 +32,10 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 2. **Aparece uma letra**, e depois uma contagem 3-2-1.
 3. **Todo mundo escreve junto**, uma palavra por categoria começando com essa letra.
 4. **STOP!** Quando jogadores suficientes dão STOP, todos os celulares travam no mesmo instante.
-5. **Pontuem juntos.** Todo mundo vê todas as respostas e dá a própria nota: 10, 5 ou 0, e os pontos de
-   todos aparecem em todos os celulares. Quando todo mundo pontuou, quem criou o jogo passa para a próxima
-   categoria. O app nunca julga: quem decide é a turma.
+5. **Pontuem juntos.** Cada pessoa lê a sua resposta em voz alta e dá a nota: 10, 5 ou 0; ela aparece com os
+   pontos em todos os celulares assim que recebe a nota (ou liguem o modo silencioso para ver todas as
+   respostas de uma vez). Quando todo mundo pontuou, quem criou o jogo passa para a próxima categoria. O app
+   nunca julga: quem decide é a turma.
 
 Depois de cada rodada aparecem a classificação e o placar geral. Joguem quantas rodadas quiserem.
 

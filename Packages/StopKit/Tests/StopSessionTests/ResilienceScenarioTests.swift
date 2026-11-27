@@ -53,7 +53,8 @@ private final class Scenario {
             let client = ClientSession(profile: profile, target: .rejoin(gameID: state.gameID), factory: net,
                                        store: InMemoryGameStore(), clock: clock)
             let bot = BotPlayer(name: profile.name, client: client, behavior: behavior, clock: clock,
-                                seed: UInt64(index + 1), index: index, sharedSeed: 7)
+                                seed: UInt64(index + 1), index: index, sharedSeed: 7,
+                                fullRound: { [weak self] in self?.host.state.currentRound })
             clients.append(client)
             bots.append(bot)
         }
@@ -391,6 +392,36 @@ private let waiter = bot(stopAfter: .seconds(2), stopWhenOthersStopped: true)
             for index in 0..<4 { #expect(round.scores[s.id(index)]?[1] == 0, "\(s.bots[index].name)") }
         }
         s.expectConsistentEverywhere()
+    }
+
+    @Test func botsScoreDuplicatesFiveInReadAloudScoring() async throws {
+        // Read-aloud scoring (the default): the bot's snapshot hides the host's answers until the host scores,
+        // but the bot still sees that the host wrote the same as it did, through the host's round.
+        let s = try Scenario(bots: [bot(stopAfter: .seconds(2))], allowGiveUp: false)
+        defer { s.tearDown() }
+        #expect(!s.host.state.settings.silentScoring)
+        s.hostAutoPlay = false
+        await s.start()
+        await s.run("writing") { s.host.state.phase == .writing }
+        // The bot types its answers by 1.5 s and stops at 2 s; the host copies them just before.
+        await s.run("bot typed everything", seconds: 5) { !s.bots[0].typed.contains(where: AnswerText.isBlank) }
+        s.host.localClient.saveDraft(s.bots[0].typed)
+        await s.run("scoring", seconds: 10) { if case .scoring = s.host.state.phase { true } else { false } }
+        #expect(s.host.state.currentRound?.answers[s.hostID] == s.bots[0].typed)
+        for category in 0..<3 {
+            await s.run("bot scored \(category)", seconds: 10) {
+                s.host.state.currentRound?.scores[s.id(0)]?[category] != nil
+            }
+            // Its snapshot hid the host's answer while it scored.
+            #expect(s.host.state.currentRound?.scores[s.hostID]?[category] == nil)
+            #expect(s.clients[0].state?.currentRound?.answers[s.hostID]?[category] == "")
+            #expect(s.host.state.currentRound?.scores[s.id(0)]?[category] != 10, "category \(category)")
+            let round = s.host.state.currentRound?.number ?? 0
+            s.host.localClient.send(.setScore(round: round, category: category, points: 5, player: s.hostID))
+            s.host.localClient.send(.nextCategory(round: round, category: category))
+        }
+        #expect(s.host.state.phase == .roundResults)
+        #expect(s.host.state.rounds[0].scores[s.id(0)]?.contains(5) == true)
     }
 
     @Test func latency500msStillConverges() async throws {

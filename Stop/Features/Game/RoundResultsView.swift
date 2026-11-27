@@ -81,7 +81,12 @@ struct RoundResultsView: View {
             Divider()
             Toggle("Allow giving up", isOn: giveUpBinding)
                 .accessibilityIdentifier("resultsAllowGiveUpToggle")
+            Divider()
+            SilentModeToggle(isOn: silentBinding, identifier: "resultsSilentModeToggle")
             Text(RulesText.footer(stopsRequired: stopsRequired, allowGiveUp: state.settings.allowGiveUp))
+                .font(Theme.Typography.caption)
+                .foregroundStyle(.secondary)
+            Text(RulesText.scoring(silent: state.settings.silentScoring))
                 .font(Theme.Typography.caption)
                 .foregroundStyle(.secondary)
         }
@@ -93,14 +98,45 @@ struct RoundResultsView: View {
 
     private var stopsBinding: Binding<Int> {
         Binding(get: { stopsRequired }, set: { stops in
-            client.send(.updateRoundSettings(stopsRequired: stops, allowGiveUp: state.settings.allowGiveUp))
+            client.send(.updateRoundSettings(stopsRequired: stops, allowGiveUp: state.settings.allowGiveUp,
+                                             silentScoring: state.settings.silentScoring))
         })
     }
 
     private var giveUpBinding: Binding<Bool> {
         Binding(get: { state.settings.allowGiveUp }, set: { allow in
-            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired, allowGiveUp: allow))
+            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired, allowGiveUp: allow,
+                                             silentScoring: state.settings.silentScoring))
         })
+    }
+
+    private var silentBinding: Binding<Bool> {
+        Binding(get: { state.settings.silentScoring }, set: { silent in
+            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired,
+                                             allowGiveUp: state.settings.allowGiveUp, silentScoring: silent))
+        })
+    }
+
+    /// Host only: reopens the round's last category, to correct a score before the next round starts.
+    private var backToScoringButton: some View {
+        Button {
+            client.send(.previousCategory(round: round.number, category: state.settings.categories.count))
+        } label: {
+            Label("Back to scoring", systemImage: "arrow.uturn.backward")
+        }
+        .font(Theme.Typography.headline)
+        .foregroundStyle(Theme.accent)
+        .frame(minHeight: 44)
+        .accessibilityHint(Text("Takes everyone back to the last category to correct a score."))
+        .accessibilityIdentifier("backToScoringButton")
+    }
+
+    private var endGameButton: some View {
+        Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
+            .font(Theme.Typography.headline)
+            .foregroundStyle(Theme.accent)
+            .frame(minHeight: 44)
+            .accessibilityIdentifier("endGameButton")
     }
 
     @ViewBuilder private var bottomBar: some View {
@@ -111,11 +147,11 @@ struct RoundResultsView: View {
                 }
                 .buttonStyle(.primary)
                 .accessibilityIdentifier("nextRoundButton")
-                Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
-                    .font(Theme.Typography.headline)
-                    .foregroundStyle(Theme.accent)
-                    .frame(minHeight: 44)
-                    .accessibilityIdentifier("endGameButton")
+                // Side by side when they fit, stacked at large text sizes.
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: Theme.Spacing.l) { backToScoringButton; endGameButton }
+                    VStack(spacing: Theme.Spacing.xs) { backToScoringButton; endGameButton }
+                }
             } else {
                 HStack(spacing: Theme.Spacing.s) {
                     ProgressView()

@@ -13,6 +13,9 @@ struct ScoringView: View {
     @Environment(\.reduceMotion) private var reduceMotion
     /// My pick, shown at once while the host confirms it.
     @State private var pendingPick: Int?
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    /// The back-arrow-only Previous button's width.
+    @ScaledMetric(relativeTo: .title3) private var compactPreviousWidth: CGFloat = 64
 
     private var me: PlayerID { client.localPlayerID }
     private var presentation: ScoringPresentation { ScoringPresentation(state: state, viewer: me) }
@@ -131,6 +134,14 @@ struct ScoringView: View {
                     Text("Blank answers score 0.")
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
+                } else if presentation.isReadAloud, presentation.myScore == nil,
+                          !dynamicTypeSize.isAccessibilitySize {
+                    // Left out at accessibility sizes, where the pinned bar has no room to spare.
+                    Text("Read your answer out loud, then score it.")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("readAloudHint")
                 }
             }
             if !isCompleted {
@@ -148,20 +159,66 @@ struct ScoringView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("waitingForHost")
             }
-            if presentation.showsAdvanceButton { nextButton(presentation) }
+            if presentation.showsAdvanceButton { hostButtons(presentation) }
+        }
+    }
+
+    /// Host only: Previous beside Next (from the second category on). Its label shows when both fit side by
+    /// side; otherwise it's just the back arrow, so the pinned bar stays one button tall.
+    @ViewBuilder private func hostButtons(_ presentation: ScoringPresentation) -> some View {
+        if presentation.showsPreviousButton {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Theme.Spacing.s) {
+                    previousButton(presentation, compact: false)
+                    nextButton(presentation)
+                }
+                // Next stays on one line (shrinking a little at the largest sizes) rather than hyphenating.
+                HStack(spacing: Theme.Spacing.s) {
+                    previousButton(presentation, compact: true)
+                    nextButton(presentation, oneLine: true)
+                }
+            }
+        } else {
+            nextButton(presentation)
+        }
+    }
+
+    /// Host only: takes everyone back to the category before, to review or correct its scores.
+    @ViewBuilder private func previousButton(_ presentation: ScoringPresentation, compact: Bool) -> some View {
+        let button = Button {
+            client.send(.previousCategory(round: round.number, category: presentation.categoryIndex))
+        } label: {
+            if compact {
+                Image(systemName: "arrow.backward")
+            } else {
+                Label("Previous category", systemImage: "arrow.backward")
+            }
+        }
+        .buttonStyle(.secondary)
+        .accessibilityLabel(Text("Previous category"))
+        .accessibilityHint(Text("Takes everyone back to the category before."))
+        .accessibilityIdentifier("previousCategoryButton")
+        if compact {
+            button.frame(width: compactPreviousWidth)
+        } else {
+            button
         }
     }
 
     /// Host only: moves everyone on once the category is complete.
-    private func nextButton(_ presentation: ScoringPresentation) -> some View {
+    private func nextButton(_ presentation: ScoringPresentation, oneLine: Bool = false) -> some View {
         Button {
             client.send(.nextCategory(round: round.number, category: presentation.categoryIndex))
         } label: {
-            if presentation.isLastCategory {
-                Label("See results", systemImage: "trophy")
-            } else {
-                Label("Next category", systemImage: "arrow.forward")
+            Group {
+                if presentation.isLastCategory {
+                    Label("See results", systemImage: "trophy")
+                } else {
+                    Label("Next category", systemImage: "arrow.forward")
+                }
             }
+            .lineLimit(oneLine ? 1 : nil)
+            .minimumScaleFactor(oneLine ? 0.6 : 1)
         }
         .buttonStyle(.primary)
         .disabled(!presentation.canAdvance)
@@ -191,6 +248,7 @@ private struct AnswerRow: View {
     private var isAway: Bool { row.presence != .present }
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.reduceMotion) private var reduceMotion
 
     /// "Ana (you) · away": one string, so it wraps as a sentence at large text sizes.
     private var nameLine: String {
@@ -211,9 +269,21 @@ private struct AnswerRow: View {
                 Text(verbatim: nameLine)
                     .font(Theme.Typography.caption)
                     .foregroundStyle(.secondary)
-                Text(verbatim: row.answer)
-                    .font(Theme.Typography.headline)
-                    .foregroundStyle(isBlank ? .secondary : .primary)
+                if row.isHidden {
+                    // Read aloud: shown once this player scores it.
+                    Text(verbatim: "…")
+                        .font(Theme.Typography.headline)
+                        .foregroundStyle(.secondary)
+                        .transition(.opacity)
+                } else {
+                    Text(verbatim: row.answer)
+                        .font(Theme.Typography.headline)
+                        .foregroundStyle(isBlank ? .secondary : .primary)
+                        .transition(reduceMotion ? .opacity
+                                    : .asymmetric(insertion: .scale(scale: 0.85, anchor: .leading)
+                                                      .combined(with: .opacity),
+                                                  removal: .opacity))
+                }
             }
             .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: Theme.Spacing.s)
@@ -222,6 +292,7 @@ private struct AnswerRow: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: row.name))
         .accessibilityValue(accessibilityValue)
+        .accessibilityIdentifier(row.isHidden ? "answerRowHidden" : "answerRow")
     }
 
     private var status: some View {
@@ -229,6 +300,7 @@ private struct AnswerRow: View {
     }
 
     private var accessibilityValue: Text {
+        if row.isHidden { return Text("Answer hidden until scored") }
         let answer = isBlank ? Text("Blank") : Text(verbatim: row.answer)
         guard let score = row.score else { return Text("\(answer), not scored yet") }
         return Text("\(answer), \(score) points")

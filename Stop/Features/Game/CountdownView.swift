@@ -7,6 +7,8 @@ struct CountdownView: View {
     let round: Round
     let gameID: UUID
     let secondsRemaining: Int
+    /// Host only: draws another letter.
+    var onReroll: (() -> Void)?
 
     @Environment(\.reduceMotion) private var reduceMotion
     /// The first number waits a moment so it doesn't cut off "Letter B" (spoken as the letter lands, or as this
@@ -47,6 +49,7 @@ struct CountdownView: View {
                 .font(Theme.Typography.headline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            if let onReroll { NewLetterButton(action: onReroll) }
         }
         .animation(reduceMotion ? .easeInOut(duration: 0.2) : .spring(duration: 0.45, bounce: 0.35),
                    value: secondsRemaining)

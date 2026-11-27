@@ -87,6 +87,20 @@ struct PracticeSetupModelTests {
         #expect(!model.setup.allowGiveUp)
     }
 
+    @Test func practiceHasSilentModeToo() {
+        let model = makeModel()
+        #expect(!model.settings().silentScoring)
+        model.setup.silentScoring = true
+        #expect(model.settings().silentScoring)
+    }
+
+    @Test func practiceFallsBackToDefaultsWhenFewLastCategoriesRemain() async {
+        await store.saveLastCategories(["Dinosaur", "Bands", "City"])
+        let model = makeModel()
+        await model.setup.load()
+        #expect(model.setup.selected == Array(DefaultCategories.list(for: .en).prefix(6)))
+    }
+
     @Test func settingsComeFromTheSharedOptions() {
         let model = makeModel()
         model.setup.allowGiveUp = true

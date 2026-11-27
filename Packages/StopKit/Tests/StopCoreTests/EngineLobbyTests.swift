@@ -141,14 +141,28 @@ private func started() throws -> (GameState, PlayerID, PlayerID) {
 
 @Test func roundSettingsEditableInLobbyAndResultsOnly() throws {
     var (s, host, _) = try started()
-    #expect(throws: GameError.wrongPhase) { try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: true), host, &s) }
+    #expect(throws: GameError.wrongPhase) { try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: true, silentScoring: false), host, &s) }
     s.phase = .roundResults
-    try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: true), host, &s)
+    try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: true, silentScoring: false), host, &s)
     #expect(s.settings.stopsRequired == 2 && s.settings.allowGiveUp)
-    #expect(throws: GameError.invalidSettings) { try send(.updateRoundSettings(stopsRequired: 0, allowGiveUp: true), host, &s) }
+    #expect(throws: GameError.invalidSettings) { try send(.updateRoundSettings(stopsRequired: 0, allowGiveUp: true, silentScoring: false), host, &s) }
     var (l, h) = try lobby()
-    try send(.updateRoundSettings(stopsRequired: 3, allowGiveUp: true), h, &l)
+    try send(.updateRoundSettings(stopsRequired: 3, allowGiveUp: true, silentScoring: false), h, &l)
     #expect(l.settings.stopsRequired == 3)
+}
+
+@Test func silentScoringIsSetInSetupAndBetweenRounds() throws {
+    var (l, h) = try lobby()
+    #expect(!l.settings.silentScoring)
+    try send(.updateSettings(GameSettings(categories: ["Nome"], stopsRequired: 1, allowGiveUp: false,
+                                          silentScoring: true)), h, &l)
+    #expect(l.settings.silentScoring)
+    var (s, host, _) = try started()
+    s.phase = .roundResults
+    let v = s.version
+    try send(.updateRoundSettings(stopsRequired: s.settings.stopsRequired, allowGiveUp: s.settings.allowGiveUp,
+                                  silentScoring: true), host, &s)
+    #expect(s.settings.silentScoring && s.version == v + 1)
 }
 
 @Test func failedIntentLeavesStateUnchanged() throws {
@@ -167,7 +181,7 @@ private func started() throws -> (GameState, PlayerID, PlayerID) {
     #expect(s.version == 1)
     try send(.join(name: "Bia"), b, &s)  // idempotent
     #expect(s.version == 1)
-    try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: false), host, &s)
+    try send(.updateRoundSettings(stopsRequired: 2, allowGiveUp: false, silentScoring: false), host, &s)
     #expect(s.version == 2)
     try send(.startGame, host, &s)
     #expect(s.version == 3)

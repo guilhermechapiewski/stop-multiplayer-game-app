@@ -156,6 +156,12 @@ struct GameSteps {
         XCTAssertEqual(standings.count, rows, "round result rows", file: file, line: line)
     }
 
+    /// On the round results, `name`'s points this round as VoiceOver reads them ("40 points").
+    func roundPoints(of name: String) -> String? {
+        let rows = element("roundStandings").descendants(matching: .any).matching(identifier: "standingRow")
+        return rows.allElementsBoundByIndex.first { $0.label.contains(name) }?.value as? String
+    }
+
     /// From the round results: End game (or End practice), confirm, and wait for the final standings.
     func endGameFromResults() {
         app.buttons["endGameButton"].tap()

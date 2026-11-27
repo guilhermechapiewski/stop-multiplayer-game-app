@@ -130,9 +130,10 @@ final class PreviewGameClient: GameClient {
 
     func send(_ intent: Intent) {
         switch intent {
-        case .updateRoundSettings(let stops, let allowGiveUp):
+        case .updateRoundSettings(let stops, let allowGiveUp, let silentScoring):
             state?.settings.stopsRequired = stops
             state?.settings.allowGiveUp = allowGiveUp
+            state?.settings.silentScoring = silentScoring
         case .removePlayer(let id):
             if let index = state?.players.firstIndex(where: { $0.id == id }) {
                 state?.players[index].presence = .removed

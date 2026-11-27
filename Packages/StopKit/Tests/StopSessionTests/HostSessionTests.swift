@@ -248,7 +248,7 @@ struct HostSessionTests {
         client.send(.startGame)
         #expect(client.lastError == .notEnoughPlayers)
         #expect(client.errorCount == 2)
-        client.send(.updateRoundSettings(stopsRequired: 1, allowGiveUp: true))
+        client.send(.updateRoundSettings(stopsRequired: 1, allowGiveUp: true, silentScoring: false))
         #expect(client.lastError == nil)
         #expect(client.errorCount == 2)
     }
@@ -365,6 +365,43 @@ struct HostSessionTests {
         await waitUntil("2 sleepers") { h.clock.sleeperCount >= 2 }
     }
 
+    @Test func rerollDuringCountdownRestartsTheRevealForEveryone() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        h.host.localClient.send(.startGame)
+        await h.advance(seconds: 3)
+        #expect(h.host.state.phase == .countdown(secondsRemaining: 2))
+        let old = try #require(h.host.state.currentRound?.letter)
+        // Ana can't; the host can, once per tap.
+        let id = ana.send(.rerollLetter(round: 1, letter: old))
+        #expect(await ana.ack(for: id) == .ack(id: id, error: .notHost))
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        let new = try #require(h.host.state.currentRound?.letter)
+        #expect(new != old)
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        #expect(await ana.nextSnapshot { $0.currentRound?.letter == new && $0.phase == .revealing(ticksRemaining: 2) }
+                != nil)
+        await h.advance(seconds: 5)
+        #expect(h.host.state.phase == .writing)
+        #expect(h.host.state.currentRound?.letter == new)
+    }
+
+    @Test func rerollDuringTheRevealGivesItTwoFullTicksAgain() async throws {
+        let h = try Harness()
+        _ = try await h.join("Ana")
+        h.host.localClient.send(.startGame)
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        let old = try #require(h.host.state.currentRound?.letter)
+        h.host.localClient.send(.rerollLetter(round: 1, letter: old))
+        // Same phase, new letter: the tick loop restarts, so the next tick is a full tick away.
+        await step(h, .milliseconds(900))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 2))
+        await step(h, .milliseconds(100))
+        #expect(h.host.state.phase == .revealing(ticksRemaining: 1))
+    }
+
     @Test func revealLastsTwoFullTicksFromStartGame() async throws {
         let h = try Harness()
         _ = try await h.join("Ana")
@@ -401,6 +438,37 @@ struct HostSessionTests {
         h.host.localClient.send(.nextCategory(round: 1, category: 0))
         #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: false))
         #expect(await ana.nextSnapshot { $0.phase == .scoring(categoryIndex: 1, completed: false) } != nil)
+    }
+
+    @Test func hostGoesBackFromResultsAndAPlayerCorrectsTheirScore() async throws {
+        let h = try Harness()
+        let ana = try await h.join("Ana")
+        await h.toWriting()
+        ana.send(.stop(answers: ["Ana", "Anta"]))
+        await waitUntil("scoring") { h.host.state.phase == .scoring(categoryIndex: 0, completed: false) }
+        for category in 0..<2 {
+            h.host.localClient.send(.setScore(round: 1, category: category, points: 10, player: h.hostID))
+            ana.send(.setScore(round: 1, category: category, points: 10, player: ana.playerID))
+            await waitUntil("completed \(category)") {
+                h.host.state.phase == .scoring(categoryIndex: category, completed: true)
+            }
+            h.host.localClient.send(.nextCategory(round: 1, category: category))
+        }
+        #expect(h.host.state.phase == .roundResults)
+        // Only the host goes back.
+        let id = ana.send(.previousCategory(round: 1, category: 2))
+        #expect(await ana.ack(for: id) == .ack(id: id, error: .notHost))
+        #expect(h.host.state.phase == .roundResults)
+        h.host.localClient.send(.previousCategory(round: 1, category: 2))
+        // A repeated tap is rejected by the category guard: it never moves twice.
+        h.host.localClient.send(.previousCategory(round: 1, category: 2))
+        #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: true))
+        #expect(await ana.nextSnapshot { $0.phase == .scoring(categoryIndex: 1, completed: true) } != nil)
+        ana.send(.setScore(round: 1, category: 1, points: 5, player: ana.playerID))
+        await waitUntil("corrected") { h.host.state.currentRound?.scores[ana.playerID]?[1] == 5 }
+        h.host.localClient.send(.nextCategory(round: 1, category: 1))
+        #expect(h.host.state.phase == .roundResults)
+        #expect(h.host.state.totals[ana.playerID] == 15)
     }
 
     @Test func suspendStopsTicksSoCountdownPauses() async throws {

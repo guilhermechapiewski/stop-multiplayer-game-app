@@ -10,6 +10,25 @@ import StopTestSupport
     #expect(next.used == [next.letter])            // reset after exhaustion
 }
 
+@Test func rerollPutsTheCurrentLetterBackAndNeverPicksItOrAUsedOne() {
+    var rng = SeededRNG(seed: 3)
+    for _ in 0..<50 {
+        let r = LetterPicker.reroll(current: "C", used: ["A", "B", "C"], using: &rng)
+        #expect(!["A", "B", "C"].contains(r.letter))
+        #expect(r.used == ["A", "B", r.letter])
+    }
+}
+
+@Test func rerollWithNoLetterLeftStartsOverWithoutTheCurrentOne() {
+    var rng = SeededRNG(seed: 3)
+    let used = LetterPicker.alphabet.filter { $0 != "Q" } + ["Q"]
+    for _ in 0..<50 {
+        let r = LetterPicker.reroll(current: "Q", used: used, using: &rng)
+        #expect(r.letter != "Q")
+        #expect(r.used == [r.letter])
+    }
+}
+
 @Test func alphabetIsFull() { #expect(LetterPicker.alphabet.count == 26); #expect(LetterPicker.alphabet.contains("K")) }
 
 @Test func seededRNGIsDeterministic() {

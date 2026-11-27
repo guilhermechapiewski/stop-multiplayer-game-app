@@ -20,6 +20,8 @@ final class HostSetupModel {
         didSet { if stopsRequired < 1 { stopsRequired = 1 } }
     }
     var allowGiveUp = false
+    /// Off: read-aloud scoring (answers show as each player scores their own). On: every answer shows at once.
+    var silentScoring = false
 
     @ObservationIgnored private let store: any GameStore
     @ObservationIgnored private let defaults: [String]
@@ -37,7 +39,8 @@ final class HostSetupModel {
 
     /// Adds the custom categories remembered on this device, keeping any added while they were loading, and
     /// selects the last hosted game's categories (in their order) that are still on offer, unless the
-    /// selection was already changed. With none of them left, the defaults stay selected.
+    /// selection was already changed. With fewer than half of them left (none, say), the defaults stay
+    /// selected: a few leftovers aren't the last game.
     func load() async {
         let saved = await store.loadCustomCategories()
         let last = await store.loadLastCategories()
@@ -49,14 +52,16 @@ final class HostSetupModel {
         isLoaded = true
         rebuildAvailable()
         guard !hasEditedSelection else { return }
+        var distinctLast: [String] = []
+        for name in last where !distinctLast.contains(where: { Self.same($0, name) }) { distinctLast.append(name) }
         var remembered: [String] = []
-        for name in last {
+        for name in distinctLast {
             guard let match = available.first(where: { Self.same($0, name) }), !remembered.contains(match) else {
                 continue
             }
             remembered.append(match)
         }
-        if !remembered.isEmpty { selected = remembered }
+        if !remembered.isEmpty, remembered.count * 2 >= distinctLast.count { selected = remembered }
     }
 
     var canCreate: Bool { !selected.isEmpty }
@@ -112,7 +117,8 @@ final class HostSetupModel {
     }
 
     func settings() -> GameSettings {
-        GameSettings(categories: selected, stopsRequired: stopsRequired, allowGiveUp: allowGiveUp)
+        GameSettings(categories: selected, stopsRequired: stopsRequired, allowGiveUp: allowGiveUp,
+                     silentScoring: silentScoring)
     }
 
     private func rebuildAvailable() { available = defaults + custom }

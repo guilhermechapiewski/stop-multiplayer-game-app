@@ -42,6 +42,39 @@ private func startedGame(players: Int = 3, stopsRequired: Int = 1, allowGiveUp: 
     #expect(!GameEngine.tick(&s) && s.version == v)
 }
 
+@Test func hostRerollsTheLetterDuringRevealOrCountdown() throws {
+    var (s, ids) = try startedGame()
+    for phase in [Phase.revealing(ticksRemaining: 1), .countdown(secondsRemaining: 2)] {
+        s.phase = phase
+        let old = try #require(s.currentRound?.letter)
+        let usedBefore = s.usedLetters
+        let v = s.version
+        try send(.rerollLetter(round: 1, letter: old), ids[0], &s)
+        let new = try #require(s.currentRound?.letter)
+        #expect(new != old && !usedBefore.contains(new))
+        #expect(s.usedLetters == usedBefore.filter { $0 != old } + [new])
+        #expect(s.phase == .revealing(ticksRemaining: 2))
+        #expect(s.version == v + 1)
+    }
+}
+
+@Test func rerollIsHostOnlyAndGuarded() throws {
+    var (s, ids) = try startedGame()
+    // In writing it's too late.
+    let letter = try #require(s.currentRound?.letter)
+    #expect(throws: GameError.wrongPhase) { try send(.rerollLetter(round: 1, letter: letter), ids[0], &s) }
+    s.phase = .countdown(secondsRemaining: 3)
+    let before = s
+    #expect(throws: GameError.notHost) { try send(.rerollLetter(round: 1, letter: letter), ids[1], &s) }
+    #expect(throws: GameError.staleRound) { try send(.rerollLetter(round: 2, letter: letter), ids[0], &s) }
+    #expect(s == before)
+    // A repeated tap names the letter that was already replaced: it never rolls twice.
+    try send(.rerollLetter(round: 1, letter: letter), ids[0], &s)
+    let after = s
+    #expect(throws: GameError.staleRound) { try send(.rerollLetter(round: 1, letter: letter), ids[0], &s) }
+    #expect(s == after)
+}
+
 @Test func stopRejectedWhileCountingDown() throws {
     var (s, ids) = try startedGame()
     s.phase = .countdown(secondsRemaining: 2)

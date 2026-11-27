@@ -9,13 +9,15 @@ struct ScoringPresentationTests {
     let bia = Player(id: UUID(), name: "Bia", presence: .away)
     let caio = Player(id: UUID(), name: "Caio", presence: .left)
 
-    /// Scoring `category` of round 1 (letter B) with the given answers and scores.
-    func makeState(players: [Player]? = nil, category: Int = 1, completed: Bool = false,
+    /// Scoring `category` of round 1 (letter B) with the given answers and scores; silent mode (every answer
+    /// shown) unless `silent` is false.
+    func makeState(players: [Player]? = nil, category: Int = 1, completed: Bool = false, silent: Bool = true,
                    answers: [PlayerID: [String]], scores: [PlayerID: [Int?]]) -> GameState {
         let players = players ?? [host, ana, bia, caio]
         return GameState(
             gameID: UUID(), hostID: host.id, version: 7, language: .en,
-            settings: GameSettings(categories: ["Name", "Animal", "Country"], stopsRequired: 1, allowGiveUp: true),
+            settings: GameSettings(categories: ["Name", "Animal", "Country"], stopsRequired: 1, allowGiveUp: true,
+                                   silentScoring: silent),
             players: players, phase: .scoring(categoryIndex: category, completed: completed),
             rounds: [Round(number: 1, letter: "B", participants: players.map(\.id),
                            stops: [StopRecord(playerID: ana.id, kind: .stop)], answers: answers, scores: scores)],
@@ -120,6 +122,59 @@ struct ScoringPresentationTests {
         #expect(!anaDone.canAdvance)
         #expect(anaDone.isCompleted)
         #expect(anaDone.hostName == "Gui")
+    }
+
+    @Test func readAloudHidesUnscoredAnswersButTheViewersOwn() {
+        // As the host's snapshot sends it to Ana: unscored answers of others withheld as "".
+        let state = makeState(silent: false,
+                              answers: [host.id: ["Bruno", "", "Brazil"], ana.id: ["Bia", "Bat", "Belgium"],
+                                        bia.id: ["Beto", "", "Bolivia"], caio.id: ["Bob", "", "Benin"]],
+                              scores: [host.id: [10, nil, nil], ana.id: [5, nil, nil], bia.id: [nil, nil, nil],
+                                       caio.id: [0, 0, nil]])
+        let presentation = ScoringPresentation(state: state, viewer: ana.id)
+        #expect(presentation.isReadAloud)
+        #expect(presentation.rows.map(\.isHidden) == [true, false, true, false])
+        #expect(presentation.rows.map(\.answer) == ["", "Bat", "", "—"])
+        // Hidden isn't blank, and has no score to show.
+        #expect(presentation.rows[0].isBlank == false && presentation.rows[0].score == nil)
+        #expect(presentation.myScore == nil && !presentation.myAnswerIsBlank)
+    }
+
+    @Test func readAloudShowsAnAnswerOnceScored() {
+        let state = makeState(silent: false, answers: answers,
+                              scores: [host.id: [10, 10, nil], ana.id: [5, 0, nil], bia.id: [nil, nil, nil],
+                                       caio.id: [0, 5, nil]])
+        let presentation = ScoringPresentation(state: state, viewer: ana.id)
+        #expect(presentation.rows.map(\.isHidden) == [false, false, true, false])
+        #expect(presentation.rows[0].answer == "Bear" && presentation.rows[0].score == 10)
+    }
+
+    @Test func readAloudShowsTheHostThePlayersItMayScoreFor() {
+        // Bia is away: the host may score for her, so it sees her answer (and its snapshot includes it).
+        let state = makeState(silent: false, answers: answers,
+                              scores: [host.id: [10, nil, nil], ana.id: [5, nil, nil], bia.id: [nil, nil, nil],
+                                       caio.id: [0, nil, nil]])
+        let presentation = ScoringPresentation(state: state, viewer: host.id)
+        #expect(presentation.rows.map(\.isHidden) == [false, true, false, false])
+        #expect(presentation.rows[2].answer == "Bee")
+        #expect(presentation.canHostScore.contains(bia.id))
+    }
+
+    @Test func silentModeShowsEveryAnswer() {
+        let state = makeState(answers: answers, scores: [host.id: [10, nil, nil], ana.id: [5, nil, nil],
+                                                         bia.id: [nil, nil, nil], caio.id: [0, nil, nil]])
+        let presentation = ScoringPresentation(state: state, viewer: ana.id)
+        #expect(!presentation.isReadAloud)
+        #expect(presentation.rows.allSatisfy { !$0.isHidden })
+        #expect(presentation.rows.map(\.answer) == ["Bear", "—", "Bee", "Bat"])
+    }
+
+    @Test func onlyTheHostGoesBackAndNotFromTheFirstCategory() {
+        let second = makeState(category: 1, answers: answers, scores: allScored)
+        #expect(ScoringPresentation(state: second, viewer: host.id).showsPreviousButton)
+        #expect(!ScoringPresentation(state: second, viewer: ana.id).showsPreviousButton)
+        let first = makeState(category: 0, completed: true, answers: answers, scores: allScored)
+        #expect(!ScoringPresentation(state: first, viewer: host.id).showsPreviousButton)
     }
 
     @Test func lastCategoryLeadsToResults() {

@@ -32,11 +32,13 @@ extension GameEngine {
         return true
     }
 
-    /// Answers that arrive during scoring fill only the categories not yet scored.
+    /// Answers that arrive during scoring fill only the categories not yet scored: none the host has already
+    /// been through, even after going back to an earlier one.
     static func applyLateAnswers(_ answers: [String], for player: PlayerID, state: inout GameState) {
         guard case .scoring(let current, let completed) = state.phase else { return }
         let index = state.rounds.count - 1
-        let first = completed ? current + 1 : current
+        let furthest = state.rounds[index].furthestCategory ?? current
+        let first = furthest > current ? furthest + 1 : (completed ? current + 1 : current)
         guard var scores = state.rounds[index].scores[player] else { return }
         for category in first..<max(first, scores.count) { scores[category] = initialScore(answers[category]) }
         state.rounds[index].scores[player] = scores
@@ -76,6 +78,30 @@ extension GameEngine {
         } else {
             state.phase = .roundResults
         }
+        return true
+    }
+
+    /// The host goes back one category to review or correct its scores: from category `category` (> 0) to the
+    /// one before, or from the round results (`category` == the category count) to the last one. Scores there
+    /// stay editable as usual. The category index guards it like `nextCategory`: a stale or repeated request
+    /// never moves twice. Once the next round has started, earlier rounds are final.
+    static func previousCategory(round number: Int, category: Int, sender: PlayerID,
+                                 state: inout GameState) throws(GameError) -> Bool {
+        guard sender == state.hostID else { throw .notHost }
+        guard let round = state.currentRound else { throw .wrongPhase }
+        guard round.number == number else { throw .staleRound }
+        switch state.phase {
+        case .scoring(category, _) where category > 0:
+            break
+        case .roundResults where category == state.settings.categories.count:
+            break
+        default:
+            throw .wrongPhase
+        }
+        let index = state.rounds.count - 1
+        state.rounds[index].furthestCategory = max(round.furthestCategory ?? category, category)
+        let previous = category - 1
+        state.phase = .scoring(categoryIndex: previous, completed: settleCategory(previous, &state))
         return true
     }
 

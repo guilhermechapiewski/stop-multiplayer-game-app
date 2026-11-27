@@ -1,10 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "%@%@" : {
-      "comment" : "Joins two styled pieces of text (a name and its badges). Not translated.",
-      "shouldTranslate" : false
-    },
     "%@ hasn’t sent answers. Continue anyway?" : {
       "comment" : "Host confirmation on the collecting screen, one player missing. %@ is the player's name.",
       "localizations" : {
@@ -103,6 +99,10 @@
           }
         }
       }
+    },
+    "%@%@" : {
+      "comment" : "Joins two styled pieces of text (a name and its badges). Not translated.",
+      "shouldTranslate" : false
     },
     "%@, %lld points" : {
       "comment" : "VoiceOver value of a scoring row once that player has a score. %@ is the answer, %lld the points (10, 5 or 0).",
@@ -380,6 +380,17 @@
       },
       "comment" : "Settings row that opens the About screen; also its title."
     },
+    "About silent mode" : {
+      "comment" : "VoiceOver label of the ⓘ button beside the Silent mode switch; it opens an explanation.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobre o modo silencioso"
+          }
+        }
+      }
+    },
     "Add" : {
       "comment" : "Button that adds the typed custom category.",
       "localizations" : {
@@ -446,6 +457,17 @@
         }
       }
     },
+    "Answer hidden until scored" : {
+      "comment" : "VoiceOver value of a scoring row in read-aloud mode while that player hasn't scored yet (read after the name).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resposta escondida até a nota"
+          }
+        }
+      }
+    },
     "Ask a friend to host a game. It shows up here as soon as their phone is on the same Wi-Fi network as yours." : {
       "comment" : "Join screen while no games have been found.",
       "localizations" : {
@@ -508,6 +530,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voltar ao início"
+          }
+        }
+      }
+    },
+    "Back to scoring" : {
+      "comment" : "Host button on round results: reopens the round's last scoring category so a score can be corrected.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rever notas"
           }
         }
       }
@@ -706,6 +739,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não está vendo o jogo do seu amigo? Confira se vocês estão na mesma rede Wi-Fi."
+          }
+        }
+      }
+    },
+    "Draws another letter for everyone and restarts the countdown." : {
+      "comment" : "VoiceOver hint of the host's New letter button.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sorteia outra letra para todo mundo e reinicia a contagem."
           }
         }
       }
@@ -1359,6 +1403,17 @@
         }
       }
     },
+    "New letter" : {
+      "comment" : "Host button (dice icon) on the letter reveal and countdown screens: draws another letter for the round.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outra letra"
+          }
+        }
+      }
+    },
     "New players can join only while the game is in the lobby." : {
       "comment" : "Alert message: why a game that already started can't be joined.",
       "localizations" : {
@@ -1612,6 +1667,17 @@
       },
       "comment" : "Home button for a solo game against computer players."
     },
+    "Previous category" : {
+      "comment" : "Host button at the bottom of scoring, beside Next category: takes everyone back to the category before.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoria anterior"
+          }
+        }
+      }
+    },
     "Privacy policy" : {
       "localizations" : {
         "pt-BR" : {
@@ -1641,6 +1707,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$lldº lugar, %2$@"
+          }
+        }
+      }
+    },
+    "Read aloud" : {
+      "comment" : "Lobby rules value: read-aloud scoring (answers show as each player scores their own).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta"
+          }
+        }
+      }
+    },
+    "Read aloud (default): answers stay hidden until each person scores their own, so everyone reads theirs out loud first." : {
+      "comment" : "First paragraph of the explanation opened by the ⓘ button beside Silent mode.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta (padrão): as respostas ficam escondidas até cada pessoa dar a nota da sua, então todo mundo lê a própria resposta em voz alta antes."
+          }
+        }
+      }
+    },
+    "Read aloud: each answer shows once its player scores it, so read yours out loud first." : {
+      "comment" : "Rules footer (setup, lobby, round results) in read-aloud scoring, the default.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em voz alta: cada resposta aparece quando a pessoa dá a nota dela, então leia a sua em voz alta antes."
+          }
+        }
+      }
+    },
+    "Read your answer out loud, then score it." : {
+      "comment" : "Hint above the score picker during read-aloud scoring, until the player has scored.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leia sua resposta em voz alta e depois dê a nota."
           }
         }
       }
@@ -1832,39 +1942,6 @@
         }
       }
     },
-    "Scan to get Stop" : {
-      "comment" : "Tell a friend screen title, above a QR code that opens the app's App Store page.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aponte a câmera para baixar o Stop"
-          }
-        }
-      }
-    },
-    "See results" : {
-      "comment" : "Host button at the bottom of scoring, on the round's last category: shows the round results.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ver resultados"
-          }
-        }
-      }
-    },
-    "Share link" : {
-      "comment" : "Tell a friend button that shares the App Store link.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Compartilhar link"
-          }
-        }
-      }
-    },
     "STOP!" : {
       "comment" : "The big button that ends the round once every category is filled.",
       "localizations" : {
@@ -1876,6 +1953,17 @@
         }
       }
     },
+    "Scan to get Stop" : {
+      "comment" : "Tell a friend screen title, above a QR code that opens the app's App Store page.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aponte a câmera para baixar o Stop"
+          }
+        }
+      }
+    },
     "Score your answer" : {
       "comment" : "Title above the 10 / 5 / 0 score picker.",
       "localizations" : {
@@ -1883,6 +1971,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pontue sua resposta"
+          }
+        }
+      }
+    },
+    "Scoring" : {
+      "comment" : "Lobby rules row for players other than the host: which scoring mode is on (value: Read aloud or Silent).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pontuação"
+          }
+        }
+      }
+    },
+    "See results" : {
+      "comment" : "Host button at the bottom of scoring, on the round's last category: shows the round results.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver resultados"
           }
         }
       }
@@ -1930,6 +2040,61 @@
         }
       },
       "comment" : "Title of the Settings sheet and the Home toolbar button that opens it."
+    },
+    "Share link" : {
+      "comment" : "Tell a friend button that shares the App Store link.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartilhar link"
+          }
+        }
+      }
+    },
+    "Silent" : {
+      "comment" : "Lobby rules value: silent scoring is on (everyone's answers show at once).",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silenciosa"
+          }
+        }
+      }
+    },
+    "Silent mode" : {
+      "comment" : "Name of the host's scoring switch (setup, lobby, round results). On: everyone's answers show at once; off (default): read-aloud scoring.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso"
+          }
+        }
+      }
+    },
+    "Silent mode: everyone’s answers show as soon as a category opens." : {
+      "comment" : "Rules footer (setup, lobby, round results) when silent scoring is on.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso: as respostas de todo mundo aparecem assim que a categoria abre."
+          }
+        }
+      }
+    },
+    "Silent mode: everyone’s answers show right away, for playing without talking." : {
+      "comment" : "Second paragraph of the explanation opened by the ⓘ button beside Silent mode.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo silencioso: as respostas de todo mundo aparecem na hora, para jogar sem falar."
+          }
+        }
+      }
     },
     "Sound effects never play while your phone is on silent." : {
       "localizations" : {
@@ -2081,6 +2246,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "STOPs para encerrar a rodada"
+          }
+        }
+      }
+    },
+    "Takes everyone back to the category before." : {
+      "comment" : "VoiceOver hint of the host's Previous category button on the scoring screen.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leva todo mundo de volta à categoria anterior."
+          }
+        }
+      }
+    },
+    "Takes everyone back to the last category to correct a score." : {
+      "comment" : "VoiceOver hint of the host's Back to scoring button on round results.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leva todo mundo de volta à última categoria para corrigir uma pontuação."
           }
         }
       }
