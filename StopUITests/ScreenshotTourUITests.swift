@@ -81,6 +81,10 @@ final class ScreenshotTourUITests: XCTestCase {
             waitUntilEnabled(ten)
             if category == 0 { capture(app, "8-scoring") }
             ten.tap()
+            let next = app.buttons["nextCategoryButton"]
+            XCTAssertTrue(next.wait(for: \.isEnabled, toEqual: true, timeout: 2 * timeout), "next \(category)")
+            if category == 0 { capture(app, "8b-scoring-completed") }
+            next.tap()
         }
 
         XCTAssertTrue(app.buttons["nextRoundButton"].waitForExistence(timeout: timeout))

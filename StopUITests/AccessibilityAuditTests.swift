@@ -42,7 +42,7 @@ final class AccessibilityAuditTests: XCTestCase {
         waitUntilGone(game.stopStamp)
         waitUntilEnabled(app.buttons["score-10"])
         try audit(app, "scoring")
-        game.scoreEveryCategory(count)
+        try game.scoreEveryCategory(count, firstCompleted: { try self.audit(app, "scoring-completed") })
 
         game.waitForRoundResults(rows: 4)
         try audit(app, "round-results")
@@ -65,6 +65,8 @@ final class AccessibilityAuditTests: XCTestCase {
     ///   buttons and texts are checked like everything else.
     /// - "Contrast nearly passed": a warning-level finding (the audit's own "nearly"), excluded as a warning, not
     ///   a failure; it's on text in the system's secondary label color on the grouped background.
+    /// - Contrast of a disabled button's text (scoring's Next category until everyone has scored): WCAG 1.4.3
+    ///   sets no contrast minimum for inactive controls, and the dimmed look is what says "not yet".
     /// - Contrast findings the audit can't attach to an element (nothing to locate); they're kept in the
     ///   attachment. Element-less clipping findings still fail.
     @MainActor
@@ -84,10 +86,17 @@ final class AccessibilityAuditTests: XCTestCase {
             return within(bottomBar) || within(app.otherElements["writingHeader"])
                 || ["playerInitial", "categoriesFooter"].contains(element.identifier)
         case .contrast:
-            return within(bottomBar) && !isPart(element, of: bottomBar)
+            return (within(bottomBar) && !isPart(element, of: bottomBar)) || isInDisabledButton(frame, in: app)
         default:
             return false
         }
+    }
+
+    /// Whether `frame` lies inside a disabled button.
+    @MainActor
+    private func isInDisabledButton(_ frame: CGRect, in app: XCUIApplication) -> Bool {
+        app.buttons.matching(NSPredicate(format: "isEnabled == false")).allElementsBoundByIndex
+            .contains { $0.frame.contains(frame) }
     }
 
     /// Whether `element` is one of `container`'s own descendants (same label and frame).

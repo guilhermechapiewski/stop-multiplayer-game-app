@@ -6,4 +6,5 @@ public enum Intent: Codable, Sendable, Equatable {
     case stop(answers: [String]), giveUp(answers: [String])
     case submitAnswers(round: Int, answers: [String])
     case setScore(round: Int, category: Int, points: Int, player: PlayerID)
+    case nextCategory(round: Int, category: Int)                     // host, completed scoring category
 }

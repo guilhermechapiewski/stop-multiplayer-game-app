@@ -98,4 +98,42 @@ struct ScoringPresentationTests {
         #expect(presentation.rows.map(\.name) == ["Gui", "Ana", "Ana 2"])
         #expect(presentation.rows.map(\.playerID) == players.map(\.id))
     }
+
+    var allScored: [PlayerID: [Int?]] {
+        [host.id: [10, 10, nil], ana.id: [5, 0, nil], bia.id: [nil, 5, nil], caio.id: [0, 0, nil]]
+    }
+
+    @Test func onlyTheHostAdvancesAndOnlyOnceComplete() {
+        let open = makeState(answers: answers, scores: [host.id: [10, nil, nil], ana.id: [5, 0, nil],
+                                                        bia.id: [nil, nil, nil], caio.id: [0, 0, nil]])
+        let hostOpen = ScoringPresentation(state: open, viewer: host.id)
+        #expect(hostOpen.showsAdvanceButton)
+        #expect(!hostOpen.canAdvance)
+        #expect(!hostOpen.isCompleted)
+
+        let done = makeState(completed: true, answers: answers, scores: allScored)
+        let hostDone = ScoringPresentation(state: done, viewer: host.id)
+        #expect(hostDone.showsAdvanceButton && hostDone.canAdvance && hostDone.isCompleted)
+
+        let anaDone = ScoringPresentation(state: done, viewer: ana.id)
+        #expect(!anaDone.showsAdvanceButton)
+        #expect(!anaDone.canAdvance)
+        #expect(anaDone.isCompleted)
+        #expect(anaDone.hostName == "Gui")
+    }
+
+    @Test func lastCategoryLeadsToResults() {
+        #expect(!ScoringPresentation(state: makeState(category: 1, completed: true, answers: answers,
+                                                      scores: allScored), viewer: host.id).isLastCategory)
+        #expect(ScoringPresentation(state: makeState(category: 2, completed: true, answers: answers,
+                                                     scores: allScored), viewer: host.id).isLastCategory)
+    }
+
+    @Test func everyoneSeesEveryScore() {
+        let state = makeState(completed: false, answers: answers,
+                              scores: [host.id: [10, 10, nil], ana.id: [5, 0, nil], bia.id: [nil, nil, nil],
+                                       caio.id: [0, 5, nil]])
+        // Not just the viewer's: every row carries its current score (nil until picked), even before completion.
+        #expect(ScoringPresentation(state: state, viewer: ana.id).rows.map(\.score) == [10, 0, nil, 5])
+    }
 }

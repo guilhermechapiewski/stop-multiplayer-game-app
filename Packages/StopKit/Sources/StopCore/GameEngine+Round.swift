@@ -1,15 +1,11 @@
 import Foundation
 
 extension GameEngine {
-    /// Advances reveal, countdown and completed scoring categories by one tick. Returns true (and bumps `version`
-    /// once) when it changed.
+    /// Advances the reveal and countdown by one tick (scoring moves on only when the host says so). Returns true
+    /// (and bumps `version` once) when it changed.
     public static func tick(_ state: inout GameState) -> Bool {
         let next: Phase
         switch state.phase {
-        case .scoring:
-            guard advanceScoring(&state) else { return false }
-            state.version += 1
-            return true
         case .revealing(let ticks):
             next = ticks > 1 ? .revealing(ticksRemaining: ticks - 1) : .countdown(secondsRemaining: 3)
         case .countdown(let seconds):
@@ -81,7 +77,7 @@ extension GameEngine {
     }
 
     /// In `.collecting`, moves on once every present participant has answers (away, left and removed players
-    /// don't block). In an open scoring category, marks it completed once every active participant has a score.
+    /// don't block). In the current scoring category, recomputes whether every active participant has a score.
     static func advanceIfComplete(_ state: inout GameState) {
         switch state.phase {
         case .collecting:
@@ -90,8 +86,8 @@ extension GameEngine {
                 state.player($0)?.presence == .present && round.answers[$0] == nil
             }
             if !waiting { enterScoring(&state) }
-        case .scoring(let category, false):
-            if settleCategory(category, &state) { state.phase = .scoring(categoryIndex: category, completed: true) }
+        case .scoring(let category, _):
+            state.phase = .scoring(categoryIndex: category, completed: settleCategory(category, &state))
         default:
             return
         }

@@ -105,7 +105,7 @@
       }
     },
     "%@, %lld points" : {
-      "comment" : "VoiceOver value of a scoring row once the category is complete. %@ is the answer, %lld the points.",
+      "comment" : "VoiceOver value of a scoring row once that player has a score. %@ is the answer, %lld the points (10, 5 or 0).",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -122,17 +122,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, ainda sem pontuação"
-          }
-        }
-      }
-    },
-    "%@, scored" : {
-      "comment" : "VoiceOver value of a scoring row once that player has scored. %@ is the answer.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@, pontuada"
           }
         }
       }
@@ -490,6 +479,17 @@
         }
       }
     },
+    "Available once everyone has scored." : {
+      "comment" : "VoiceOver hint of the host's Next category button while it is disabled.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disponível quando todo mundo tiver pontuado."
+          }
+        }
+      }
+    },
     "Away — score for %@" : {
       "comment" : "Host-only control in scoring for a player who is away. %@ is the player's name.",
       "localizations" : {
@@ -821,7 +821,7 @@
       }
     },
     "Everyone has scored!" : {
-      "comment" : "Scoring: the category is complete and the game moves on in a moment.",
+      "comment" : "Scoring: every player has scored this category. Picks can still change until the host moves on.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1359,6 +1359,17 @@
         }
       }
     },
+    "Next category" : {
+      "comment" : "Host button at the bottom of scoring that moves everyone on to the next category.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próxima categoria"
+          }
+        }
+      }
+    },
     "Next round" : {
       "comment" : "Host button on round results that starts the next round; also the heading of the next round's rules.",
       "localizations" : {
@@ -1399,6 +1410,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Não permitida"
+          }
+        }
+      }
+    },
+    "Not scored yet" : {
+      "comment" : "VoiceOver label of the “…” badge on a scoring row: that player hasn't picked a score yet.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda sem pontuação"
           }
         }
       }
@@ -1784,6 +1806,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Regras"
+          }
+        }
+      }
+    },
+    "See results" : {
+      "comment" : "Host button at the bottom of scoring, on the round's last category: shows the round results.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver resultados"
           }
         }
       }
@@ -2290,6 +2323,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Esperando %@ voltar"
+          }
+        }
+      }
+    },
+    "Waiting for %@ to continue…" : {
+      "comment" : "Scoring, for players other than the host, once everyone has scored: waiting for the host to move on. %@ is the host's name.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando %@ continuar…"
           }
         }
       }

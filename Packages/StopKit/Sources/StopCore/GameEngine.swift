@@ -66,6 +66,8 @@ public enum GameEngine {
         case .setScore(let round, let category, let points, let player):
             return try setScore(round: round, category: category, points: points, player: player,
                                 sender: sender, state: &state)
+        case .nextCategory(let round, let category):
+            return try nextCategory(round: round, category: category, sender: sender, state: &state)
         case .nextRound:
             return try nextRound(sender: sender, state: &state, using: &rng)
         case .endGame:

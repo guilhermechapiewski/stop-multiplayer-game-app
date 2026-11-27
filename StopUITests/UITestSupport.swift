@@ -4,7 +4,7 @@ import XCTest
 /// busy machines, where short waits tripped); there are no fixed sleeps.
 enum UITest {
     static let timeout: TimeInterval = 30
-    /// Scoring a whole round: every category waits for the bots' self-scores and a host tick.
+    /// Waits on the bots: their stops, and their self-scores in each category.
     static let longTimeout: TimeInterval = 90
 
     /// `-mockGame` with a clean state: hosting straight away, with the bots Ana, Bia and Caio.
@@ -119,17 +119,33 @@ struct GameSteps {
         XCTAssertLessThanOrEqual(element.frame.maxY, bar.frame.minY, "\(element) is under the bottom bar")
     }
 
-    /// Scores every category with `points`, waiting for each to come up. The STOP! stamp covers the screen for
-    /// a moment as scoring opens, and a tap then would be lost, so the first category waits for it to go.
-    func scoreEveryCategory(_ count: Int, points: Int = 10, beforeFirstTap: (() -> Void)? = nil) {
+    /// Scores every category with `points` and, as the host, taps Next category (See results after the last)
+    /// once everyone has scored, waiting for each category to come up. The STOP! stamp covers the screen for a
+    /// moment as scoring opens, and a tap then would be lost, so the first category waits for it to go.
+    /// `beforeFirstTap` runs on the first category before scoring it; `firstCompleted` once it is complete,
+    /// before moving on.
+    func scoreEveryCategory(_ count: Int, points: Int = 10, beforeFirstTap: (() throws -> Void)? = nil,
+                            firstCompleted: (() throws -> Void)? = nil) rethrows {
         for category in 0..<count {
             test.waitFor(element("scoringCategory-\(category)"), timeout: UITest.longTimeout)
             if category == 0 {
                 test.waitUntilGone(stopStamp)
             }
             let button = test.waitUntilEnabled(app.buttons["score-\(points)"])
-            if category == 0 { beforeFirstTap?() }
+            if category == 0 { try beforeFirstTap?() }
             button.tap()
+            let next = test.waitUntilEnabled(app.buttons["nextCategoryButton"], timeout: UITest.longTimeout)
+            if category == 0 { try firstCompleted?() }
+            next.tap()
+        }
+    }
+
+    /// As the host, taps Next category through every category once it's complete (blank answers and the bots'
+    /// self-scores complete them without a pick of the host's), up to the round results.
+    func advanceEveryCategory(_ count: Int) {
+        for category in 0..<count {
+            test.waitFor(element("scoringCategory-\(category)"), timeout: UITest.longTimeout)
+            test.waitUntilEnabled(app.buttons["nextCategoryButton"], timeout: UITest.longTimeout).tap()
         }
     }
 

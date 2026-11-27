@@ -75,6 +75,14 @@ private final class RawClient {
         return nil
     }
 
+    /// The ack for intent `id`, skipping acks for earlier intents.
+    func ack(for id: UUID) async -> WireMessage.Body? {
+        while let body = await nextAck() {
+            if case .ack(id, _) = body { return body }
+        }
+        return nil
+    }
+
     func untilClosed() async -> Bool {
         while await next() != nil {}
         return isClosed
@@ -372,20 +380,27 @@ struct HostSessionTests {
         #expect(h.host.state.phase == .countdown(secondsRemaining: 3))
     }
 
-    @Test func completedCategoryStaysAFullTick() async throws {
+    @Test func completedCategoryWaitsForTheHostToMoveOn() async throws {
         let h = try Harness()
         let ana = try await h.join("Ana")
         await h.toWriting()
         ana.send(.stop(answers: ["Ana", "Anta"]))
         await waitUntil("scoring") { h.host.state.phase == .scoring(categoryIndex: 0, completed: false) }
         h.host.localClient.send(.setScore(round: 1, category: 0, points: 10, player: h.hostID))
-        await step(h, .milliseconds(600))
         ana.send(.setScore(round: 1, category: 0, points: 10, player: ana.playerID))
         await waitUntil("completed") { h.host.state.phase == .scoring(categoryIndex: 0, completed: true) }
-        await step(h, .milliseconds(900))
+        // Ticks never move scoring on: everyone sees the scores until the host taps Next.
+        await h.advance(seconds: 5)
         #expect(h.host.state.phase == .scoring(categoryIndex: 0, completed: true))
-        await step(h, .milliseconds(100))
+        // Ana can still correct her pick; only the host may advance.
+        ana.send(.setScore(round: 1, category: 0, points: 5, player: ana.playerID))
+        await waitUntil("corrected") { h.host.state.currentRound?.scores[ana.playerID]?[0] == 5 }
+        let id = ana.send(.nextCategory(round: 1, category: 0))
+        #expect(await ana.ack(for: id) == .ack(id: id, error: .notHost))
+        #expect(h.host.state.phase == .scoring(categoryIndex: 0, completed: true))
+        h.host.localClient.send(.nextCategory(round: 1, category: 0))
         #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: false))
+        #expect(await ana.nextSnapshot { $0.phase == .scoring(categoryIndex: 1, completed: false) } != nil)
     }
 
     @Test func suspendStopsTicksSoCountdownPauses() async throws {

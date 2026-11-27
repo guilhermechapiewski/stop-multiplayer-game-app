@@ -14,6 +14,12 @@ private func score(_ s: inout GameState, _ sender: PlayerID, category: Int, poin
     try send(.setScore(round: round, category: category, points: points, player: player ?? sender), sender, &s)
 }
 
+/// The host moves past the current (completed) scoring category.
+private func next(_ s: inout GameState) throws {
+    guard case .scoring(let category, _) = s.phase else { Issue.record("not scoring: \(s.phase)"); return }
+    try send(.nextCategory(round: s.currentRound?.number ?? 0, category: category), s.hostID, &s)
+}
+
 /// Host plus `players - 1` others; ticked to `.writing`.
 private func writingGame(players: Int = 3, categories: [String] = ["Animal", "Fruta"], stopsRequired: Int = 1)
     throws -> (state: GameState, ids: [PlayerID]) {
@@ -45,11 +51,11 @@ private func collect(_ s: inout GameState, _ ids: [PlayerID], _ answers: [[Strin
     }
 }
 
-/// Everyone submits blanks, so every category completes at once; ticks through to `.roundResults`.
+/// Everyone submits blanks, so every category completes at once; the host advances to `.roundResults`.
 private func playBlankRound(_ s: inout GameState, _ ids: [PlayerID]) throws {
     let blank = Array(repeating: "", count: s.settings.categories.count)
     try collect(&s, ids, ids.map { _ in blank })
-    while s.phase != .roundResults { guard GameEngine.tick(&s) else { Issue.record("stalled at \(s.phase)"); return } }
+    while s.phase != .roundResults { try next(&s) }
 }
 
 private let full = ["Ana", "Uva"]
@@ -128,7 +134,7 @@ private let full = ["Ana", "Uva"]
     }
 }
 
-@Test func scoreCanChangeUntilCategoryCompletes() throws {
+@Test func scoreCanChangeUntilHostAdvances() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [full, full, full])
     let v = s.version
@@ -139,8 +145,29 @@ private let full = ["Ana", "Uva"]
     try score(&s, ids[0], category: 0, points: 10)
     try score(&s, ids[2], category: 0, points: 0)
     #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
-    #expect(throws: GameError.wrongPhase) { try score(&s, ids[1], category: 0, points: 10) }
-    #expect(s.currentRound?.scores[ids[1]] == [5, nil])
+    // Completed but not yet advanced: a wrong pick can still be corrected, and the category stays completed.
+    let completedVersion = s.version
+    try score(&s, ids[1], category: 0, points: 10)
+    #expect(s.version == completedVersion + 1)
+    #expect(s.currentRound?.scores[ids[1]] == [10, nil])
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    #expect(throws: GameError.cannotScoreForOthers) { try score(&s, ids[1], category: 0, points: 0, for: ids[2]) }
+    try next(&s)
+    #expect(throws: GameError.wrongPhase) { try score(&s, ids[1], category: 0, points: 5) }
+    #expect(s.currentRound?.scores[ids[1]] == [10, nil])
+}
+
+@Test func hostCanCorrectAwayPlayersScoreWhileCompleted() throws {
+    var (s, ids) = try writingGame()
+    try collect(&s, ids, [full, full, full])
+    #expect(GameEngine.setPresence(.away, for: ids[2], in: &s))
+    try score(&s, ids[0], category: 0, points: 10)
+    try score(&s, ids[1], category: 0, points: 10)
+    try score(&s, ids[0], category: 0, points: 10, for: ids[2])
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    try score(&s, ids[0], category: 0, points: 5, for: ids[2])
+    #expect(s.currentRound?.scores[ids[2]] == [5, nil])
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
 }
 
 // MARK: - Category completion and advancing
@@ -157,34 +184,77 @@ private let full = ["Ana", "Uva"]
     #expect(s.version == v + 1)
 }
 
-@Test func tickAdvancesToNextCategory() throws {
+@Test func tickNeverAdvancesScoring() throws {
+    var (s, ids) = try writingGame()
+    try collect(&s, ids, [full, full, full])
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    let before = s
+    #expect(!GameEngine.tick(&s))
+    #expect(s == before)
+}
+
+@Test func nextCategoryAdvancesToNextCategory() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [full, ["Asno", ""], full])
     for id in ids { try score(&s, id, category: 0, points: 10) }
     let v = s.version
-    #expect(GameEngine.tick(&s))
+    try send(.nextCategory(round: 1, category: 0), ids[0], &s)
     #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
     #expect(s.version == v + 1)
-    #expect(!GameEngine.tick(&s))  // incomplete category does not advance
 }
 
-@Test func tickLandsOnPreCompletedCategory() throws {
+@Test func nextCategoryIsHostOnly() throws {
+    var (s, ids) = try writingGame()
+    try collect(&s, ids, [full, full, full])
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    let before = s
+    #expect(throws: GameError.notHost) { try send(.nextCategory(round: 1, category: 0), ids[1], &s) }
+    #expect(s == before)
+}
+
+@Test func nextCategoryOnlyWhenCompleted() throws {
+    var (s, ids) = try writingGame()
+    #expect(throws: GameError.wrongPhase) { try send(.nextCategory(round: 1, category: 0), ids[0], &s) }
+    try collect(&s, ids, [full, full, full])
+    try score(&s, ids[0], category: 0, points: 10)
+    let before = s
+    #expect(throws: GameError.wrongPhase) { try send(.nextCategory(round: 1, category: 0), ids[0], &s) }
+    #expect(s == before)
+}
+
+@Test func nextCategoryRejectsStaleOrDuplicateRequests() throws {
+    var (s, ids) = try writingGame(categories: ["Animal", "Fruta", "Lugar"])
+    try collect(&s, ids, [["Ana", "Uva", "Rio"], ["Asno", "Abacate", "Roma"], ["Arara", "Amora", "Acre"]])
+    for id in ids { try score(&s, id, category: 0, points: 10) }
+    #expect(throws: GameError.staleRound) { try send(.nextCategory(round: 2, category: 0), ids[0], &s) }
+    #expect(throws: GameError.wrongPhase) { try send(.nextCategory(round: 1, category: 1), ids[0], &s) }
+    try send(.nextCategory(round: 1, category: 0), ids[0], &s)
+    for id in ids { try score(&s, id, category: 1, points: 5) }
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: true))
+    // A retried "next" for category 0 must not skip category 1.
+    let before = s
+    #expect(throws: GameError.wrongPhase) { try send(.nextCategory(round: 1, category: 0), ids[0], &s) }
+    #expect(s == before)
+}
+
+@Test func nextCategoryLandsOnPreCompletedCategory() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [["Ana", ""], ["Asno", " "], ["Arara", ""]])
     for id in ids { try score(&s, id, category: 0, points: 10) }
-    #expect(GameEngine.tick(&s))
+    try next(&s)
     #expect(s.phase == .scoring(categoryIndex: 1, completed: true))
 }
 
-@Test func lastCategoryTickGoesToRoundResults() throws {
+@Test func nextCategoryAfterLastGoesToRoundResults() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [full, full, full])
     for c in 0..<2 {
         for id in ids { try score(&s, id, category: c, points: 5) }
-        #expect(GameEngine.tick(&s))
+        try next(&s)
     }
     #expect(s.phase == .roundResults)
-    #expect(!GameEngine.tick(&s))
+    #expect(throws: GameError.wrongPhase) { try send(.nextCategory(round: 1, category: 1), ids[0], &s) }
     #expect(s.totals == [ids[0]: 10, ids[1]: 10, ids[2]: 10])
 }
 
@@ -196,7 +266,7 @@ private let full = ["Ana", "Uva"]
     try score(&s, ids[1], category: 0, points: 10)
     #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
     #expect(s.currentRound?.scores[ids[2]] == [0, nil])
-    #expect(GameEngine.tick(&s))
+    try next(&s)
     try score(&s, ids[0], category: 1, points: 5)
     try score(&s, ids[1], category: 1, points: 5)
     #expect(s.currentRound?.scores[ids[2]] == [0, 0])
@@ -210,7 +280,7 @@ private let full = ["Ana", "Uva"]
     #expect(s.currentRound?.scores[ids[2]] == [0, 0, 0])
     try score(&s, ids[0], category: 0, points: 10)
     try score(&s, ids[1], category: 0, points: 10)
-    #expect(GameEngine.tick(&s))
+    try next(&s)
     #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
     #expect(GameEngine.setPresence(.present, for: ids[2], in: &s))
     let late = ["Arara", "Banana", " "]
@@ -242,7 +312,7 @@ private let full = ["Ana", "Uva"]
     for c in 0..<2 {
         try score(&s, ids[0], category: c, points: 10)
         try score(&s, ids[1], category: c, points: 5)
-        #expect(GameEngine.tick(&s))
+        try next(&s)
     }
     #expect(s.phase == .roundResults)
     try send(.nextRound, ids[0], &s)
@@ -250,9 +320,9 @@ private let full = ["Ana", "Uva"]
     try collect(&s, ids, [full, ["Asno", ""]])
     try score(&s, ids[0], category: 0, points: 5)
     try score(&s, ids[1], category: 0, points: 10)
-    #expect(GameEngine.tick(&s))
+    try next(&s)
     try score(&s, ids[0], category: 1, points: 0)
-    #expect(GameEngine.tick(&s))
+    try next(&s)
     #expect(s.phase == .roundResults)
     #expect(s.totals == [ids[0]: 25, ids[1]: 20])
 }

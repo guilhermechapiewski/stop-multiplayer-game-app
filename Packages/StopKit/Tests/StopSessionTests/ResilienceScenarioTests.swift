@@ -29,7 +29,7 @@ private final class Scenario {
     private(set) var bots: [BotPlayer] = []
     /// Rounds the host plays before ending the game.
     let rounds: Int
-    /// The host types, scores itself and moves on from round results on its own.
+    /// The host types, scores itself and moves on from completed categories and round results on its own.
     var hostAutoPlay = true
     /// With auto-play, the host also calls STOP with its typed answers as soon as writing starts.
     var hostStops = false
@@ -130,7 +130,8 @@ private final class Scenario {
         #expect(recorded?.contains(where: AnswerText.isBlank) == false, "\(bots[index].name): \(recorded ?? [])")
     }
 
-    /// The host (a human here) types placeholder answers, scores itself 10 and plays `rounds` rounds.
+    /// The host (a human here) types placeholder answers, scores itself 10, moves on from each completed category
+    /// and plays `rounds` rounds.
     private func playHost() {
         let state = host.state
         guard let round = state.currentRound else { return }
@@ -143,6 +144,8 @@ private final class Scenario {
         case .scoring(let category, false) where round.participants.contains(hostID):
             guard round.scores[hostID]?[category] == nil else { return }
             host.localClient.send(.setScore(round: round.number, category: category, points: 10, player: hostID))
+        case .scoring(let category, true):
+            host.localClient.send(.nextCategory(round: round.number, category: category))
         case .roundResults:
             host.localClient.send(state.rounds.count < rounds ? .nextRound : .endGame)
         default:

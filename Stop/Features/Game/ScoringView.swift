@@ -2,9 +2,9 @@ import StopCore
 import StopSession
 import SwiftUI
 
-/// Scoring, one category at a time: everyone's answers read-only, and each player scores their own
-/// (10 / 5 / 0). The host can score for players who are away. A completed category is highlighted for a beat
-/// before the host's tick moves on.
+/// Scoring, one category at a time: everyone's answers and current scores, read-only, and each player scores
+/// their own (10 / 5 / 0). The host can score for players who are away. Once everyone has scored, picks stay
+/// editable until the host taps Next category (See results after the last).
 struct ScoringView: View {
     let client: any GameClient
     let state: GameState
@@ -16,9 +16,7 @@ struct ScoringView: View {
 
     private var me: PlayerID { client.localPlayerID }
     private var presentation: ScoringPresentation { ScoringPresentation(state: state, viewer: me) }
-    private var isCompleted: Bool {
-        if case .scoring(_, true) = state.phase { true } else { false }
-    }
+    private var isCompleted: Bool { presentation.isCompleted }
     private var isParticipant: Bool { round.participants.contains(me) }
 
     var body: some View {
@@ -39,6 +37,7 @@ struct ScoringView: View {
         .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.4),
                    value: presentation.categoryIndex)
         .animation(reduceMotion ? nil : .spring(duration: 0.35), value: isCompleted)
+        .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: presentation.rows.map(\.score))
         .onChange(of: presentation.categoryIndex) { pendingPick = nil }
         .onChange(of: presentation.myScore) { _, score in
             if score == pendingPick { pendingPick = nil }
@@ -82,8 +81,8 @@ struct ScoringView: View {
         VStack(spacing: 0) {
             ForEach(presentation.rows) { row in
                 VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-                    AnswerRow(row: row, isMe: row.playerID == me, isCompleted: isCompleted)
-                    if presentation.canHostScore.contains(row.playerID) && !isCompleted {
+                    AnswerRow(row: row, isMe: row.playerID == me)
+                    if presentation.canHostScore.contains(row.playerID) {
                         HostScoreControl(row: row) { points in
                             client.send(.setScore(round: round.number, category: presentation.categoryIndex,
                                                   points: points, player: row.playerID))
@@ -100,11 +99,11 @@ struct ScoringView: View {
         .clipShape(.rect(cornerRadius: Theme.Radius.card))
         .overlay {
             RoundedRectangle(cornerRadius: Theme.Radius.card)
-                .strokeBorder(Theme.accent, lineWidth: isCompleted ? 2.5 : 0)
+                .strokeBorder(Theme.accent.opacity(0.6), lineWidth: isCompleted ? 1.5 : 0)
         }
     }
 
-    // MARK: Picker
+    // MARK: Picker and Next
 
     @ViewBuilder private func picker(_ presentation: ScoringPresentation) -> some View {
         BottomActionBar {
@@ -120,9 +119,9 @@ struct ScoringView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier(isCompleted ? "categoryCompleted" : "scorePickerTitle")
+                // Stays enabled once the category is complete: a wrong pick can be fixed until the host moves on.
                 ScorePicker(selection: pendingPick ?? presentation.myScore,
-                            options: presentation.myAnswerIsBlank ? [0] : [10, 5, 0],
-                            isEnabled: !isCompleted) { points in
+                            options: presentation.myAnswerIsBlank ? [0] : [10, 5, 0]) { points in
                     pendingPick = points
                     GameFeedback.play(.scorePicked)
                     client.send(.setScore(round: round.number, category: presentation.categoryIndex,
@@ -133,9 +132,41 @@ struct ScoringView: View {
                         .font(Theme.Typography.caption)
                         .foregroundStyle(.secondary)
                 }
-                if !isCompleted { waitingLine(presentation) }
+            }
+            if !isCompleted {
+                waitingLine(presentation)
+            } else if !presentation.showsAdvanceButton {
+                HStack(spacing: Theme.Spacing.s) {
+                    ProgressView()
+                        .accessibilityHidden(true)
+                    Text("Waiting for \(presentation.hostName) to continue…")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
+                .frame(minHeight: 32)
+                .accessibilityElement(children: .combine)
+                .accessibilityIdentifier("waitingForHost")
+            }
+            if presentation.showsAdvanceButton { nextButton(presentation) }
+        }
+    }
+
+    /// Host only: moves everyone on once the category is complete.
+    private func nextButton(_ presentation: ScoringPresentation) -> some View {
+        Button {
+            client.send(.nextCategory(round: round.number, category: presentation.categoryIndex))
+        } label: {
+            if presentation.isLastCategory {
+                Label("See results", systemImage: "trophy")
+            } else {
+                Label("Next category", systemImage: "arrow.forward")
             }
         }
+        .buttonStyle(.primary)
+        .disabled(!presentation.canAdvance)
+        .accessibilityHint(presentation.canAdvance ? Text(verbatim: "") : Text("Available once everyone has scored."))
+        .accessibilityIdentifier("nextCategoryButton")
     }
 
     /// "Waiting for Ana and Bia" while others still have to score.
@@ -151,11 +182,10 @@ struct ScoringView: View {
     }
 }
 
-/// One player's answer, with a checkmark once they've scored (their points once the category completes).
+/// One player's answer and their current score (10 / 5 / 0), or "…" until they pick one.
 private struct AnswerRow: View {
     let row: ScoringPresentation.Row
     let isMe: Bool
-    let isCompleted: Bool
 
     private var isBlank: Bool { row.isBlank }
     private var isAway: Bool { row.presence != .present }
@@ -194,30 +224,51 @@ private struct AnswerRow: View {
         .accessibilityValue(accessibilityValue)
     }
 
-    @ViewBuilder private var status: some View {
-        if isCompleted, let score = row.score {
-            Text(score, format: .number)
-                .font(Theme.Typography.headline.monospacedDigit())
-                .foregroundStyle(score > 0 ? .white : .secondary)
-                .frame(minWidth: 44, minHeight: 32)
-                .background(score > 0 ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.fill.tertiary), in: .capsule)
-                .transition(.scale.combined(with: .opacity))
-        } else if row.score != nil {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.title2)
-                .foregroundStyle(Theme.accent)
-                .transition(.scale.combined(with: .opacity))
-        } else {
-            Image(systemName: "ellipsis.circle")
-                .font(.title2)
-                .foregroundStyle(.tertiary)
-        }
+    private var status: some View {
+        ScoreBadge(score: row.score)
     }
 
     private var accessibilityValue: Text {
         let answer = isBlank ? Text("Blank") : Text(verbatim: row.answer)
         guard let score = row.score else { return Text("\(answer), not scored yet") }
-        return isCompleted ? Text("\(answer), \(score) points") : Text("\(answer), scored")
+        return Text("\(answer), \(score) points")
+    }
+}
+
+/// A player's points for the category: filled for 10 and 5, muted for 0, "…" while not scored yet. A minimum
+/// width keeps the answers lined up whatever the score.
+private struct ScoreBadge: View {
+    let score: Int?
+
+    @ScaledMetric(relativeTo: .title3) private var width: CGFloat = 48
+    @ScaledMetric(relativeTo: .title3) private var height: CGFloat = 34
+
+    var body: some View {
+        if let score {
+            Text(score, format: .number)
+                .font(Theme.Typography.headline.monospacedDigit())
+                .foregroundStyle(score > 0 ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+                .padding(.horizontal, Theme.Spacing.s)
+                .frame(minWidth: width, minHeight: height)
+                .background(fill(score), in: .capsule)
+                .contentTransition(.numericText(value: Double(score)))
+                .transition(.scale.combined(with: .opacity))
+        } else {
+            Text(verbatim: "…")
+                .font(Theme.Typography.headline)
+                .foregroundStyle(.secondary)
+                .frame(minWidth: width, minHeight: height)
+                .overlay { Capsule().strokeBorder(.tertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])) }
+                .accessibilityLabel(Text("Not scored yet"))
+        }
+    }
+
+    private func fill(_ score: Int) -> AnyShapeStyle {
+        switch score {
+        case 10: AnyShapeStyle(Theme.accent)
+        case 5: AnyShapeStyle(Theme.accent.opacity(0.7))
+        default: AnyShapeStyle(.fill.tertiary)
+        }
     }
 }
 
@@ -225,7 +276,6 @@ private struct AnswerRow: View {
 private struct ScorePicker: View {
     let selection: Int?
     let options: [Int]
-    let isEnabled: Bool
     let onPick: (Int) -> Void
 
     @ScaledMetric(relativeTo: .title) private var height: CGFloat = 64
@@ -243,13 +293,11 @@ private struct ScorePicker: View {
                                     in: .rect(cornerRadius: Theme.Radius.control))
                 }
                 .buttonStyle(.plain)
-                .disabled(!isEnabled)
                 .accessibilityLabel(Text(verbatim: AccessibilityText.score(points)))
                 .accessibilityAddTraits(selected ? .isSelected : [])
                 .accessibilityIdentifier("score-\(points)")
             }
         }
-        .opacity(isEnabled ? 1 : 0.6)
         .animation(.snappy(duration: 0.2), value: selection)
     }
 }
@@ -295,6 +343,21 @@ private struct HostScoreControl: View {
     state.rounds[0].scores = Dictionary(uniqueKeysWithValues: ids.map { ($0, [10, nil, nil, nil, nil, nil]) })
     state.rounds[0].scores[ids[1]]?[1] = 5
     state.rounds[0].scores[ids[2]]?[1] = 0
+    client.state = state
+    return ScoringView(client: client, state: state, round: state.rounds[0])
+        .background(Theme.background)
+}
+
+#Preview("Scoring – host, completed") {
+    let client = PreviewData.client(isHost: true, phase: .scoring(categoryIndex: 5, completed: true))
+    var state = client.state!
+    let ids = state.players.map(\.id)
+    state.rounds[0].answers = Dictionary(uniqueKeysWithValues: ids.map { ($0, Array(repeating: "Bread", count: 6)) })
+    state.rounds[0].answers[ids[1]]?[5] = "Bagel"
+    state.rounds[0].answers[ids[3]]?[5] = ""
+    state.rounds[0].scores = Dictionary(uniqueKeysWithValues: ids.map { ($0, [10, 10, 10, 10, 10, 5]) })
+    state.rounds[0].scores[ids[1]]?[5] = 10
+    state.rounds[0].scores[ids[3]]?[5] = 0
     client.state = state
     return ScoringView(client: client, state: state, round: state.rounds[0])
         .background(Theme.background)

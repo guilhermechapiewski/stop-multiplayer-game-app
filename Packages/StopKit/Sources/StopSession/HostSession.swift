@@ -167,7 +167,7 @@ public final class HostSession {
     }
 
     /// With `restartingTicks`, a phase change restarts the tick loop so the next tick is a full `timing.tick`
-    /// away: the reveal lasts exactly 2 ticks and a completed category stays on screen for a whole tick.
+    /// away: the reveal lasts exactly 2 ticks.
     private func commit(_ next: GameState, except: PlayerID? = nil, restartingTicks: Bool = false) {
         let old = state
         state = next

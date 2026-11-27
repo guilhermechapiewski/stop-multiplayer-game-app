@@ -17,7 +17,8 @@ extension GameEngine {
                          state: inout GameState) throws(GameError) -> Bool {
         guard let round = state.currentRound else { throw .wrongPhase }
         guard round.number == number else { throw .staleRound }
-        guard state.phase == .scoring(categoryIndex: category, completed: false) else { throw .wrongPhase }
+        // A completed category stays editable until the host moves on, so a wrong pick can be corrected.
+        guard case .scoring(category, _) = state.phase else { throw .wrongPhase }
         guard round.participants.contains(player), let target = state.player(player) else { throw .notParticipant }
         if sender != player && !(sender == state.hostID && target.presence != .present) {
             throw .cannotScoreForOthers
@@ -60,10 +61,16 @@ extension GameEngine {
         return true
     }
 
-    /// One tick in `.scoring(i, completed: true)`: next category, or round results after the last one.
-    static func advanceScoring(_ state: inout GameState) -> Bool {
-        guard case .scoring(let current, true) = state.phase else { return false }
-        let next = current + 1
+    /// The host moves past a completed category: to the next one (settled as on entering scoring), or to the
+    /// round results after the last. A stale or repeated request (another round or category) is rejected, so a
+    /// retry never skips a category.
+    static func nextCategory(round number: Int, category: Int, sender: PlayerID,
+                             state: inout GameState) throws(GameError) -> Bool {
+        guard sender == state.hostID else { throw .notHost }
+        guard let round = state.currentRound else { throw .wrongPhase }
+        guard round.number == number else { throw .staleRound }
+        guard state.phase == .scoring(categoryIndex: category, completed: true) else { throw .wrongPhase }
+        let next = category + 1
         if next < state.settings.categories.count {
             state.phase = .scoring(categoryIndex: next, completed: settleCategory(next, &state))
         } else {

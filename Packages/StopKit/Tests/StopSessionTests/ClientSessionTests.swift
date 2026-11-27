@@ -591,7 +591,7 @@ struct ClientSessionTests {
         h.host.localClient.send(.stop(answers: ["Gui", "Gato"]))
         #expect(h.host.state.phase == .scoring(categoryIndex: 0, completed: false))
         h.host.localClient.send(.setScore(round: 1, category: 0, points: 10, player: h.hostID))
-        h.tick()
+        h.host.localClient.send(.nextCategory(round: 1, category: 0))
         #expect(h.host.state.phase == .scoring(categoryIndex: 1, completed: false))
         await h.reconnect(ana)
         await waitUntil("late answers") { h.host.state.currentRound?.answers[ana.localPlayerID] == ["Ana", "Anta"] }
@@ -631,7 +631,7 @@ struct ClientSessionTests {
         h.host.localClient.send(.stop(answers: ["Gui", "Gato"]))
         for category in 0..<2 {
             h.host.localClient.send(.setScore(round: 1, category: category, points: 10, player: h.hostID))
-            h.tick()
+            h.host.localClient.send(.nextCategory(round: 1, category: category))
         }
         #expect(h.host.state.phase == .roundResults)
         h.host.localClient.send(.nextRound)

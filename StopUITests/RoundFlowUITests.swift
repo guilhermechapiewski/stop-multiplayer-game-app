@@ -44,6 +44,7 @@ final class RoundFlowUITests: XCTestCase {
         // A confirmation dialog (an action sheet), not an alert.
         waitFor(app.buttons["confirmGiveUpButton"].firstMatch).tap()
         game.expectRoundLocked(2)
+        game.advanceEveryCategory(count)
         game.waitForRoundResults(rows: 4)
 
         game.endGameFromResults()

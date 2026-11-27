@@ -24,19 +24,39 @@ struct ScoringPresentation: Equatable {
     let myAnswerIsBlank: Bool
     /// Away or left participants the host may still score for (empty for everyone but the host).
     let canHostScore: Set<PlayerID>
+    /// Every active participant has a score; picks stay editable until the host moves on.
+    let isCompleted: Bool
+    /// The open category is the round's last: moving on shows the results.
+    let isLastCategory: Bool
+    /// The viewer is the host, who moves everyone on to the next category.
+    let showsAdvanceButton: Bool
+    /// The host's display name, for "Waiting for Gui to continue…".
+    let hostName: String
+
+    /// The host can move on now.
+    var canAdvance: Bool { showsAdvanceButton && isCompleted }
 
     static let blankAnswer = "—"
 
     init(state: GameState, viewer: PlayerID) {
         let round = state.currentRound
         let index: Int
-        if case .scoring(let category, _) = state.phase { index = category } else { index = 0 }
+        if case .scoring(let category, let completed) = state.phase {
+            index = category
+            isCompleted = completed
+        } else {
+            index = 0
+            isCompleted = false
+        }
         let categories = state.settings.categories
         categoryIndex = index
         categoryName = categories.indices.contains(index) ? categories[index] : ""
         total = categories.count
+        isLastCategory = index == categories.count - 1
+        showsAdvanceButton = viewer == state.hostID
 
         let names = state.displayNames
+        hostName = names[state.hostID] ?? state.player(state.hostID)?.name ?? ""
         let participants = Set(round?.participants ?? [])
         func answer(_ id: PlayerID) -> String? {
             guard let answers = round?.answers[id], answers.indices.contains(index) else { return nil }

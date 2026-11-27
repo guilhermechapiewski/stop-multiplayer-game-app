@@ -227,7 +227,7 @@ private func startedGame(players: Int = 3, stopsRequired: Int = 1, allowGiveUp: 
     // Category 0: only the host has an answer; scoring it completes the category.
     try send(.setScore(round: 1, category: 0, points: 10, player: ids[0]), ids[0], &s)
     #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
-    #expect(GameEngine.tick(&s))
+    try send(.nextCategory(round: 1, category: 0), ids[0], &s)
     #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
 
     // P1 reconnects: their answers arrive and the category still open is theirs to score.
