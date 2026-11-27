@@ -16,6 +16,11 @@ struct ScoringView: View {
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     /// The back-arrow-only Previous button's width.
     @ScaledMetric(relativeTo: .title3) private var compactPreviousWidth: CGFloat = 64
+    /// The category this view last settled on. It still holds the old one during the update that changes it,
+    /// which is how that update knows which way to slide.
+    @State private var settledCategory: Int?
+    /// Which way the last category change went; kept while the card slides.
+    @State private var slideDirection = ScoringCategoryChange.Direction.forward
 
     private var me: PlayerID { client.localPlayerID }
     private var presentation: ScoringPresentation { ScoringPresentation(state: state, viewer: me) }
@@ -24,29 +29,45 @@ struct ScoringView: View {
 
     var body: some View {
         let presentation = presentation
+        let index = presentation.categoryIndex
+        let settled = settledCategory ?? index
+        let direction = ScoringCategoryChange.direction(from: settled, to: index, otherwise: slideDirection)
+        let categoryAnimation: Animation = reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.4)
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.l) {
                 header(presentation)
+                // The new card slides in from the side it comes from (trailing for next, leading for previous).
+                // The old one just fades: a removed view keeps the transition of its last update, which can't
+                // know the direction of a change that hadn't happened yet.
                 answersCard(presentation)
-                    .id(presentation.categoryIndex)
+                    .id(index)
                     .transition(reduceMotion ? .opacity
-                                : .asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
-                                              removal: .move(edge: .leading).combined(with: .opacity)))
+                                : .asymmetric(insertion: .move(edge: direction == .forward ? .trailing : .leading)
+                                                .combined(with: .opacity),
+                                              removal: .opacity))
             }
             .padding(.horizontal, Theme.Spacing.m)
             .padding(.bottom, Theme.Spacing.l)
         }
         .safeAreaInset(edge: .bottom) { picker(presentation) }
-        .animation(reduceMotion ? .easeInOut(duration: 0.2) : .smooth(duration: 0.4),
-                   value: presentation.categoryIndex)
-        .animation(reduceMotion ? nil : .spring(duration: 0.35), value: isCompleted)
+        .animation(categoryAnimation, value: index)
+        // Arriving at a category that is already complete moves with the slide, without the completion spring.
+        .animation(settled != index ? categoryAnimation : reduceMotion ? nil : .spring(duration: 0.35),
+                   value: isCompleted)
         .animation(reduceMotion ? nil : .snappy(duration: 0.25), value: presentation.rows.map(\.score))
-        .onChange(of: presentation.categoryIndex) { pendingPick = nil }
+        .onAppear { settledCategory = index }
+        .onChange(of: index) { old, new in
+            pendingPick = nil
+            slideDirection = ScoringCategoryChange.direction(from: old, to: new, otherwise: slideDirection)
+            settledCategory = new
+        }
         .onChange(of: presentation.myScore) { _, score in
             if score == pendingPick { pendingPick = nil }
         }
-        .onChange(of: isCompleted) { _, completed in
-            if completed { GameFeedback.play(.categoryCompleted) }
+        .onChange(of: ScoringCategoryChange.Snapshot(categoryIndex: index, isCompleted: isCompleted)) { old, new in
+            if ScoringCategoryChange.celebratesCompletion(from: old, to: new) {
+                GameFeedback.play(.categoryCompleted)
+            }
         }
     }
 
