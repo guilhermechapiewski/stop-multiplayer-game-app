@@ -692,4 +692,24 @@ struct ClientSessionTests {
         await waitUntil("ended") { ana.hostStatus == .ended(.leftGame) }
         await waitUntil("ref cleared") { await store.loadActiveGame() == nil }
     }
+
+    @Test func abandonForgetsGameAndPendingDraftWithoutLeaving() async throws {
+        let h = try Harness()
+        let store = InMemoryGameStore()
+        let ana = try await h.join("Ana", store: store)
+        h.toWriting()
+        await waitUntil("writing") { ana.state?.phase == .writing }
+        await waitUntil("ref saved") { await store.loadActiveGame() != nil }
+        ana.saveDraft(["Ana", "Anta"])  // still debouncing: abandon's flush writes it, then the clear wins
+
+        ana.abandon()
+
+        #expect(ana.hostStatus == .ended(.leftGame))
+        await waitUntil("forgotten") {
+            let ref = await store.loadActiveGame()
+            let draft = await store.loadDraft(gameID: h.gameID, round: 1)
+            return ref == nil && draft == nil
+        }
+        #expect(h.host.state.player(ana.localPlayerID)?.presence != .left)
+    }
 }

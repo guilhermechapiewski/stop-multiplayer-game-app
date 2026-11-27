@@ -140,6 +140,13 @@ public final class ClientSession: GameClient {
         if !isEnded { hostStatus = .connecting }
     }
 
+    /// Gives up on the game without telling the host (e.g. the player cancels a rejoin): stops, then forgets
+    /// the game and its drafts, queued after any draft write still pending so none is left behind.
+    public func abandon() {
+        stop()
+        end(.leftGame)
+    }
+
     // MARK: GameClient
 
     public func send(_ intent: Intent) {
