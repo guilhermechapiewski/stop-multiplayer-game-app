@@ -1,0 +1,232 @@
+import StopCore
+import StopSession
+import SwiftUI
+
+/// After a round: this round's ranking and the running totals. The host tunes the next round's rules and
+/// picks Next round or End game; everyone else waits for the host.
+struct RoundResultsView: View {
+    let client: any GameClient
+    let state: GameState
+    let round: Round
+
+    @Environment(\.reduceMotion) private var reduceMotion
+    @State private var confirmingEnd = false
+
+    private var names: [PlayerID: String] { state.displayNames }
+    private var hostName: String { names[state.hostID] ?? "" }
+    private var roundStandings: [RankedEntry] {
+        Standings.rank(Standings.roundPoints(round),
+                       players: state.players.filter { round.participants.contains($0.id) })
+    }
+    private var totalStandings: [RankedEntry] { Standings.rank(state.totals, players: state.players) }
+    private var activeCount: Int { state.activePlayers.count }
+    private var stopsRequired: Int { max(1, min(state.settings.stopsRequired, activeCount)) }
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Spacing.l) {
+                VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
+                    Text("Round \(round.number) · Letter \(round.letter)")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                    Text("Round results")
+                        .font(Theme.Typography.display)
+                        .accessibilityAddTraits(.isHeader)
+                }
+                .padding(.top, Theme.Spacing.s)
+
+                StandingsCard(title: "This round", systemImage: "flag.checkered", entries: roundStandings,
+                              names: names, me: client.localPlayerID, players: state.players,
+                              highlightTop: false, identifier: "roundStandings")
+                StandingsCard(title: "Total", systemImage: "trophy.fill", entries: totalStandings,
+                              names: names, me: client.localPlayerID, players: state.players,
+                              highlightTop: true, identifier: "totalStandings")
+                if client.isHost { rulesCard }
+            }
+            .padding(.horizontal, Theme.Spacing.m)
+            .padding(.bottom, Theme.Spacing.l)
+        }
+        .safeAreaInset(edge: .bottom) { bottomBar }
+        .alert("End the game?", isPresented: $confirmingEnd) {
+            Button("End game", role: .destructive) { client.send(.endGame) }
+                .accessibilityIdentifier("confirmEndGameButton")
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Everyone sees the final standings.")
+        }
+    }
+
+    // MARK: Host
+
+    private var rulesCard: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.m) {
+            Label("Next round", systemImage: "slider.horizontal.3")
+                .font(Theme.Typography.headline)
+                .accessibilityAddTraits(.isHeader)
+            Stepper(value: stopsBinding, in: 1...max(1, activeCount)) {
+                LabeledContent("Stops to end a round") {
+                    Text(stopsRequired, format: .number)
+                        .font(Theme.Typography.headline)
+                        .monospacedDigit()
+                        .foregroundStyle(Color.primary)
+                }
+            }
+            .accessibilityIdentifier("resultsStopsStepper")
+            Divider()
+            Toggle("Allow giving up", isOn: giveUpBinding)
+                .accessibilityIdentifier("resultsAllowGiveUpToggle")
+            Text(RulesText.footer(stopsRequired: stopsRequired, allowGiveUp: state.settings.allowGiveUp))
+                .font(Theme.Typography.caption)
+                .foregroundStyle(.secondary)
+        }
+        .font(Theme.Typography.body)
+        .padding(Theme.Spacing.m)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+    }
+
+    private var stopsBinding: Binding<Int> {
+        Binding(get: { stopsRequired }, set: { stops in
+            client.send(.updateRoundSettings(stopsRequired: stops, allowGiveUp: state.settings.allowGiveUp))
+        })
+    }
+
+    private var giveUpBinding: Binding<Bool> {
+        Binding(get: { state.settings.allowGiveUp }, set: { allow in
+            client.send(.updateRoundSettings(stopsRequired: state.settings.stopsRequired, allowGiveUp: allow))
+        })
+    }
+
+    @ViewBuilder private var bottomBar: some View {
+        BottomActionBar {
+            if client.isHost {
+                Button { client.send(.nextRound) } label: {
+                    Label("Next round", systemImage: "arrow.forward")
+                }
+                .buttonStyle(.primary)
+                .accessibilityIdentifier("nextRoundButton")
+                Button("End game") { confirmingEnd = true }
+                    .font(Theme.Typography.headline)
+                    .foregroundStyle(Theme.accent)
+                    .frame(minHeight: 44)
+                    .accessibilityIdentifier("endGameButton")
+            } else {
+                HStack(spacing: Theme.Spacing.s) {
+                    ProgressView()
+                        .accessibilityHidden(true)
+                    Text("Waiting for \(hostName)…")
+                        .font(Theme.Typography.headline)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(minHeight: 44)
+                .accessibilityElement(children: .combine)
+            }
+        }
+    }
+}
+
+/// A ranked list: rank, name, points. Ties share a rank.
+struct StandingsCard: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let entries: [RankedEntry]
+    let names: [PlayerID: String]
+    let me: PlayerID
+    let players: [Player]
+    /// Crowns the leaders.
+    var highlightTop = false
+    var identifier: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+            Label(title, systemImage: systemImage)
+                .font(Theme.Typography.headline)
+                .accessibilityAddTraits(.isHeader)
+                .padding(.horizontal, Theme.Spacing.m)
+                .padding(.top, Theme.Spacing.m)
+            VStack(spacing: 0) {
+                ForEach(entries, id: \.playerID) { entry in
+                    StandingRow(entry: entry, name: names[entry.playerID] ?? "", isMe: entry.playerID == me,
+                                hasLeft: players.first { $0.id == entry.playerID }?.presence.isActive == false,
+                                crowned: highlightTop && entry.rank == 1 && entry.points > 0)
+                    if entry.playerID != entries.last?.playerID { Divider().padding(.leading, 64) }
+                }
+            }
+            .padding(.bottom, Theme.Spacing.s)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(identifier)
+    }
+}
+
+struct StandingRow: View {
+    let entry: RankedEntry
+    let name: String
+    let isMe: Bool
+    var hasLeft = false
+    var crowned = false
+
+    var body: some View {
+        HStack(spacing: Theme.Spacing.m) {
+            Text(entry.rank, format: .number)
+                .font(Theme.Typography.headline.monospacedDigit())
+                .foregroundStyle(entry.rank == 1 ? Theme.accent : .secondary)
+                .frame(minWidth: 28)
+            HStack(spacing: Theme.Spacing.xs) {
+                Text(verbatim: name)
+                    .font(Theme.Typography.body.weight(isMe ? .bold : .semibold))
+                if crowned {
+                    Image(systemName: "crown.fill")
+                        .font(.caption)
+                        .foregroundStyle(.yellow)
+                        .accessibilityHidden(true)
+                }
+                if isMe {
+                    Text("(you)")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if hasLeft {
+                    Text("· left")
+                        .font(Theme.Typography.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: Theme.Spacing.s)
+            Text("\(entry.points) pts")
+                .font(Theme.Typography.headline.monospacedDigit())
+        }
+        .padding(.horizontal, Theme.Spacing.s)
+        .padding(.vertical, Theme.Spacing.s + 2)
+        .background(isMe ? Theme.accent.opacity(0.1) : .clear, in: .rect(cornerRadius: 14))
+        .padding(.horizontal, Theme.Spacing.s)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Rank \(entry.rank), \(name)"))
+        .accessibilityValue(Text("\(entry.points) points"))
+    }
+}
+
+@MainActor private func previewResultsClient(isHost: Bool) -> PreviewGameClient {
+    let client = PreviewData.client(isHost: isHost, phase: .roundResults)
+    var state = client.state!
+    let ids = state.players.map(\.id)
+    state.rounds[0].scores = Dictionary(uniqueKeysWithValues: ids.enumerated().map { index, id in
+        (id, [10, index % 2 == 0 ? 5 : 10, 0, 10, 5, index == 1 ? 10 : 0])
+    })
+    client.state = state
+    return client
+}
+
+#Preview("Round results – host") {
+    let client = previewResultsClient(isHost: true)
+    RoundResultsView(client: client, state: client.state!, round: client.state!.rounds[0])
+        .background(Theme.background)
+}
+
+#Preview("Round results – guest") {
+    let client = previewResultsClient(isHost: false)
+    RoundResultsView(client: client, state: client.state!, round: client.state!.rounds[0])
+        .background(Theme.background)
+}

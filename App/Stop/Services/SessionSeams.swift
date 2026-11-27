@@ -1,18 +1,11 @@
 import Foundation
-import os
 import StopCore
 import StopNetworking
 import StopSession
+import StopSimulation
 
 // App-side seams for the session types: `ClientSession` and `MockGameLauncher` / `BotPlayer` (Task 12).
-// `AppModel` only talks to these, so tests can stub them. When `MockGameLauncher` lands, wire it in
-// `SessionFactories.live`:
-//
-//     launchMockGame: { profile, bots, settings, language, clock in
-//         let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
-//                                            language: language, clock: clock)
-//         return MockGame(host: game.host, retained: game.bots + [game.network])
-//     }
+// `AppModel` only talks to these, so tests can stub them.
 
 /// A game client that talks to a host over a transport: `ClientSession`'s lifecycle on top of `GameClient`.
 @MainActor protocol RemoteGameSession: GameClient {
@@ -52,7 +45,8 @@ struct SessionFactories {
         _ clock: any Clock<Duration>
     ) -> any RemoteGameSession
 
-    /// Returns a started host whose bots have been told to join.
+    /// `-mockGame` only: returns a started host whose bots have been told to join. Practice games launch with
+    /// their own behavior (`BotPlayer.Behavior.practice(speed)`), not through this.
     typealias LaunchMockGame = @MainActor (
         _ hostProfile: Profile, _ botNames: [String], _ settings: GameSettings, _ language: GameLanguage,
         _ clock: any Clock<Duration>
@@ -61,37 +55,22 @@ struct SessionFactories {
     var makeClient: MakeClient
     var launchMockGame: LaunchMockGame
 
-    /// Production wiring. Until `MockGameLauncher` exists in StopKit, mock mode's bots only sit in the game.
+    /// Production wiring.
     static let live = SessionFactories(
         makeClient: { profile, target, factory, store, clock in
             ClientSession(profile: profile, target: target.sessionTarget, factory: factory, store: store, clock: clock)
         },
         launchMockGame: { profile, bots, settings, language, clock in
-            idleBotsMockGame(hostProfile: profile, botNames: bots, settings: settings, language: language, clock: clock)
+            let game = MockGameLauncher.launch(hostProfile: profile, botNames: bots, settings: settings,
+                                               language: language, botBehavior: mockGameBotBehavior, clock: clock)
+            return MockGame(host: game.host, retained: game.bots + [game.network])
         })
 
-    /// A host on its own in-memory network, joined by bots that never play (stand-in for `MockGameLauncher`).
-    @MainActor
-    static func idleBotsMockGame(hostProfile: Profile, botNames: [String], settings: GameSettings,
-                                 language: GameLanguage, clock: any Clock<Duration>) -> MockGame? {
-        let network = InMemoryNetwork()
-        let state: GameState
-        do {
-            state = try GameEngine.newGame(gameID: UUID(), hostID: hostProfile.playerID, hostName: hostProfile.name,
-                                           settings: settings, language: language)
-        } catch {
-            Logger.app.error("mock game: invalid settings")
-            return nil
-        }
-        let host = HostSession(state: state, factory: network, store: InMemoryGameStore(), clock: clock)
-        host.start()
-        let bots = botNames.map { name in
-            let bot = ClientSession(profile: Profile(playerID: UUID(), name: name, soundsEnabled: false),
-                                    target: .rejoin(gameID: state.gameID), factory: network,
-                                    store: InMemoryGameStore(), clock: clock)
-            bot.start()
-            return bot
-        }
-        return MockGame(host: host, retained: [network] + bots)
+    /// `-mockGame` bots (screenshots, UI tests, development): normal speed, and each waits for someone else's
+    /// STOP before stopping, so the local player always gets to write. Not for practice games.
+    static var mockGameBotBehavior: BotPlayer.Behavior {
+        var behavior = BotPlayer.Behavior.practice(.normal)
+        behavior.stopWhenOthersStopped = true
+        return behavior
     }
 }

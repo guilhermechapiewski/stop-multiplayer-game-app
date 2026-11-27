@@ -29,7 +29,9 @@ public final class HostSession {
     @ObservationIgnored var intentLogs: [PlayerID: IntentLog] = [:]
     @ObservationIgnored var isShutDown = false
 
-    @ObservationIgnored private var loops: [Task<Void, Never>] = []
+    @ObservationIgnored private var heartbeatLoop: Task<Void, Never>?
+    /// Restarted whenever a change other than a tick moves the phase, so each phase gets full ticks.
+    @ObservationIgnored private var tickLoop: Task<Void, Never>?
     @ObservationIgnored private let storeQueue: StoreQueue
     @ObservationIgnored private var stateWriteQueued = false
 
@@ -123,24 +125,31 @@ public final class HostSession {
         } catch {
             return error
         }
-        if next.version != state.version { commit(next, except: except) }
+        if next.version != state.version { commit(next, except: except, restartingTicks: true) }
         return nil
     }
 
     /// Runs a non-intent change (tick, presence); commits it when `change` returns true.
     func mutate(_ change: (inout GameState) -> Bool) {
+        mutate(restartingTicks: true, change)
+    }
+
+    private func mutate(restartingTicks: Bool, _ change: (inout GameState) -> Bool) {
         guard !isShutDown else { return }
         var next = state
-        if change(&next) { commit(next) }
+        if change(&next) { commit(next, restartingTicks: restartingTicks) }
     }
 
     func markAway(_ player: PlayerID) {
         mutate { GameEngine.setPresence(.away, for: player, in: &$0) }
     }
 
-    private func commit(_ next: GameState, except: PlayerID? = nil) {
+    /// With `restartingTicks`, a phase change restarts the tick loop so the next tick is a full `timing.tick`
+    /// away: the reveal lasts exactly 2 ticks and a completed category stays on screen for a whole tick.
+    private func commit(_ next: GameState, except: PlayerID? = nil, restartingTicks: Bool = false) {
         let old = state
         state = next
+        if restartingTicks, old.phase != next.phase, tickLoop != nil { startTickLoop() }
         persist()
         broadcastSnapshots(except: except)
         updateAdvertisement()
@@ -182,16 +191,23 @@ public final class HostSession {
     // MARK: Loops
 
     private func startLoops() {
-        guard loops.isEmpty else { return }
-        loops = [
-            repeating(every: timing.heartbeat) { $0.heartbeat() },
-            repeating(every: timing.tick) { session in session.mutate { GameEngine.tick(&$0) } },
-        ]
+        guard heartbeatLoop == nil else { return }
+        heartbeatLoop = repeating(every: timing.heartbeat) { $0.heartbeat() }
+        startTickLoop()
+    }
+
+    private func startTickLoop() {
+        tickLoop?.cancel()
+        tickLoop = repeating(every: timing.tick) { session in
+            session.mutate(restartingTicks: false) { GameEngine.tick(&$0) }
+        }
     }
 
     private func stopLoops() {
-        for loop in loops { loop.cancel() }
-        loops = []
+        heartbeatLoop?.cancel()
+        tickLoop?.cancel()
+        heartbeatLoop = nil
+        tickLoop = nil
     }
 
     private func repeating(every interval: Duration,

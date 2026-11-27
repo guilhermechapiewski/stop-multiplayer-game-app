@@ -212,7 +212,33 @@ private func startedGame(players: Int = 3, stopsRequired: Int = 1, allowGiveUp: 
     #expect(throws: GameError.notHost) { try send(.continueToScoring, ids[1], &s) }
     try send(.continueToScoring, ids[0], &s)
     guard case .scoring = s.phase else { Issue.record("expected scoring, got \(s.phase)"); return }
-    #expect(s.currentRound?.answers[ids[1]] == ["", ""])
-    #expect(s.currentRound?.answers[ids[2]] == ["", ""])
+    // Missing answers stay missing (so they can still arrive) and score 0 meanwhile.
+    #expect(s.currentRound?.answers[ids[1]] == nil)
+    #expect(s.currentRound?.answers[ids[2]] == nil)
+    #expect(s.currentRound?.scores[ids[1]] == [0, 0])
+    #expect(s.currentRound?.scores[ids[2]] == [0, 0])
     #expect(s.currentRound?.answers[ids[0]] == full)
+}
+
+@Test func lateAnswersAfterContinueFillUnscoredCategories() throws {
+    var (s, ids) = try startedGame(players: 3, stopsRequired: 1)
+    try send(.stop(answers: full), ids[0], &s)
+    try send(.continueToScoring, ids[0], &s)
+    // Category 0: only the host has an answer; scoring it completes the category.
+    try send(.setScore(round: 1, category: 0, points: 10, player: ids[0]), ids[0], &s)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    #expect(GameEngine.tick(&s))
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
+
+    // P1 reconnects: their answers arrive and the category still open is theirs to score.
+    try send(.submitAnswers(round: 1, answers: ["Bode", "Banana"]), ids[1], &s)
+    #expect(s.currentRound?.answers[ids[1]] == ["Bode", "Banana"])
+    #expect(s.currentRound?.scores[ids[1]] == [0, nil])
+    // P2 is still missing: 0 for now.
+    #expect(s.currentRound?.scores[ids[2]] == [0, 0])
+    try send(.setScore(round: 1, category: 1, points: 10, player: ids[0]), ids[0], &s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
+    try send(.setScore(round: 1, category: 1, points: 5, player: ids[1]), ids[1], &s)
+    #expect(s.phase == .scoring(categoryIndex: 1, completed: true))
+    #expect(s.currentRound?.scores[ids[1]] == [0, 5])
 }
