@@ -2,7 +2,8 @@ import StopNetworking
 import SwiftUI
 import UIKit
 
-/// Games hosted nearby, live. Tapping a joinable one joins it.
+/// Games hosted nearby, live. Tapping a joinable one joins it; tapping one in progress rejoins it (the host
+/// takes back players it knows and turns anyone else away).
 struct JoinView: View {
     let model: AppModel
 
@@ -83,7 +84,8 @@ private struct GameRow: View {
     let availability: JoinModel.Availability
     let onJoin: () -> Void
 
-    private var isJoinable: Bool { availability == .joinable }
+    /// Joinable, or in progress (to rejoin); not when it needs another app version.
+    private var isTappable: Bool { availability != .updateRequired }
 
     var body: some View {
         Button(action: onJoin) {
@@ -98,7 +100,7 @@ private struct GameRow: View {
                         .foregroundStyle(Color.secondary)
                 }
                 Spacer(minLength: Theme.Spacing.s)
-                if isJoinable {
+                if isTappable {
                     Image(systemName: "chevron.right")
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Color(.tertiaryLabel))
@@ -108,10 +110,10 @@ private struct GameRow: View {
             .padding(.vertical, Theme.Spacing.xs)
             .contentShape(.rect)
         }
-        .disabled(!isJoinable)
-        .opacity(isJoinable ? 1 : 0.5)
+        .disabled(!isTappable)
+        .opacity(isTappable ? 1 : 0.5)
         .accessibilityElement(children: .combine)
-        .accessibilityHint(isJoinable ? Text("Joins this game.") : Text(verbatim: ""))
+        .accessibilityHint(hint)
         .accessibilityIdentifier("game-\(hostName)")
     }
 
@@ -119,8 +121,16 @@ private struct GameRow: View {
         let players = Text("\(game.advertisement.playerCount) players")
         switch availability {
         case .joinable: players
-        case .inProgress: Text("\(players) · In progress")
+        case .inProgress: Text("In progress · tap to rejoin if you were playing")
         case .updateRequired: Text("Update the app")
+        }
+    }
+
+    private var hint: Text {
+        switch availability {
+        case .joinable: Text("Joins this game.")
+        case .inProgress: Text("Rejoins this game if you were playing in it.")
+        case .updateRequired: Text(verbatim: "")
         }
     }
 }

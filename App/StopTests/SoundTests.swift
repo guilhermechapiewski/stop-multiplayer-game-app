@@ -35,16 +35,18 @@ struct SoundSpecTests {
     }
 }
 
-/// Records what `SoundEngine` asks of its graph; `start()` fails while `failStart` is set.
-@MainActor
-private final class FakeSoundGraph: SoundGraph {
-    var onNeedsRestart: (() -> Void)?
+/// Records what `SoundEngine` asks of its graph; `start()` fails while `failStart` is set, and waits for
+/// `releaseStart()` while `blockStart` is set. Called on the engine's queue; the test reads it after `drain()`.
+private final class FakeSoundGraph: SoundGraph, @unchecked Sendable {
+    var onNeedsRestart: (@Sendable () -> Void)?
     var builds = 0
     var starts = 0
     var pauses = 0
     var scheduled: [Sound] = []
     var failStart = false
+    var blockStart = false
     private(set) var isRunning = false
+    private let startGate = DispatchSemaphore(value: 0)
 
     func build(samples: [Sound: [Float]], sampleRate: Double) -> Bool {
         builds += 1
@@ -53,10 +55,12 @@ private final class FakeSoundGraph: SoundGraph {
 
     func start() throws {
         starts += 1
+        if blockStart { startGate.wait() }
         if failStart { throw CocoaError(.featureUnsupported) }
         isRunning = true
     }
 
+    func releaseStart() { startGate.signal() }
     func pause() { pauses += 1; isRunning = false }
     func schedule(_ sound: Sound) { scheduled.append(sound) }
     func stopBehindTheEnginesBack() { isRunning = false }
@@ -72,14 +76,17 @@ struct SoundEngineTests {
         engine.play(.tick)
         engine.play(.tick)
         engine.play(.stop)
+        engine.drain()
         #expect(graph.builds == 1)
         #expect(graph.starts == 3)
         #expect(graph.scheduled.isEmpty)
 
         graph.failStart = false
         engine.play(.win)
+        engine.drain()
         #expect(graph.builds == 1)
         #expect(graph.scheduled == [.win])
+        #expect(engine.isGraphBuilt)
     }
 
     @Test func disabledEngineNeverTouchesAudio() {
@@ -87,6 +94,7 @@ struct SoundEngineTests {
         let engine = SoundEngine(graph: graph)
         engine.play(.tick)
         engine.warmUp()
+        engine.drain()
         #expect(graph.builds == 0)
         #expect(graph.starts == 0)
     }
@@ -96,17 +104,43 @@ struct SoundEngineTests {
         let engine = SoundEngine(graph: graph)
         engine.enabled = true
         engine.warmUp()
+        engine.drain()
         #expect(graph.isRunning)
 
         // An interruption stopped the engine; it resumes because sounds were active.
         graph.stopBehindTheEnginesBack()
         graph.onNeedsRestart?()
+        engine.drain()
         #expect(graph.isRunning)
 
         engine.enabled = false
+        engine.drain()
         #expect(!graph.isRunning)
         #expect(graph.pauses == 1)
         graph.onNeedsRestart?()
+        engine.drain()
         #expect(!graph.isRunning)
+    }
+
+    @Test func playReturnsAtOnceWhileTheEngineIsSlowToStartAndLateSoundsAreDropped() {
+        let graph = FakeSoundGraph()
+        // No latency allowed: any sound that waits behind the start is dropped.
+        let engine = SoundEngine(graph: graph, maxLatency: .zero)
+        engine.enabled = true
+        graph.blockStart = true
+        // The engine start hangs (an audio server call timing out): the caller must not wait for it.
+        let clock = ContinuousClock()
+        let elapsed = clock.measure {
+            engine.warmUp()
+            engine.play(.tick)
+            engine.play(.go)
+        }
+        #expect(elapsed < .milliseconds(50))
+        graph.releaseStart()
+        engine.drain()
+        #expect(graph.starts == 1)
+        #expect(graph.isRunning)
+        // Both sounds waited too long behind the start: dropped rather than played late.
+        #expect(graph.scheduled.isEmpty)
     }
 }

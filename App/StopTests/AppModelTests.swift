@@ -246,6 +246,43 @@ struct AppModelTests {
         model.leaveGame()
     }
 
+    @Test func leavingHostIsKeptAliveThroughItsShutdownGrace() async throws {
+        _ = await saveProfile()
+        let clock = TestClock()
+        let model = AppModel(store: store, factory: network, clock: clock, launchArguments: [],
+                             sessions: sessions.factories)
+        await model.bootstrap()
+        model.hostGame(settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true))
+        try await waitUntil { await store.loadActiveGame() != nil }
+
+        model.leaveGame()
+
+        #expect(model.route == .home)
+        #expect(model.departingHosts.count == 1)
+        // Still advertised: the listener stays up for the grace, so clients get the final snapshot.
+        _ = try await discoverGame(hostName: "Gui")
+        // The host's own grace timer and the model's hold.
+        try await waitUntil { clock.sleeperCount == 2 }
+        await clock.advance(by: HostSession.shutdownGrace - .milliseconds(1))
+        #expect(model.departingHosts.count == 1)
+        await clock.advance(by: .milliseconds(1))
+        try await waitUntil { model.departingHosts.isEmpty }
+        try await waitUntil { await noGameAdvertised() }
+    }
+
+    @Test func hostLocalNetworkDenialReachesTheModel() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.hostGame(settings: GameSettings(categories: ["Animal"], stopsRequired: 1, allowGiveUp: true))
+        #expect(!model.isLocalNetworkDenied)
+        network.setLocalNetworkDenied(true)
+        try await waitUntil { model.isLocalNetworkDenied }
+        network.setLocalNetworkDenied(false)
+        try await waitUntil { !model.isLocalNetworkDenied }
+        model.leaveGame()
+    }
+
     @Test func joinStartsClientSessionForDiscoveredGame() async throws {
         let profile = await saveProfile()
         let model = makeModel()
@@ -664,6 +701,16 @@ struct AppModelTests {
         }
         Issue.record("no game discovered within 3 s")
         throw CancellationError()
+    }
+
+    /// The network's current browse results are empty.
+    private func noGameAdvertised() async -> Bool {
+        let browser = network.makeBrowser()
+        defer { browser.stop() }
+        for await event in browser.start() {
+            if case .results(let games) = event { return games.isEmpty }
+        }
+        return false
     }
 }
 

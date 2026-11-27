@@ -104,17 +104,6 @@
         }
       }
     },
-    "%@ · In progress" : {
-      "comment" : "Join list detail for a game that already started. %@ is the player count, e.g. \"5 players\".",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Em andamento"
-          }
-        }
-      }
-    },
     "%@, %lld points" : {
       "comment" : "VoiceOver value of a scoring row once the category is complete. %@ is the answer, %lld the points.",
       "localizations" : {
@@ -1117,6 +1106,17 @@
       },
       "comment" : "Home button that starts setting up a game on this phone."
     },
+    "In progress · tap to rejoin if you were playing" : {
+      "comment" : "Join list detail for a game that already started: players who were in it can tap to get back in.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em andamento · toque para voltar se você estava jogando"
+          }
+        }
+      }
+    },
     "Join a game" : {
       "localizations" : {
         "pt-BR" : {
@@ -1256,6 +1256,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Letra %@"
+          }
+        }
+      }
+    },
+    "Local Network access is off, so friends nearby can’t find your game. Turn it on in Settings." : {
+      "comment" : "Host's lobby: this app was denied Local Network access, so nobody nearby can find the game.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso à rede local está desativado, então os amigos por perto não conseguem encontrar seu jogo. Ative nos Ajustes."
           }
         }
       }
@@ -1634,6 +1645,17 @@
         }
       }
     },
+    "Rejoins this game if you were playing in it." : {
+      "comment" : "VoiceOver hint for a game in progress in the Join list.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Volta para este jogo se você estava jogando nele."
+          }
+        }
+      }
+    },
     "Relaxed" : {
       "comment" : "Bot speed option: bots call STOP slowly.",
       "localizations" : {
@@ -1986,6 +2008,17 @@
         }
       }
     },
+    "That player isn’t in this game." : {
+      "comment" : "Error toast when the host doesn't know the player an action was about.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esse jogador não está neste jogo."
+          }
+        }
+      }
+    },
     "The classic word game, played with friends nearby." : {
       "localizations" : {
         "pt-BR" : {
@@ -2125,17 +2158,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A rodada termina quando %lld jogadores tocam em STOP ou desistem."
-          }
-        }
-      }
-    },
-    "This game doesn’t know you anymore. Leave and join again." : {
-      "comment" : "Error toast when the host doesn't recognize this player.",
-      "localizations" : {
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este jogo não reconhece mais você. Saia e entre de novo."
           }
         }
       }
