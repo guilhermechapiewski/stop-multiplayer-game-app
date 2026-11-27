@@ -251,3 +251,32 @@ private func eventually(within timeout: Duration = .seconds(1), _ condition: () 
     // The delivery task stops at once instead of sleeping out the 30 s deadline (holding the network).
     #expect(await eventually { weakNet == nil })
 }
+
+@Test(.timeLimit(.minutes(1))) func concurrentSendersEachMessageArrivesExactlyOnce() async throws {
+    let net = InMemoryNetwork()
+    let (client, server, _) = try await connectedPair(on: net)
+    var serverEvents = server.events.makeAsyncIterator()
+    #expect(await serverEvents.next() == .ready)
+
+    let senders = 8, perSender = 100
+    await withTaskGroup(of: Void.self) { group in
+        for s in 0..<senders {
+            group.addTask {
+                for i in 0..<perSender { client.send(Data("\(s):\(i)".utf8)) }
+            }
+        }
+    }
+    var received: [String] = []
+    for _ in 0..<senders * perSender {
+        guard case .message(let data) = await serverEvents.next() else { break }
+        received.append(String(decoding: data, as: UTF8.self))
+    }
+    let expected = Set((0..<senders).flatMap { s in (0..<perSender).map { "\(s):\($0)" } })
+    #expect(received.count == expected.count)
+    #expect(Set(received) == expected)
+    // Each sender's own messages keep their order.
+    for s in 0..<senders {
+        let mine = received.filter { $0.hasPrefix("\(s):") }
+        #expect(mine == (0..<perSender).map { "\(s):\($0)" })
+    }
+}
