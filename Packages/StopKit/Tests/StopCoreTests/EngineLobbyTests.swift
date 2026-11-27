@@ -58,7 +58,7 @@ private func started() throws -> (GameState, PlayerID, PlayerID) {
     try send(.join(name: "Bia2"), b, &s)
     #expect(s.player(b)?.presence == .present)
     #expect(s.player(b)?.name == "Bia2")
-    #expect(s.currentRound!.participants.contains(b))  // was a participant before removal
+    #expect(!s.currentRound!.participants.contains(b))  // rejoined mid-round: back from the next round
     var (s2, h2) = try lobby()
     let c = UUID()
     try send(.join(name: "C"), c, &s2)

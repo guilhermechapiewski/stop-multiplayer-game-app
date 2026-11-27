@@ -41,6 +41,14 @@ public struct GameState: Codable, Sendable, Equatable {
         return result
     }
 
+    /// True from the letter reveal until the round's results.
+    public var isRoundInProgress: Bool {
+        switch phase {
+        case .revealing, .countdown, .writing, .collecting, .scoring: !rounds.isEmpty
+        case .lobby, .roundResults, .gameOver: false
+        }
+    }
+
     /// `settings.stopsRequired` capped by current-round participants who haven't left or been removed; at least 1.
     public var effectiveStopsRequired: Int {
         let remaining = currentRound?.participants.filter { player($0)?.presence.isActive == true }.count ?? 0

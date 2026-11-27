@@ -9,6 +9,11 @@ extension GameEngine {
             if player.presence == .present && player.name == trimmed { return false }
             state.players[index].presence = .present
             state.players[index].name = trimmed
+            if !player.presence.isActive && state.isRoundInProgress {
+                // A left/removed player returns from the next round; answers and scores already recorded stay.
+                state.rounds[state.rounds.count - 1].participants.removeAll { $0 == sender }
+                reevaluateRound(&state)
+            }
             return true
         }
         guard state.phase == .lobby else { throw .gameClosed }

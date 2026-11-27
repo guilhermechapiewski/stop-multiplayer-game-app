@@ -15,7 +15,8 @@ extension GameEngine {
 
     static func setScore(round number: Int, category: Int, points: Int, player: PlayerID, sender: PlayerID,
                          state: inout GameState) throws(GameError) -> Bool {
-        guard let round = state.currentRound, round.number == number else { throw .staleRound }
+        guard let round = state.currentRound else { throw .wrongPhase }
+        guard round.number == number else { throw .staleRound }
         guard state.phase == .scoring(categoryIndex: category, completed: false) else { throw .wrongPhase }
         guard round.participants.contains(player), let target = state.player(player) else { throw .notParticipant }
         if sender != player && !(sender == state.hostID && target.presence != .present) {

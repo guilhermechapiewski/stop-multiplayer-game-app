@@ -109,6 +109,15 @@ private let full = ["Ana", "Uva"]
     #expect(throws: GameError.cannotScoreForOthers) { try score(&s, ids[0], category: 0, points: 10, for: ids[1]) }
 }
 
+@Test func setScoreInLobbyIsWrongPhase() throws {
+    var (s, ids) = try writingGame()
+    s.phase = .lobby
+    s.rounds = []
+    #expect(throws: GameError.wrongPhase) {
+        try send(.setScore(round: 1, category: 0, points: 10, player: ids[1]), ids[1], &s)
+    }
+}
+
 @Test func setScoreValidatesRoundPhaseAndCategory() throws {
     var (s, ids) = try writingGame()
     #expect(throws: GameError.wrongPhase) { try score(&s, ids[1], category: 0, points: 10) }
@@ -159,7 +168,7 @@ private let full = ["Ana", "Uva"]
     #expect(!GameEngine.tick(&s))  // incomplete category does not advance
 }
 
-@Test func tickSkipsAlreadyCompleteCategory() throws {
+@Test func tickLandsOnPreCompletedCategory() throws {
     var (s, ids) = try writingGame()
     try collect(&s, ids, [["Ana", ""], ["Asno", " "], ["Arara", ""]])
     for id in ids { try score(&s, id, category: 0, points: 10) }
@@ -210,6 +219,7 @@ private let full = ["Ana", "Uva"]
     #expect(s.currentRound?.scores[ids[2]] == [0, nil, 0])
     #expect(s.phase == .scoring(categoryIndex: 1, completed: false))
     try score(&s, ids[2], category: 1, points: 10)
+    #expect(s.currentRound?.scores[ids[2]] == [0, 10, 0])
 }
 
 @Test func lateAnswersAfterCompletionLeaveCurrentCategory() throws {
@@ -385,4 +395,60 @@ private let full = ["Ana", "Uva"]
         #expect(!GameEngine.setPresence(p, for: ids[3], in: &s))
     }
     #expect(s == before)
+}
+
+// MARK: - Left/removed players rejoining mid-round come back from the next round
+
+@Test func rejoinedPlayerDoesNotCountTowardStopsRequired() throws {
+    var (s, ids) = try writingGame(players: 3, stopsRequired: 3)
+    try send(.leave, ids[2], &s)
+    let v = s.version
+    try send(.join(name: "P2"), ids[2], &s)
+    #expect(s.version == v + 1)
+    #expect(s.player(ids[2])?.presence == .present)
+    #expect(s.currentRound?.participants == [ids[0], ids[1]])
+    try send(.stop(answers: full), ids[0], &s)
+    try send(.stop(answers: full), ids[1], &s)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: false))
+    #expect(throws: GameError.notParticipant) { try score(&s, ids[2], category: 0, points: 10) }
+}
+
+@Test func rejoinedPlayerDoesNotBlockCollecting() throws {
+    var (s, ids) = try writingGame(players: 3, stopsRequired: 1)
+    try send(.removePlayer(ids[2]), ids[0], &s)
+    try send(.join(name: "P2"), ids[2], &s)
+    try send(.stop(answers: full), ids[0], &s)
+    #expect(s.phase == .collecting)
+    try send(.submitAnswers(round: 1, answers: full), ids[1], &s)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: false))
+}
+
+@Test func rejoinedPlayerDoesNotBlockCategoryCompletion() throws {
+    var (s, ids) = try writingGame()
+    try collect(&s, ids, [full, full, ["Asno", ""]])
+    try send(.leave, ids[2], &s)
+    try send(.join(name: "P2"), ids[2], &s)
+    try score(&s, ids[0], category: 0, points: 10)
+    try score(&s, ids[1], category: 0, points: 10)
+    #expect(s.phase == .scoring(categoryIndex: 0, completed: true))
+    // Already-recorded answers and scores are kept.
+    #expect(s.currentRound?.answers[ids[2]] == ["Asno", ""])
+    #expect(s.currentRound?.scores[ids[2]] == [nil, 0])
+}
+
+@Test func rejoinedPlayerIsParticipantInNextRound() throws {
+    var (s, ids) = try writingGame()
+    try send(.leave, ids[2], &s)
+    try send(.join(name: "P2"), ids[2], &s)
+    try playBlankRound(&s, Array(ids.prefix(2)))  // ids[2] sits this round out
+    try send(.nextRound, ids[0], &s)
+    #expect(s.currentRound?.participants == ids)
+}
+
+@Test func rejoinBetweenRoundsKeepsParticipantsUntouched() throws {
+    var (s, ids) = try writingGame()
+    try playBlankRound(&s, ids)
+    try send(.leave, ids[2], &s)
+    try send(.join(name: "P2"), ids[2], &s)
+    #expect(s.currentRound?.participants == ids)
 }
