@@ -30,7 +30,7 @@ public struct GameState: Codable, Sendable, Equatable {
     public func player(_ id: PlayerID) -> Player? { players.first { $0.id == id } }
 
     /// Players who are present or away.
-    public var activePlayers: [Player] { players.filter { $0.presence == .present || $0.presence == .away } }
+    public var activePlayers: [Player] { players.filter { $0.presence.isActive } }
 
     /// Sum of non-nil scores over all rounds.
     public var totals: [PlayerID: Int] {
@@ -43,10 +43,7 @@ public struct GameState: Codable, Sendable, Equatable {
 
     /// `settings.stopsRequired` capped by current-round participants who haven't left or been removed; at least 1.
     public var effectiveStopsRequired: Int {
-        let remaining = currentRound?.participants.filter {
-            let presence = player($0)?.presence
-            return presence == .present || presence == .away
-        }.count ?? 0
+        let remaining = currentRound?.participants.filter { player($0)?.presence.isActive == true }.count ?? 0
         return max(1, min(settings.stopsRequired, remaining))
     }
 }

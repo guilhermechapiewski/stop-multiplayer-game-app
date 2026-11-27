@@ -11,3 +11,8 @@ public struct Player: Codable, Sendable, Equatable {
         self.presence = presence
     }
 }
+
+public extension Presence {
+    /// Present or away: still part of the game.
+    var isActive: Bool { self == .present || self == .away }
+}
