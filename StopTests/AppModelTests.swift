@@ -271,8 +271,10 @@ struct AppModelTests {
         #expect(model.departingHosts.count == 1)
         // Still advertised: the listener stays up for the grace, so clients get the final snapshot.
         _ = try await discoverGame(hostName: "Gui")
-        // The host's own grace timer and the model's hold.
-        try await waitUntil(timeout: .seconds(10)) { clock.sleeperCount >= 2 }
+        // The host's grace timer, armed at leaving (the clock hasn't moved since); the model's hold waits for it.
+        // Counted by deadline, so other timers (heartbeats) can't stand in for it.
+        let graceEnd = clock.now.advanced(by: HostSession.shutdownGrace)
+        try await waitUntil(timeout: .seconds(10)) { clock.sleeperCount(dueAt: graceEnd) == 1 }
         await clock.advance(by: HostSession.shutdownGrace - .milliseconds(1))
         #expect(model.departingHosts.count == 1)
         await clock.advance(by: .milliseconds(1))

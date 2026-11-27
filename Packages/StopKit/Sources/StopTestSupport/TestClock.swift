@@ -35,6 +35,10 @@ public final class TestClock: Clock, @unchecked Sendable {
 
     public var now: Instant { state.withLock { $0.now } }
     public var sleeperCount: Int { state.withLock { $0.sleepers.count } }
+    /// The sleepers waiting for exactly `deadline`: lets a test wait for the timers it means, not any timers.
+    public func sleeperCount(dueAt deadline: Instant) -> Int {
+        state.withLock { $0.sleepers.count { $0.deadline.offset == deadline.offset } }
+    }
     public var minimumResolution: Swift.Duration { .zero }
 
     public func sleep(until deadline: Instant, tolerance: Swift.Duration? = nil) async throws {

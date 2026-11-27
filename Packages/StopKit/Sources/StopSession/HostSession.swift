@@ -42,6 +42,8 @@ public final class HostSession {
     @ObservationIgnored var lastSeen: [PlayerID: Stopwatch] = [:]
     @ObservationIgnored var intentLogs: [PlayerID: IntentLog] = [:]
     @ObservationIgnored var isShutDown = false
+    /// After `shutdown()`: waits out `shutdownGrace`, then closes the transport.
+    @ObservationIgnored private var shutdownGraceTimer: Task<Void, Never>?
 
     @ObservationIgnored private var heartbeatLoop: Task<Void, Never>?
     /// Restarted whenever a change other than a tick moves the phase, so each phase gets full ticks.
@@ -123,11 +125,18 @@ public final class HostSession {
             await store.saveActiveGame(nil)
             await store.clearDrafts(gameID: gameID)
         }
-        Task { [weak self, clock] in
+        shutdownGraceTimer = Task { [weak self, clock] in
             do { try await clock.sleep(for: Self.shutdownGrace) } catch { return }
             guard !Task.isCancelled else { return }
             self?.closeTransport()
         }
+    }
+
+    /// Returns once the shutdown grace is over and the transport is closed (at once if not shut down). Whoever
+    /// keeps the session alive through the grace awaits this rather than a timer of its own, which could run
+    /// first and release the session before it closes the transport.
+    public func waitForShutdown() async {
+        await shutdownGraceTimer?.value
     }
 
     private func closeTransport() {

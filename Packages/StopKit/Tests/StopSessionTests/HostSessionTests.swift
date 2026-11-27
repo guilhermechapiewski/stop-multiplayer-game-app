@@ -694,6 +694,24 @@ struct HostSessionTests {
         host.shutdown()
     }
 
+    /// Whoever keeps a shut-down host alive waits for its own grace timer, so it never lets go before the
+    /// transport is closed (a timer of its own with the same deadline could run first).
+    @Test func waitForShutdownReturnsOnceTheTransportIsClosed() async throws {
+        let h = try Harness()
+        _ = try #require(await h.browse())
+        h.host.shutdown()
+        let closed = Task { @MainActor in
+            await h.host.waitForShutdown()
+            return h.host.listener == nil
+        }
+        let graceEnd = h.clock.now.advanced(by: HostSession.shutdownGrace)
+        await waitUntil("grace timer") { h.clock.sleeperCount(dueAt: graceEnd) == 1 }
+        await h.clock.advance(by: HostSession.shutdownGrace - .milliseconds(1))
+        #expect(h.host.listener != nil)
+        await h.clock.advance(by: .milliseconds(1))
+        #expect(await closed.value)
+    }
+
     @Test func listenerIsNotRestartedAfterShutdown() async throws {
         let h = try Harness()
         h.host.shutdown()

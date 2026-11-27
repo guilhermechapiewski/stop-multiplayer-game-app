@@ -275,10 +275,9 @@ final class AppModel {
     private func keepAliveThroughShutdown(_ host: HostSession) {
         guard !departingHosts.contains(where: { $0 === host }) else { return }
         departingHosts.append(host)
-        Task { [weak self, clock] in
-            try? await clock.sleep(for: HostSession.shutdownGrace)
-            // Let the host's own grace timer (armed first, same deadline) close its transport first.
-            await Task.yield()
+        Task { [weak self] in
+            // The host's own grace timer, so it has closed its transport before it's released.
+            await host.waitForShutdown()
             self?.departingHosts.removeAll { $0 === host }
         }
     }

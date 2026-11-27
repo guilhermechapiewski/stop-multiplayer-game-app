@@ -27,6 +27,19 @@ struct TestClockTests {
         _ = (await t1.value, await t2.value, await t3.value)
     }
 
+    /// Lets a test wait for specific sleepers rather than any `n`, which other timers could make up.
+    @Test func countsSleepersByDeadline() async {
+        let clock = TestClock()
+        let tasks = [Task { try? await clock.sleep(for: .seconds(5)) }, Task { try? await clock.sleep(for: .seconds(1)) },
+                     Task { try? await clock.sleep(for: .seconds(5)) }]
+        await waitForSleepers(clock, 3)
+        #expect(clock.sleeperCount(dueAt: clock.now.advanced(by: .seconds(5))) == 2)
+        #expect(clock.sleeperCount(dueAt: clock.now.advanced(by: .seconds(1))) == 1)
+        #expect(clock.sleeperCount(dueAt: clock.now.advanced(by: .seconds(2))) == 0)
+        await clock.advance(by: .seconds(5))
+        for task in tasks { await task.value }
+    }
+
     @Test func cancellationThrowsAndRemovesSleeper() async {
         let clock = TestClock()
         let t = Task { do { try await clock.sleep(for: .seconds(10)); return false } catch { return error is CancellationError } }
