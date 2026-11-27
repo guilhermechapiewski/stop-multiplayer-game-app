@@ -57,8 +57,13 @@ struct CountdownView: View {
         }
         .task(id: secondsRemaining) {
             if !announcedANumber {
-                // Cancelled if the next tick comes first; that number is then announced at once.
-                do { try await Task.sleep(for: Self.firstAnnouncementDelay) } catch { return }
+                do {
+                    try await Task.sleep(for: Self.firstAnnouncementDelay)
+                } catch {
+                    // The next tick came first: skip this number and announce that one at once.
+                    announcedANumber = true
+                    return
+                }
             }
             announcedANumber = true
             AccessibilityNotification.Announcement(secondsRemaining.formatted()).post()

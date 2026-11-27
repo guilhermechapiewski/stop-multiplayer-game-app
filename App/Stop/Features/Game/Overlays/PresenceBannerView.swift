@@ -37,9 +37,9 @@ struct Banner: Equatable, Identifiable {
     }
 }
 
-/// Turns a session's presence changes into banners shown one at a time, `displayDuration` each. A player's
-/// newer change replaces their older one that hasn't shown yet (or is showing), so "Ana left the app" right
-/// before "Ana is back" only shows "Ana is back".
+/// Turns a session's presence changes into banners shown one at a time, `displayDuration` each, with at most
+/// one waiting per player: a newer change replaces the older one (or the one showing). "Ana is back" right
+/// after an unseen "Ana left the app" drops both.
 @MainActor @Observable
 final class BannerQueue {
     static let displayDuration: Duration = .seconds(3)
@@ -85,7 +85,12 @@ final class BannerQueue {
             pending.insert(banner, at: 0)
             advance()
         } else if let index = pending.firstIndex(where: { $0.playerID == banner.playerID }) {
-            pending[index] = banner
+            // Away and back before anyone saw it: nothing to tell.
+            if pending[index].style == .away, banner.style == .back {
+                pending.remove(at: index)
+            } else {
+                pending[index] = banner
+            }
         } else {
             pending.append(banner)
             if current == nil { advance() }
@@ -128,12 +133,8 @@ struct PresenceBannerView: View {
         .padding(.top, Theme.Spacing.s)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("presenceBanner")
-        .onAppear { announce() }
-        .onChange(of: banner.id) { announce() }
-    }
-
-    private func announce() {
-        AccessibilityNotification.Announcement(banner.text).post()
+        // The game screen gives each banner its own identity, so every one appears (and is read out) afresh.
+        .onAppear { AccessibilityNotification.Announcement(banner.text).post() }
     }
 
     private var symbol: String {

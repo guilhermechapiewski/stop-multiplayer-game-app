@@ -527,6 +527,23 @@ struct AppModelTests {
         #expect(realNetwork.uses == 0)
     }
 
+    @Test func practiceHasNoBannersAndItsBotsSuspendWithTheHost() async throws {
+        _ = await saveProfile()
+        let model = makeModel()
+        await model.bootstrap()
+        startPractice(model, bots: 1)
+        let client = try #require(model.client)
+        try await waitUntil { client.state?.players.count == 2 }
+        #expect(model.banners == nil)
+
+        model.scenePhaseChanged(.background)
+        #expect(sessions.botSuspends == 1)
+        model.scenePhaseChanged(.active)
+        #expect(sessions.botResumes == 1)
+        try await waitUntil { client.state?.players.allSatisfy { $0.presence == .present } == true }
+        model.leaveGame()
+    }
+
     @Test func endingPracticeStopsTheBots() async throws {
         _ = await saveProfile()
         let model = makeModel()
@@ -737,6 +754,9 @@ final class SessionSpy {
     }
 
     private(set) var practiceLaunches: [PracticeLaunch] = []
+    /// Practice bots suspended / resumed with the host.
+    private(set) var botSuspends = 0
+    private(set) var botResumes = 0
 
     var factories: SessionFactories {
         SessionFactories(
@@ -752,8 +772,18 @@ final class SessionSpy {
             },
             launchPractice: { [unowned self] profile, botNames, settings, language, speed, store, clock in
                 // The real launcher: practice games must really run on their own in-memory network.
-                let game = SessionFactories.live.launchPractice(profile, botNames, settings, language, speed, store,
+                var game = SessionFactories.live.launchPractice(profile, botNames, settings, language, speed, store,
                                                                 clock)
+                if let launched = game {
+                    game?.suspendBots = { [unowned self] in
+                        botSuspends += 1
+                        launched.suspendBots()
+                    }
+                    game?.resumeBots = { [unowned self] in
+                        botResumes += 1
+                        launched.resumeBots()
+                    }
+                }
                 practiceLaunches.append(PracticeLaunch(botNames: botNames, speed: speed, game: game))
                 return game
             })

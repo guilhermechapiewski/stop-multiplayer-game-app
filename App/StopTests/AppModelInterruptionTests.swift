@@ -114,7 +114,7 @@ struct AppModelInterruptionTests {
 
     // MARK: Ended sessions
 
-    @Test(arguments: [EndReason.removed, .versionMismatch, .gameClosed])
+    @Test(arguments: [EndReason.removed, .versionMismatch])
     func endingWithAnExplanationRoutesHomeWithNotice(reason: EndReason) async throws {
         let (model, session, ref) = try await rejoining()
         session.state = try state(gameID: ref.gameID, me: session.localPlayerID)
@@ -128,20 +128,51 @@ struct AppModelInterruptionTests {
         #expect(model.endNotice == nil)
     }
 
-    @Test func endingWhileRejoiningExplainsToo() async throws {
-        let (model, session, _) = try await rejoining()
+    @Test func joiningAStartedGameExplainsItStarted() async throws {
+        _ = await profile()
+        let model = makeModel()
+        await model.bootstrap()
+        model.join(try await discoverGame())
+        let session = try #require(sessions.clients.first?.session)
+
         session.hostStatus = .ended(.gameClosed)
+
         try await waitUntil { model.route == .home }
         #expect(model.endNotice == .gameClosed)
     }
 
-    @Test func leavingShowsNoNotice() async throws {
+    @Test func turnedAwayAfterPlayingSaysTheGameEnded() async throws {
+        _ = await profile()
+        let model = makeModel()
+        await model.bootstrap()
+        let game = try await discoverGame()
+        model.join(game)
+        let session = try #require(sessions.clients.first?.session)
+        session.state = try state(gameID: game.advertisement.gameID, me: session.localPlayerID)
+
+        // A reconnect is turned away (the host is running another game now).
+        session.hostStatus = .ended(.gameClosed)
+
+        try await waitUntil { model.route == .home }
+        #expect(model.endNotice == .gameOver)
+    }
+
+    @Test func rejoinTurnedAwaySaysTheGameEnded() async throws {
+        let (model, session, _) = try await rejoining()
+        session.hostStatus = .ended(.gameClosed)
+        try await waitUntil { model.route == .home }
+        #expect(model.endNotice == .gameOver)
+    }
+
+    @Test func sessionEndingByLeavingShowsNoNotice() async throws {
         let (model, session, ref) = try await rejoining()
         session.state = try state(gameID: ref.gameID, me: session.localPlayerID)
         try await waitUntil { model.route == .game }
-        model.leaveGame()
+
+        // Ended by leaving (e.g. a leave sent from elsewhere), seen by the session watch, not `leaveGame()`.
         session.hostStatus = .ended(.leftGame)
-        #expect(model.route == .home)
+
+        try await waitUntil { model.route == .home }
         #expect(model.endNotice == nil)
     }
 
@@ -156,6 +187,27 @@ struct AppModelInterruptionTests {
 
         session.state?.phase = .gameOver
         #expect(!model.keepsScreenAwake)
+    }
+
+    // MARK: Helpers
+
+    /// Advertises a game on the test network and returns it as discovered.
+    func discoverGame() async throws -> DiscoveredGame {
+        let listener = network.makeListener()
+        _ = listener.start(advertising: Advertisement(gameID: UUID(), hostName: "Ana", playerCount: 1,
+                                                      protocolVersion: currentProtocolVersion, joinable: true))
+        let browser = network.makeBrowser()
+        defer { browser.stop() }
+        let deadline = Task {
+            try? await Task.sleep(for: .seconds(3))
+            browser.stop()
+        }
+        defer { deadline.cancel() }
+        for await event in browser.start() {
+            if case .results(let games) = event, let game = games.first { return game }
+        }
+        Issue.record("no game discovered within 3 s")
+        throw CancellationError()
     }
 
     // MARK: Banners

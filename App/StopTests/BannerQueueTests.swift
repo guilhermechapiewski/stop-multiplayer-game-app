@@ -39,13 +39,27 @@ struct BannerQueueTests {
         events.yield(PresenceChange(playerID: bia, kind: .wentAway))
         try await waitUntil { queue.current?.text == "Bia left the app" }
 
-        // Ana's two changes arrive while Bia's banner shows: only the latest is kept.
+        // Ana's changes arrive while Bia's banner shows: one waits for her, the latest.
         events.yield(PresenceChange(playerID: ana, kind: .wentAway))
-        events.yield(PresenceChange(playerID: ana, kind: .returned))
+        events.yield(PresenceChange(playerID: ana, kind: .left))
         try await waitUntil { queue.pendingCount == 1 }
 
         await clock.advance(by: BannerQueue.displayDuration)
-        try await waitUntil { queue.current?.text == "Ana is back" }
+        try await waitUntil { queue.current?.text == "Ana left the game" }
+        #expect(queue.pendingCount == 0)
+    }
+
+    @Test func awayAndBackUnseenShowsNothing() async throws {
+        let (queue, events) = makeQueue()
+        events.yield(PresenceChange(playerID: bia, kind: .left))
+        try await waitUntil { queue.current?.text == "Bia left the game" }
+
+        // A burst: Ana is away and back before her first banner shows, then Bia is back.
+        events.yield(PresenceChange(playerID: ana, kind: .wentAway))
+        try await waitUntil { queue.pendingCount == 1 }
+        events.yield(PresenceChange(playerID: ana, kind: .returned))
+        events.yield(PresenceChange(playerID: bia, kind: .returned))
+        try await waitUntil { queue.current?.text == "Bia is back" }
         #expect(queue.pendingCount == 0)
     }
 
@@ -64,9 +78,14 @@ struct BannerQueueTests {
         try await waitUntil { queue.current != nil && clock.sleeperCount == 1 }
 
         await clock.advance(by: .milliseconds(2900))
+        // Let anything the advance woke run before looking.
+        for _ in 0..<20 { await Task.yield() }
         #expect(queue.current?.text == "Ana left the game")
+        #expect(clock.sleeperCount == 1)
+
         await clock.advance(by: .milliseconds(100))
         try await waitUntil { queue.current == nil }
+        #expect(clock.sleeperCount == 0)
     }
 
     @Test func playersWithoutANameAreSkipped() async throws {

@@ -45,6 +45,10 @@ final class AppModel {
     @ObservationIgnored private var retained: [AnyObject] = []
     /// Stops the bots of a mock or practice game.
     @ObservationIgnored private var stopBots: (@MainActor () -> Void)?
+    @ObservationIgnored private var suspendBots: (@MainActor () -> Void)?
+    @ObservationIgnored private var resumeBots: (@MainActor () -> Void)?
+    /// The remote session was started to rejoin a game this phone was already in (after a relaunch).
+    @ObservationIgnored private var isRejoin = false
     @ObservationIgnored private var sessionWatch: Task<Void, Never>?
     /// Remote sessions saying goodbye to their host; kept alive until they end.
     @ObservationIgnored private var departing: [any RemoteGameSession] = []
@@ -287,6 +291,7 @@ final class AppModel {
             // Suspending sends "going away" and saves; background time lets that finish.
             let endBackgroundTime = backgroundTasks.begin("Suspend game")
             hostSession?.suspend()
+            suspendBots?()
             remoteSession?.suspend()
             Task { [clock] in
                 try? await clock.sleep(for: Self.suspendGrace)
@@ -297,6 +302,7 @@ final class AppModel {
             guard wasBackgrounded else { return }
             wasBackgrounded = false
             hostSession?.resume()
+            resumeBots?()
             remoteSession?.resume()
         default:
             break
@@ -320,9 +326,12 @@ final class AppModel {
     private func start(_ game: MockGame) {
         retained = game.retained
         stopBots = game.stopBots
+        suspendBots = game.suspendBots
+        resumeBots = game.resumeBots
         hostSession = game.host
         client = game.host.localClient
-        showBanners(for: game.host.localClient)
+        // Bots never go away, so a practice game has no presence banners.
+        if !isPractice { showBanners(for: game.host.localClient) }
         route = .game
     }
 
@@ -338,6 +347,7 @@ final class AppModel {
         guard let profile else { return }
         let session = sessions.makeClient(profile, target, factory, store, clock)
         remoteSession = session
+        isRejoin = if case .rejoin = target { true } else { false }
         client = session
         showBanners(for: session)
         route = destination
@@ -366,9 +376,10 @@ final class AppModel {
                 if let reason = change.ended {
                     let showsGameOver = reason == .gameOver && change.hasState && self.route == .game
                     if !showsGameOver {
+                        let notice = self.notice(for: reason, hadState: change.hasState)
                         session?.stop()
                         self.endSession()
-                        if Self.explains(reason) { self.endNotice = reason }
+                        self.endNotice = notice
                     }
                     return
                 }
@@ -377,11 +388,14 @@ final class AppModel {
         }
     }
 
-    /// Endings Home explains with an alert; the others (a game over, leaving) need no words.
-    private static func explains(_ reason: EndReason) -> Bool {
+    /// What Home's alert explains about a session that ended, if anything (a game over or leaving needs no
+    /// words). A game that turns this phone away after it had played in it (a rejoin, or a reconnect once the
+    /// game was on screen) no longer exists, so that reads "This game has ended", not "already started".
+    private func notice(for reason: EndReason, hadState: Bool) -> EndReason? {
         switch reason {
-        case .removed, .versionMismatch, .gameClosed: true
-        case .gameOver, .leftGame: false
+        case .removed, .versionMismatch: reason
+        case .gameClosed: isRejoin || hadState ? .gameOver : .gameClosed
+        case .gameOver, .leftGame: nil
         }
     }
 
@@ -392,6 +406,9 @@ final class AppModel {
         banners = nil
         stopBots?()
         stopBots = nil
+        suspendBots = nil
+        resumeBots = nil
+        isRejoin = false
         hostSession = nil
         remoteSession = nil
         retained = []

@@ -432,7 +432,7 @@
       }
     },
     "Allow Local Network access" : {
-      "comment" : "Title on Join when the Local Network permission was refused.",
+      "comment" : "Title when the app was denied Local Network access.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -471,6 +471,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peça para um amigo criar um jogo. Ele aparece aqui assim que o celular dele estiver na mesma rede Wi-Fi que o seu."
+          }
+        }
+      }
+    },
+    "Asks to confirm leaving the game." : {
+      "comment" : "VoiceOver hint for the Leave game button when the host may be gone.",
+      "localizations" : {
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pede para confirmar a saída do jogo."
           }
         }
       }
@@ -1136,6 +1147,7 @@
       }
     },
     "Keep the app open. You’ll be back in the game as soon as the host’s phone is nearby." : {
+      "comment" : "While resuming an interrupted game after a relaunch.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1143,8 +1155,7 @@
             "value" : "Mantenha o app aberto. Você volta para o jogo assim que o celular de quem criou o jogo estiver por perto."
           }
         }
-      },
-      "comment" : "Shown while reconnecting to an interrupted game after a relaunch."
+      }
     },
     "Keep waiting" : {
       "comment" : "Cancel button of the host's Continue anyway confirmation.",
@@ -1246,12 +1257,12 @@
       }
     },
     "Local Network access is off, so this phone can’t reach the game. Turn it on in Settings." : {
-      "comment" : "Host away / rejoining: this app was denied Local Network access.",
+      "comment" : "Explains that this app was denied Local Network access, so the game can't be reached.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O acesso à rede local está desativado, então este celular não consegue chegar ao jogo. Ative nos Ajustes."
+            "value" : "O acesso à rede local está desativado, então este celular não consegue se conectar ao jogo. Ative nos Ajustes."
           }
         }
       }
@@ -1322,13 +1333,13 @@
         }
       }
     },
-    "New players can join only in the lobby. Ask the host to start a new game." : {
+    "New players can join only while the game is in the lobby." : {
       "comment" : "Alert message: why a game that already started can't be joined.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Novos jogadores só entram na sala de espera. Peça para quem criou o jogo começar um novo."
+            "value" : "Novos jogadores só podem entrar enquanto o jogo está na sala de espera."
           }
         }
       }
@@ -1587,6 +1598,7 @@
       }
     },
     "Reconnecting to %@’s game…" : {
+      "comment" : "Title while resuming an interrupted game after a relaunch. %@ is the host's name.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -1594,8 +1606,7 @@
             "value" : "Reconectando ao jogo de %@…"
           }
         }
-      },
-      "comment" : "Title while rejoining an interrupted game. %@ is the host's name."
+      }
     },
     "Reconnecting…" : {
       "comment" : "Collecting screen: this player is away and reconnecting.",
@@ -1609,7 +1620,7 @@
       }
     },
     "Rejoining game…" : {
-      "comment" : "Reconnecting to an interrupted game whose host's name isn't known.",
+      "comment" : "Title while resuming an interrupted game whose host's name isn't known.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2038,12 +2049,12 @@
       }
     },
     "The host may be gone" : {
-      "comment" : "Shown when the host's phone has been unreachable for about 2 minutes.",
+      "comment" : "Title shown when the host's phone has been unreachable for about 2 minutes.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O anfitrião pode ter saído"
+            "value" : "Quem criou o jogo pode ter saído"
           }
         }
       }
@@ -2247,7 +2258,7 @@
       }
     },
     "Waiting for %@ to come back" : {
-      "comment" : "Shown while the host's phone is away (app in the background or out of range). %@ is the host's name.",
+      "comment" : "Title while the host's phone is away (app in the background or out of range). %@ is the host's name.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2291,7 +2302,7 @@
       }
     },
     "Waiting for the host to come back" : {
-      "comment" : "Shown while the host's phone is away, before the host's name is known.",
+      "comment" : "Title while the host's phone is away, before the host's name is known.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {
@@ -2346,7 +2357,7 @@
       }
     },
     "You can keep waiting, or leave the game. Your points so far stay in the standings." : {
-      "comment" : "Host away for a long time: what the player can do.",
+      "comment" : "What the player can do when the host's phone has been away for a long time.",
       "localizations" : {
         "pt-BR" : {
           "stringUnit" : {

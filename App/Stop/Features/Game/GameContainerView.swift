@@ -64,6 +64,7 @@ struct GameScreen: View {
 
     @Environment(\.reduceMotion) private var reduceMotion
     @Environment(\.isPracticeGame) private var isPractice
+    @State private var hostAwayGate = HostAwayGate()
     /// The round whose lock is being stamped "STOP!" over the screen.
     @State private var stampedRound: Round?
     @State private var toast: ToastItem?
@@ -143,6 +144,7 @@ struct GameScreen: View {
             do { try await Task.sleep(for: Self.stampDuration) } catch { return }
             stampedRound = nil
         }
+        .onChange(of: client.hostStatus, initial: true) { _, status in hostAwayGate.update(status) }
         .onChange(of: client.errorCount) {
             // A fresh item for every error (even a repeat of the last one), so it shows again and restarts the timer.
             if let error = client.lastError, ErrorToast.shows(error) { toast = ToastItem(error: error) }
@@ -157,7 +159,7 @@ struct GameScreen: View {
     /// How the host-away overlay shows, if it does: never for the host itself (or in practice, where this phone
     /// is the host), nor once the game has ended.
     private var hostAway: HostAwayOverlay.Presentation? {
-        guard !client.isHost, !isPractice, HostAwayOverlay.shows(for: client.hostStatus) else { return nil }
+        guard !client.isHost, !isPractice, hostAwayGate.isShowing else { return nil }
         switch stage {
         case .ended, .gameOver: return nil
         case .writing: return .banner
@@ -308,7 +310,7 @@ struct EndReasonCopy {
             title = LocalizedStringResource("This game has already started",
                                             comment: "Alert title: the game can't be joined, it's past its lobby.")
             message = LocalizedStringResource(
-                "New players can join only in the lobby. Ask the host to start a new game.",
+                "New players can join only while the game is in the lobby.",
                 comment: "Alert message: why a game that already started can't be joined.")
         case .gameOver, .leftGame:
             systemImage = "flag.checkered"
