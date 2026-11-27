@@ -10,15 +10,11 @@ lang: pt-BR
 **O clássico jogo de palavras, para iPhones na mesma sala.**
 Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastreamento.
 
-<!-- badge: enable after approval, see appstore/PUBLISHING.md step 11
 <p>
-  <a href="https://apps.apple.com/br/app/idAPPLE_ID">
+  <a href="https://apps.apple.com/br/app/id6840139205">
     <img src="../images/app-store-badge.svg" alt="Baixar na App Store" height="54">
   </a>
 </p>
--->
-
-**Em breve na App Store** como *Stop: Multiplayer Party Game*. Para iPhone.
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
   <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: as categorias de quem criou o jogo e os jogadores que entraram" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">

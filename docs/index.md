@@ -9,15 +9,11 @@ title: Stop
 **The classic word game, for iPhones in the same room.**
 No internet, no accounts, no ads. Free, with no in-app purchases and no tracking.
 
-<!-- badge: enable after approval, see appstore/PUBLISHING.md step 11
 <p>
-  <a href="https://apps.apple.com/app/idAPPLE_ID">
+  <a href="https://apps.apple.com/app/id6840139205">
     <img src="images/app-store-badge.svg" alt="Download on the App Store" height="54">
   </a>
 </p>
--->
-
-**Coming soon to the App Store** as *Stop: Multiplayer Party Game*. For iPhone.
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
   <img src="images/screens/en-US/01-lobby.jpg" alt="The lobby: the host's categories and the players who joined" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">

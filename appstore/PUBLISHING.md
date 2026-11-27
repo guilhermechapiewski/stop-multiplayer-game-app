@@ -199,14 +199,13 @@ running the TestFlight build you're submitting.
 ## Step 11. After approval
 
 1. **Release** it (if you chose Manual).
-2. Enable Apple's "Download on the App Store" badge on the website: in `docs/index.md` and
-   `docs/pt/index.md`, remove the `<!-- badge: ... -->` comment markers around the badge, replace `APPLE_ID`
-   in its link with the app's Apple ID (on **App Information**, e.g. `https://apps.apple.com/app/id1234567890`),
-   remove the "Coming soon to the App Store" / "Em breve na App Store" line, and update the README's first
-   paragraph with the App Store name. On the Portuguese page, use Apple's pt-BR badge ("Baixar na App
-   Store", from Apple's Marketing Resources) instead of `app-store-badge.svg`: add it as
-   `docs/images/app-store-badge-pt-br.svg` and point the pt page's `<img>` at it, with a
-   `https://apps.apple.com/br/app/id…` link. The links work once Apple releases the app.
+2. The website's "Download on the App Store" badge is **already enabled**, linking to the app's App Store ID
+   **6840139205** (`https://apps.apple.com/app/id6840139205`; the Portuguese page uses
+   `https://apps.apple.com/br/app/id6840139205`). The README links there too, and the app's Settings → Tell a
+   friend shows a QR code for it (`AppInfo.appStoreURL`). The links 404 until Apple releases the app, so check
+   them once it's live. Optional: the Portuguese page still shows the English badge (with Portuguese alt text);
+   to use Apple's pt-BR badge ("Baixar na App Store", from Apple's Marketing Resources), add it as
+   `docs/images/app-store-badge-pt-br.svg` and point the pt page's `<img>` at it.
 3. **Accessibility Nutrition Labels** (optional): **App Accessibility** → **Get Started**.
    Declare only what you checked on a device (VoiceOver, Larger Text, Dark Interface, Reduced Motion...).
 
