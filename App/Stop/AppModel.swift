@@ -4,6 +4,7 @@ import os
 import StopCore
 import StopNetworking
 import StopSession
+import StopSimulation
 import SwiftUI
 
 /// App-wide state: the profile, which screen is showing, and the game session in progress (if any).
@@ -17,6 +18,8 @@ final class AppModel {
     private(set) var profile: Profile?
     /// The session the game screens read from: the host's `LocalGameClient` or a remote session.
     private(set) var client: (any GameClient)?
+    /// The game in progress is a practice game against bots on this phone (never saved or restored).
+    private(set) var isPractice = false
 
     /// `-uiTesting`: clean state, no sounds, forced Reduce Motion.
     let isUITesting: Bool
@@ -35,6 +38,8 @@ final class AppModel {
     @ObservationIgnored private var hostSession: HostSession?
     @ObservationIgnored private var remoteSession: (any RemoteGameSession)?
     @ObservationIgnored private var retained: [AnyObject] = []
+    /// Stops the bots of a mock or practice game.
+    @ObservationIgnored private var stopBots: (@MainActor () -> Void)?
     @ObservationIgnored private var sessionWatch: Task<Void, Never>?
     /// Remote sessions saying goodbye to their host; kept alive until they end.
     @ObservationIgnored private var departing: [any RemoteGameSession] = []
@@ -60,6 +65,9 @@ final class AppModel {
 
     /// Options for a new hosted game, with this device's custom categories.
     func makeSetupModel() -> HostSetupModel { HostSetupModel(store: store, language: gameLanguage) }
+
+    /// Options for a practice game: the shared game options plus the bots.
+    func makePracticeSetupModel() -> PracticeSetupModel { PracticeSetupModel(store: store, language: gameLanguage) }
 
     /// Browses this app's transport for nearby games.
     func makeJoinModel() -> JoinModel { JoinModel(factory: factory) }
@@ -180,6 +188,19 @@ final class AppModel {
         }
     }
 
+    /// Starts a practice game: this phone hosts on an in-memory network (never the real one, so no Local
+    /// Network prompt), the bots join and the lobby opens; the player starts the first round from there.
+    /// Nothing about the game is persisted, so it isn't restored after the app is killed.
+    func startPractice(settings: GameSettings, botNames: [String], speed: BotSpeed) {
+        guard let profile, client == nil, !botNames.isEmpty else { return }
+        guard let game = sessions.launchPractice(profile, botNames, settings, gameLanguage, speed, store, clock) else {
+            return
+        }
+        // Before the route changes, so the game screen never renders as a hosted game.
+        isPractice = true
+        start(game)
+    }
+
     func join(_ game: DiscoveredGame) {
         guard client == nil else { return }
         startClient(target: .discovered(game), route: .game)
@@ -265,7 +286,13 @@ final class AppModel {
             route = .home
             return
         }
+        start(game)
+    }
+
+    /// Shows a game whose host and bots are already running.
+    private func start(_ game: MockGame) {
         retained = game.retained
+        stopBots = game.stopBots
         hostSession = game.host
         client = game.host.localClient
         route = .game
@@ -317,9 +344,12 @@ final class AppModel {
     private func endSession() {
         sessionWatch?.cancel()
         sessionWatch = nil
+        stopBots?()
+        stopBots = nil
         hostSession = nil
         remoteSession = nil
         retained = []
+        isPractice = false
         client = nil
         route = .home
     }

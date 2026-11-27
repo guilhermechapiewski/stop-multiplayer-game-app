@@ -136,11 +136,23 @@ struct PlayerInitial: View {
     let name: String
     var dimmed = false
     var size: CGFloat = 40
+    /// Practice bots ("Robo Ana") show their own name's initial, so they don't all read "R".
+    var isBot = false
 
     @ScaledMetric private var scale: CGFloat = 1
+    /// In practice, views that don't know who's a bot (scoring, results) still get the bots' own initials.
+    @Environment(\.isPracticeGame) private var isPractice
+
+    private var showsBotInitial: Bool { isBot || (isPractice && PracticeSetupModel.isBotName(name)) }
+
+    nonisolated static func initial(for name: String, isBot: Bool) -> String {
+        let words = name.split(separator: " ")
+        let source = isBot && words.count > 1 ? words[1] : Substring(name)
+        return source.first.map { String($0).uppercased() } ?? "?"
+    }
 
     var body: some View {
-        Text(verbatim: name.first.map { String($0).uppercased() } ?? "?")
+        Text(verbatim: Self.initial(for: name, isBot: showsBotInitial))
             .font(.system(size: size * scale * 0.45, weight: .heavy, design: .rounded))
             .foregroundStyle(.white)
             .frame(width: size * scale, height: size * scale)

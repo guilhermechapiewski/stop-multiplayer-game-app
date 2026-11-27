@@ -31,10 +31,11 @@ struct RootView: View {
             JoinView(model: model)
                 .transition(.opacity)
         case .practiceSetup:
-            // Replaced by PracticeSetupView (Task 17b).
-            ComingSoonView(title: "Practice with bots", systemImage: "cpu") { model.navigate(to: .home) }
+            PracticeSetupView(model: model)
+                .transition(.opacity)
         case .game:
             GameContainerView(model: model)
+                .environment(\.isPracticeGame, model.isPractice)
                 .transition(.opacity)
         }
     }
