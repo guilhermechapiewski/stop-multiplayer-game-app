@@ -1,7 +1,9 @@
 import Foundation
 import StopCore
 
-public let currentProtocolVersion = 1
+/// The wire protocol version. 2 = build 3 (read-aloud redaction in snapshots, previous/next category, re-roll);
+/// 1 = builds 1 and 2. Phones only play together on the same version.
+public let currentProtocolVersion = 2
 
 public enum RejectReason: String, Codable, Sendable { case versionMismatch, gameClosed, wrongGame }
 

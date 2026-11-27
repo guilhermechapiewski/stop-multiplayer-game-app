@@ -126,7 +126,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 
 ### 6.3 Wire protocol
 - TCP over Network.framework, length-prefixed frames (custom `NWProtocolFramer` or equivalent — builder's call), Codable JSON payloads.
-- Every message carries `protocolVersion`. Mismatch → friendly "Everyone needs the same app version" error.
+- Every message carries `protocolVersion`. Mismatch → friendly "Everyone needs the same version of the app" error (see §10 for the versions).
 - Bonjour service type `_stopgame._tcp`; TXT record carries host name, game ID, player count, protocol version, joinable flag.
 
 ### 6.4 Presence and reconnection
@@ -189,6 +189,7 @@ Keep logic out of the app target so it's testable with fast `swift test` runs.
 - The host can re-roll the letter during the reveal or countdown (2026-11-27).
 - Scoring is read aloud by default (answers revealed as each player scores), with a Silent mode toggle that shows every answer at once (2026-11-27).
   The `.nextCategory` intent replaced the tick auto-advance within protocolVersion 1 on 2026-11-27 (version not bumped): builds before build 2 still auto-advance, so every phone in a game needs build 2 or later.
+- Protocol versions: v1 = builds 1 and 2; v2 = build 3 (read-aloud redaction in snapshots, previous/next category, letter re-roll). Phones on different versions can't play together: an older phone is told to update, a newer one that this game uses an older version (2026-11-27).
 - The last hosted game's categories are preselected in setup (2026-11-27).
 - Leave game action; left/removed players keep their score in standings and can rejoin; away players don't lower the stop cap.
 - Disconnected-while-open players keep typing until reconnect; late answers fill only unscored categories.

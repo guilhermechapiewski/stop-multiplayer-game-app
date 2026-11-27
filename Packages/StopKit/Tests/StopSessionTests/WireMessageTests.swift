@@ -24,6 +24,12 @@ struct WireMessageTests {
         }
     }
 
+    /// Build 3 changed what snapshots mean (read-aloud redaction, previous category, re-roll), so it speaks
+    /// version 2; builds 1 and 2 speak version 1 and must not join a build 3 game.
+    @Test func build3SpeaksProtocolVersion2() {
+        #expect(currentProtocolVersion == 2)
+    }
+
     @Test func decodeRejectsGarbage() {
         #expect(throws: (any Error).self) { try WireMessage.decode(Data("nope".utf8)) }
         #expect(throws: (any Error).self) { try WireMessage.decode(Data("{\"protocolVersion\":1}".utf8)) }

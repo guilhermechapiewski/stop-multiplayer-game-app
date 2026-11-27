@@ -773,7 +773,7 @@ struct AppModelTests {
     private func discoverGame(hostName: String? = nil) async throws -> DiscoveredGame {
         if hostName == nil {
             let listener = network.makeListener()
-            let ad = Advertisement(gameID: UUID(), hostName: "Ana", playerCount: 1, protocolVersion: 1, joinable: true)
+            let ad = Advertisement(gameID: UUID(), hostName: "Ana", playerCount: 1, protocolVersion: currentProtocolVersion, joinable: true)
             _ = listener.start(advertising: ad)
         }
         let browser = network.makeBrowser()
