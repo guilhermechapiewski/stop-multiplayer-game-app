@@ -95,7 +95,7 @@ show changes: the PNGs are large, and every run adds them to the repository's hi
 `tools/design_gallery.sh <dest> en-light en-dark pt-BR-light en-light-ax` screenshots every screen
 (`DesignGalleryUITests`) on a temporary iPhone 17 in each variant (`-ax` is the largest accessibility text
 size) and saves 600 px JPEGs under `<dest>/<variant>/`, for design review; `swift tools/compare_sheet.swift
-<before-dir> <after-dir> <out.png>` lays two such sets side by side. The build 4 refresh is in `design/build4/`.
+<before-dir> <after-dir> <out.png>` lays two such sets side by side.
 
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).

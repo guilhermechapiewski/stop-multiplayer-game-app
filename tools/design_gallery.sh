@@ -4,7 +4,7 @@
 #
 # Usage: tools/design_gallery.sh <dest-dir> <variant>...
 #   variant: <lang>-<appearance>[-ax]   lang en | pt-BR, appearance light | dark, -ax = the largest
-#            accessibility text size.  e.g.  tools/design_gallery.sh design/build4/after en-light en-dark pt-BR-light en-light-ax
+#            accessibility text size.  e.g.  tools/design_gallery.sh build/gallery en-light en-dark pt-BR-light en-light-ax
 # Writes <dest-dir>/<variant>/NN-name.jpg (the full-size PNGs stay in build/gallery-raw/<variant>/, git-ignored).
 # The simulator is temporary (iPhone 17, iOS 27.0, created for the run and deleted afterwards).
 set -euo pipefail
