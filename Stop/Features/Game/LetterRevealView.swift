@@ -41,6 +41,9 @@ struct LetterRevealView: View {
                     }
                 }
                 .opacity(shown == nil ? 0 : 1)
+                // One element for the tile and its sunburst, so the label and identifier land only here.
+                .accessibilityElement(children: .ignore)
+                .accessibilityAddTraits(.isStaticText)
                 .accessibilityHidden(!landed)
                 .accessibilityLabel(Text("Letter \(round.letter)"))
                 .accessibilityIdentifier("revealedLetter")
@@ -120,13 +123,17 @@ struct LetterTile: View {
 
     @ScaledMetric private var scale: CGFloat = 1
 
-    private static let cream = [Color(rgb: 0xFFFFFF), Color(rgb: 0xFFF6E2), Color(rgb: 0xF6DDB4)]
+    /// Light enough throughout for the red letter's 4.5:1.
+    private static let cream = [Color(rgb: 0xFFFFFF), Color(rgb: 0xFFF7E8), Color(rgb: 0xFFF1DC)]
 
     var body: some View {
         let side = size * min(scale, 1.4)
         let shape = RoundedRectangle(cornerRadius: side * 0.24, style: .continuous)
+        // Small tiles (the writing header, the countdown) show a plain red letter: at that size the outline
+        // would sit right against the face and pull its contrast under 4.5:1.
+        let chunky = side >= 100
         ChunkyText(text: Text(verbatim: letter).font(.system(size: side * 0.6, weight: .black, design: .rounded)),
-                   outline: max(1.5, side * 0.025), depth: max(1.5, side * 0.035))
+                   outline: chunky ? max(1.5, side * 0.025) : 0, depth: chunky ? max(1.5, side * 0.035) : 0)
             .contentTransition(.identity)
             .offset(y: -side * 0.02)
             .frame(width: side, height: side)

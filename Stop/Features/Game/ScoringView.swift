@@ -226,7 +226,8 @@ struct ScoringView: View {
         .accessibilityHint(Text("Takes everyone back to the category before."))
         .accessibilityIdentifier("previousCategoryButton")
         if compact {
-            button.frame(width: compactPreviousWidth)
+            // Capped, so Next keeps its label at the largest text sizes.
+            button.frame(width: min(compactPreviousWidth, 88))
         } else {
             button
         }
@@ -428,6 +429,7 @@ private struct CompletedBurst: View {
     @ScaledMetric(relativeTo: .title3) private var side: CGFloat = 52
 
     var body: some View {
+        let side = min(self.side, 64)
         let burst = Starburst(points: 10, innerRatio: 0.76)
         Image(systemName: "checkmark")
             .font(.system(size: side * 0.36, weight: .black))

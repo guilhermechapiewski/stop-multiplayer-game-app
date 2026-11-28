@@ -87,13 +87,16 @@ private struct GameRow: View {
     let availability: JoinModel.Availability
     let onJoin: () -> Void
 
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
     /// Joinable, or in progress (to rejoin); not when it needs another app version.
     private var isTappable: Bool { availability == .joinable || availability == .inProgress }
 
     var body: some View {
         Button(action: onJoin) {
             HStack(spacing: Theme.Spacing.m) {
-                PlayerInitial(name: hostName)
+                // At accessibility sizes the (decorative) initial gives its room to the host's name.
+                if !dynamicTypeSize.isAccessibilitySize { PlayerInitial(name: hostName) }
                 VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text("\(hostName)’s game")
                         .font(Theme.Typography.headline)

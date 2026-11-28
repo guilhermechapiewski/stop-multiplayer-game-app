@@ -29,6 +29,13 @@ final class DesignGalleryUITests: XCTestCase {
         try? app.screenshot().pngRepresentation.write(to: directory.appendingPathComponent("\(name).png"))
     }
 
+    /// Swipes up until `element` can be tapped (at accessibility text sizes rows start off screen).
+    @MainActor
+    private func scrollTo(_ element: XCUIElement, in app: XCUIApplication) -> XCUIElement {
+        for _ in 0..<6 where !(element.exists && element.isHittable) { app.swipeUp() }
+        return waitFor(element, "hittable == true")
+    }
+
     // MARK: Menus
 
     @MainActor
@@ -45,14 +52,14 @@ final class DesignGalleryUITests: XCTestCase {
         app.buttons["settingsButton"].tap()
         waitFor(app.switches["soundsToggle"])
         capture(app, "03-settings")
-        app.buttons["tellAFriendLink"].tap()
+        scrollTo(app.buttons["tellAFriendLink"], in: app).tap()
         waitFor(app.descendants(matching: .any)["tellAFriendQRCode"])
         capture(app, "04-tell-a-friend")
         app.terminate()
 
         app = launch(["-playerName", "Sam"])
         waitFor(app.buttons["settingsButton"]).tap()
-        waitFor(app.buttons["aboutLink"]).tap()
+        scrollTo(app.buttons["aboutLink"], in: app).tap()
         waitFor(app.staticTexts["appVersion"])
         capture(app, "05-about")
         app.terminate()

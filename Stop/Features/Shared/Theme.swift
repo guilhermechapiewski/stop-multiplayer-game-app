@@ -113,10 +113,14 @@ enum Theme {
     /// UIKit chrome (navigation bar titles) in the app's type, set once at launch.
     @MainActor static func applyAppearance() {
         func rounded(_ style: UIFont.TextStyle, _ weight: UIFont.Weight) -> UIFont {
-            let size = UIFont.preferredFont(forTextStyle: style).pointSize
+            // The default size, like the system's own titles: a navigation bar title doesn't grow with Dynamic
+            // Type (it would crowd out the bar's buttons).
+            let size = UIFont.preferredFont(forTextStyle: style,
+                                            compatibleWith: UITraitCollection(preferredContentSizeCategory: .large))
+                .pointSize
             let base = UIFont.systemFont(ofSize: size, weight: weight)
             let font = base.fontDescriptor.withDesign(.rounded).map { UIFont(descriptor: $0, size: size) } ?? base
-            return UIFontMetrics(forTextStyle: style).scaledFont(for: font)
+            return font
         }
         let text = UIColor(rgb: 0x2B140D, dark: 0xFFF3E3)
         let bar = UINavigationBar.appearance()
@@ -293,15 +297,17 @@ extension ButtonStyle where Self == LinkButtonStyle {
 // MARK: Display type
 
 /// Big chunky letters like the icon's "STOP!": a red-orange face with a dark-brown outline and a dark
-/// extrusion below. `text` keeps its accessibility (it stays the element); the outline copies behind it are
-/// hidden from VoiceOver. Pass a `Text` that already has its font.
+/// extrusion below. `text` stays the only accessibility element (labels and identifiers applied outside land
+/// on it): the outline is drawn in a `Canvas`, which VoiceOver and UI tests never see. Pass a `Text` that
+/// already has its font.
 struct ChunkyText: View {
     let text: Text
     /// The outline's thickness, in points.
     var outline: CGFloat = 4
     /// How far the extrusion drops below the face.
     var depth: CGFloat = 6
-    var face: [Color] = [Color(rgb: 0xF0532A), Color(rgb: 0xD63A12), Color(rgb: 0xB52D0B)]
+    /// Top to bottom; every stop is at least 4.5:1 on the cream letter tile.
+    var face: [Color] = [Color(rgb: 0xC8360F), Color(rgb: 0xB8300C), Color(rgb: 0xA82A08)]
     var ink: Color = Theme.ink
     var minimumScaleFactor: CGFloat = 1
 
@@ -316,21 +322,32 @@ struct ChunkyText: View {
             .minimumScaleFactor(minimumScaleFactor)
             .foregroundStyle(LinearGradient(colors: face, startPoint: .top, endPoint: .bottom))
             .background {
-                ZStack {
-                    ForEach(0..<Self.directions.count, id: \.self) { index in
-                        let direction = Self.directions[index]
-                        copy.offset(x: direction.width * outline, y: direction.height * outline + depth)
-                        copy.offset(x: direction.width * outline, y: direction.height * outline)
-                    }
-                }
-                .accessibilityHidden(true)
+                if outline > 0 || depth > 0 { outlineLayer }
             }
     }
 
-    private var copy: some View {
-        text
-            .minimumScaleFactor(minimumScaleFactor)
-            .foregroundStyle(ink)
+    /// The outline and extrusion: copies of the text in ink, drawn around and below the face.
+    private var outlineLayer: some View {
+        // Grown on every side so the outline and extrusion aren't clipped; the centre stays the face's.
+        let margin = outline + depth
+        return Canvas { context, size in
+            let copy = context.resolve(text.foregroundStyle(ink))
+            let natural = copy.measure(in: CGSize(width: CGFloat.infinity, height: .infinity))
+            // Follows the face when `minimumScaleFactor` shrinks it.
+            let scale = min(1, (size.width - 2 * margin) / max(1, natural.width),
+                            (size.height - 2 * margin) / max(1, natural.height))
+            for direction in Self.directions {
+                for drop in [depth, 0] {
+                    var layer = context
+                    layer.translateBy(x: size.width / 2 + direction.width * outline,
+                                      y: size.height / 2 + direction.height * outline + drop)
+                    layer.scaleBy(x: scale, y: scale)
+                    layer.draw(copy, at: .zero, anchor: .center)
+                }
+            }
+        }
+        .padding(-margin)
+        .accessibilityHidden(true)
     }
 }
 
@@ -442,6 +459,8 @@ struct TileIconLabelStyle: LabelStyle {
     @ScaledMetric(relativeTo: .body) private var side: CGFloat = 30
 
     func makeBody(configuration: Configuration) -> some View {
+        // Grows with the text, but stops at 44 pt so the title keeps the room at accessibility sizes.
+        let side = min(self.side, 44)
         HStack(spacing: Theme.Spacing.m) {
             configuration.icon
                 .font(.system(size: side * 0.5, weight: .bold))
@@ -503,7 +522,8 @@ struct PlayerInitial: View {
     }
 
     var body: some View {
-        let side = size * scale
+        // Grows with the text, up to 1.6×, so names keep the room at the accessibility sizes.
+        let side = size * min(scale, 1.6)
         let colors = Theme.tileColors[Self.colorIndex(for: name, count: Theme.tileColors.count)]
         let shape = RoundedRectangle(cornerRadius: side * 0.3, style: .continuous)
         Text(verbatim: Self.initial(for: name, isBot: Self.showsBotInitial(name: name, isBot: isBot, isPractice: isPractice, isYou: isYou)))

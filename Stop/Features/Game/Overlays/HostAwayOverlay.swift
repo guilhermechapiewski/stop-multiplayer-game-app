@@ -56,6 +56,7 @@ struct HostAwayOverlay: View {
                         .foregroundStyle(Theme.text)
                     Text(copy.message).font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText)
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .accessibilityElement(children: .combine)
@@ -66,6 +67,8 @@ struct HostAwayOverlay: View {
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.top, Theme.Spacing.s)
         .padding(.bottom, Theme.Stroke.depth)
+        // Pinned over the answers, so it stops growing at the second accessibility size (like the header below).
+        .dynamicTypeSize(...DynamicTypeSize.accessibility2)
         .accessibilityIdentifier("hostAwayBanner")
     }
 
@@ -76,8 +79,10 @@ struct HostAwayOverlay: View {
             VStack(spacing: Theme.Spacing.m) {
                 icon(size: 44)
                 Text(copy.title)
-                    .font(Theme.Typography.title)
+                    .font(Theme.Typography.headline)
+                    .fontWeight(.heavy)
                     .foregroundStyle(Theme.text)
+                    .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 Text(copy.message)
@@ -99,7 +104,7 @@ struct HostAwayOverlay: View {
 
     @ViewBuilder private func icon(size: CGFloat) -> some View {
         if size > 30 {
-            StatusBadge(icon: copy.systemImage.map(StatusIcon.symbol) ?? .progress, size: 72)
+            StatusBadge(icon: copy.systemImage.map(StatusIcon.symbol) ?? .progress, size: 56)
         } else {
             Group {
                 if let symbol = copy.systemImage {

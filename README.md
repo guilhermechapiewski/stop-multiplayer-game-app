@@ -92,6 +92,11 @@ iPhone 17 Pro Max and iPhone 17 simulators in English and Portuguese, then `tool
 captions them into `appstore/screenshots/` and `docs/images/screens/`. Regenerate them only when the UI they
 show changes: the PNGs are large, and every run adds them to the repository's history again.
 
+`tools/design_gallery.sh <dest> en-light en-dark pt-BR-light en-light-ax` screenshots every screen
+(`DesignGalleryUITests`) on a temporary iPhone 17 in each variant (`-ax` is the largest accessibility text
+size) and saves 600 px JPEGs under `<dest>/<variant>/`, for design review; `swift tools/compare_sheet.swift
+<before-dir> <after-dir> <out.png>` lays two such sets side by side. The build 4 refresh is in `design/build4/`.
+
 Multi-iPhone behaviour (routers, locking, calls, force-quits) is checked by hand with
 [`docs/device-test-checklist.md`](docs/device-test-checklist.md).
 
@@ -114,6 +119,8 @@ They work in Debug builds only (development, UI tests, screenshots); a Release b
 | `-resetState` | Wipes the on-device store at launch. |
 | `-keepState` | Keeps the store under `-uiTesting` (for UI tests that relaunch the app; `-resetState` still wipes). |
 | `-playerName <name>` | Sets the display name and skips onboarding. |
+| `-demoPresence <kind>` | Shows one demo screen (screenshots, design previews): `hostAway`, `mayBeGone`, `writingAway`, `banner`, `collecting`, `ended`, `rejoining`, `rejoiningGone`. |
+| `-demoEndNotice <reason>` | Opens Home with the "game ended" alert: `removed`, `versionMismatch` or `gameClosed`. |
 | `-uiTesting` | Clean state, no sounds, and Reduce Motion forced on (views read a custom `\.reduceMotion` value) so XCUITest never waits on looping animations. |
 
 For example: `tools/run-sim.sh "iPhone 17" build/shot.png -mockGame -playerName Gui`.
