@@ -19,6 +19,11 @@ struct HostAwayOverlay: View {
     let onLeave: () -> Void
 
     @State private var confirmsLeaving = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    /// At the accessibility sizes the banner shows only its title, on one line (the message is its
+    /// accessibility value), so the answer being typed stays on screen above the keyboard.
+    nonisolated static func bannerIsCompact(at size: DynamicTypeSize) -> Bool { size.isAccessibilitySize }
 
     private var copy: HostAwayCopy {
         HostAwayCopy(hostName: hostName, mayBeGone: mayBeGone, networkDenied: networkDenied,
@@ -48,21 +53,30 @@ struct HostAwayOverlay: View {
     // MARK: Banner (writing)
 
     private var banner: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-            HStack(alignment: .top, spacing: Theme.Spacing.s) {
+        let isCompact = Self.bannerIsCompact(at: dynamicTypeSize)
+        return VStack(alignment: .leading, spacing: Theme.Spacing.s) {
+            HStack(alignment: isCompact ? .center : .top, spacing: Theme.Spacing.s) {
                 icon(size: 22)
-                VStack(alignment: .leading, spacing: 2) {
+                if isCompact {
                     Text(copy.title).font(.system(.headline, design: .rounded, weight: .heavy))
                         .foregroundStyle(Theme.text)
-                    Text(copy.message).font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText)
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityValue(Text(copy.message))
+                } else {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(copy.title).font(.system(.headline, design: .rounded, weight: .heavy))
+                            .foregroundStyle(Theme.text)
+                        Text(copy.message).font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .accessibilityElement(children: .combine)
             actions(compact: true)
         }
-        .padding(Theme.Spacing.m)
+        .padding(isCompact ? Theme.Spacing.s + 4 : Theme.Spacing.m)
         .pieceCard()
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.top, Theme.Spacing.s)
@@ -296,7 +310,7 @@ private struct OverlayButtonStyle: ViewModifier {
     }
 }
 
-/// A small game-piece button for the host-away banner.
+/// A small game-piece button for the host-away banner, as wide as its label.
 private struct CompactPieceButtonStyle: ButtonStyle {
     let prominent: Bool
 
@@ -308,7 +322,8 @@ private struct CompactPieceButtonStyle: ButtonStyle {
         PieceButtonBody(configuration: configuration, fill: prominent ? Theme.accentFill : Theme.surface,
                         foreground: prominent ? Theme.onAccent : Theme.accent,
                         edge: prominent ? Theme.accentEdge : Theme.edge, minHeight: minHeight, isEnabled: isEnabled,
-                        reduceMotion: reduceMotion, font: Theme.Typography.label, cornerRadius: 12)
+                        reduceMotion: reduceMotion, font: Theme.Typography.label, cornerRadius: 12,
+                        fillsWidth: false)
     }
 }
 

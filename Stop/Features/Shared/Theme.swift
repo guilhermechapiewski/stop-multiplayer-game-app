@@ -212,6 +212,8 @@ struct PieceButtonBody: View {
     let reduceMotion: Bool
     var font: Font = Theme.Typography.headline
     var cornerRadius: CGFloat = Theme.Radius.control
+    /// Stretches to the width offered (the full-width buttons); off, it is as wide as its label.
+    var fillsWidth = true
 
     private var depth: CGFloat { isEnabled ? Theme.Stroke.depth : 0 }
 
@@ -224,7 +226,7 @@ struct PieceButtonBody: View {
             .multilineTextAlignment(.center)
             .padding(.horizontal, Theme.Spacing.m)
             .padding(.vertical, Theme.Spacing.s)
-            .frame(maxWidth: .infinity, minHeight: minHeight)
+            .frame(maxWidth: fillsWidth ? .infinity : nil, minHeight: minHeight)
             .background {
                 shape.fill(isEnabled ? fill : Theme.disabledFill)
                 shape.strokeBorder(isEnabled ? Theme.outline : Theme.outline.opacity(0.35),

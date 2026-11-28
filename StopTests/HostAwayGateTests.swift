@@ -1,4 +1,5 @@
 import StopSession
+import SwiftUI
 import StopTestSupport
 import Testing
 @testable import Stop
@@ -41,5 +42,19 @@ struct HostAwayGateTests {
         #expect(gate.isShowing)
         gate.update(.connected)
         #expect(!gate.isShowing)
+    }
+}
+
+struct HostAwayBannerTests {
+    /// At the accessibility text sizes the banner shrinks to its one-line title, so the answer field being typed
+    /// into stays on screen above the keyboard.
+    @Test(arguments: [
+        (DynamicTypeSize.large, false),
+        (.xxxLarge, false),
+        (.accessibility1, true),
+        (.accessibility5, true),
+    ])
+    func compactAtAccessibilitySizes(size: DynamicTypeSize, expected: Bool) {
+        #expect(HostAwayOverlay.bannerIsCompact(at: size) == expected)
     }
 }
