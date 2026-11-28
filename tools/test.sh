@@ -32,11 +32,16 @@ app_tests() {
     echo "error: no available iPhone simulator" >&2
     exit 1
   fi
+  # A narrower -only-testing in the extra args replaces the default bundle (xcodebuild would run the union).
+  local scope=(-only-testing:"$only")
+  for arg in "$@"; do
+    [[ "$arg" == -only-testing:"$only"* ]] && scope=()
+  done
   echo "▸ $only on $sim"
   xcodebuild test -project Stop.xcodeproj -scheme Stop \
     -destination "platform=iOS Simulator,name=$sim" \
     -derivedDataPath "$DD" -parallel-testing-enabled NO \
-    -only-testing:"$only" "$@"
+    ${scope[@]+"${scope[@]}"} "$@"
 }
 
 run_unit() {
