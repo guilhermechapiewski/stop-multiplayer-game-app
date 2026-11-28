@@ -129,7 +129,7 @@ private struct WinnerBadge: View {
             .piece(Circle(), fill: Theme.surface, lineWidth: 3, depth: 6)
             .background {
                 if hasWinner {
-                    Sunburst(isAnimated: !reduceMotion, rays: 24, period: 30)
+                    Sunburst(isAnimated: !reduceMotion, rays: 24, period: 30, turnsFor: 10)
                         .frame(width: side * 2.6, height: side * 2.6)
                 }
             }
