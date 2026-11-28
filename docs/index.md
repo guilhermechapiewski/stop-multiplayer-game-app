@@ -16,11 +16,11 @@ No internet, no accounts, no ads. Free, with no in-app purchases and no tracking
 </p>
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
-  <img src="images/screens/en-US/01-lobby.jpg" alt="The lobby: the host's categories and the players who joined" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
+  <img src="images/screens/en-US/01-lobby.jpg" alt="The lobby: the players who joined and the host's rules" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="images/screens/en-US/02-letter.jpg" alt="The letter for the round is revealed" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="images/screens/en-US/03-writing.jpg" alt="Writing one answer per category" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="images/screens/en-US/04-stop.jpg" alt="STOP! Every phone locks at once" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
-  <img src="images/screens/en-US/05-scoring.jpg" alt="Scoring a category together, with everyone's answers" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
+  <img src="images/screens/en-US/05-scoring.jpg" alt="Scoring read aloud: each answer shows with its points once its player scores it" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="images/screens/en-US/06-results.jpg" alt="Round results and running totals" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="images/screens/en-US/07-game-over.jpg" alt="Final standings and the winner" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
 </p>

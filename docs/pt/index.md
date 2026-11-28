@@ -17,11 +17,11 @@ Sem internet, sem contas, sem anúncios. Grátis, sem compras no app e sem rastr
 </p>
 
 <p style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;">
-  <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: as categorias de quem criou o jogo e os jogadores que entraram" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
+  <img src="../images/screens/pt-BR/01-lobby.jpg" alt="A sala de espera: os jogadores que entraram e as regras de quem criou o jogo" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/02-letter.jpg" alt="A letra da rodada aparece" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/03-writing.jpg" alt="Escrevendo uma resposta por categoria" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/04-stop.jpg" alt="STOP! Todos os celulares travam ao mesmo tempo" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
-  <img src="../images/screens/pt-BR/05-scoring.jpg" alt="Pontuando uma categoria juntos, com as respostas de todos" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
+  <img src="../images/screens/pt-BR/05-scoring.jpg" alt="Pontuação em voz alta: cada resposta aparece com seus pontos quando o jogador dá a nota" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/06-results.jpg" alt="Resultado da rodada e o placar geral" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
   <img src="../images/screens/pt-BR/07-game-over.jpg" alt="A classificação final e o vencedor" loading="lazy" style="width: 160px; max-width: 46%; height: auto;">
 </p>

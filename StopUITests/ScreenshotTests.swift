@@ -59,7 +59,7 @@ final class ScreenshotTests: XCTestCase {
         waitFor(game.stopStamp)
         attachScreenshot(app, "04-stop")
 
-        // Read aloud (the default): the seeded bots score 3 s apart, so the shot has Ana's and Bia's answers
+        // Read aloud (the default): the seeded bots score 5 s apart, so the shot has Ana's and Bia's answers
         // revealed with their points, Caio's still hidden, and the player's own answer waiting for a score.
         waitFor(game.element("scoringCategory-0"), timeout: UITest.longTimeout)
         waitUntilGone(game.stopStamp)
@@ -74,7 +74,29 @@ final class ScreenshotTests: XCTestCase {
         game.scoreEveryCategory(count)
         game.waitForRoundResults(rows: 4)
         // Taken at the top. Scrolling the host's rules card into view was worse: both standings cards then
-        // run under the status bar, and the menu button covers the points.
+        // run under the status bar, and the menu button covers the points. When the bottom bar cuts into the
+        // total standings, scroll up to show that card whole, or else to end it at a row's edge rather than
+        // through a name, but no further than keeps the heading clear: the "Round 1 · Letter C" line below
+        // the menu button's top, and the title below the button itself when it is wide enough to reach it.
+        func text(_ english: String, _ portuguese: String) -> XCUIElement {
+            app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@",
+                                                 english, portuguese)).firstMatch
+        }
+        let line = text("Round 1", "Rodada 1").frame, title = text("Round results", "Resultado da rodada").frame
+        let menu = game.element("gameMenu").frame
+        let room = title.maxX > menu.minX - 8 ? title.minY - menu.maxY - 6 : line.minY - menu.minY
+        let total = game.element("totalStandings")
+        let barTop = app.buttons["nextRoundButton"].frame.minY - 16
+        let edges = [total.frame.maxY + 20] + total.descendants(matching: .any).matching(identifier: "standingRow")
+            .allElementsBoundByIndex.map { $0.frame.maxY + 1 }
+        let scroll = edges.map { $0 - barTop }.filter { $0 <= room }.max() ?? 0
+        if scroll > 4 {
+            let start = game.element("roundStandings").coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+            // The first few points of a drag only start the pan (touch slop) and don't scroll.
+            start.press(forDuration: 0.2, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -scroll - 10)),
+                        withVelocity: .slow, thenHoldForDuration: 0.5)
+            Thread.sleep(forTimeInterval: 2) // let the scroll indicator fade
+        }
         attachScreenshot(app, "06-results")
 
         game.endGameFromResults()

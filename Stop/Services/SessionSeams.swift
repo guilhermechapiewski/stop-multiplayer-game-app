@@ -123,9 +123,10 @@ struct SessionFactories {
         var behavior = BotPlayer.Behavior.practice(.normal)
         if seeded {
             behavior.stopAfter = .seconds(4)
-            // One after another (Ana, then Bia 3 s later, then Caio): the scoring screenshot catches Ana's and
-            // Bia's answers revealed and Caio's still hidden, in read-aloud mode.
-            behavior.scoreStagger = .seconds(3)
+            // One after another (Ana, then Bia 5 s later, then Caio): the scoring screenshot catches Ana's and
+            // Bia's answers revealed and Caio's still hidden, in read-aloud mode. (3 s was too tight a window
+            // for the shot on a slower simulator.)
+            behavior.scoreStagger = .seconds(5)
         }
         behavior.stopWhenOthersStopped = true
         return behavior

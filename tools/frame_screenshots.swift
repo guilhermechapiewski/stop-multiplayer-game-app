@@ -1,5 +1,6 @@
-// Frames raw simulator screenshots for the App Store and the website: each shot sits on an accent-color
-// gradient under a large caption, at the exact App Store size of its device.
+// Frames raw simulator screenshots for the App Store and the website, in the app's look: each shot sits on
+// warm cream paper under a chunky red-orange caption, as an outlined "game piece" standing on a hard
+// dark-brown edge, with a few yellow and teal confetti bits, at the exact App Store size of its device.
 //
 //   swift tools/frame_screenshots.swift <raw dir> <App Store dir> <website dir>
 //
@@ -24,28 +25,40 @@ let websiteWidth = 600
 /// Captions per locale, by shot.
 let captions: [String: [String: String]] = [
     "en-US": [
-        "01-lobby": "Pick your categories",
+        "01-lobby": "Friends nearby, no internet",
         "02-letter": "A new letter every round",
         "03-writing": "Everyone writes at once",
         "04-stop": "STOP! Pens down.",
-        "05-scoring": "Score together, your way",
+        "05-scoring": "Read aloud, score together",
         "06-results": "See who's winning",
-        "07-game-over": "No internet needed",
+        "07-game-over": "Crown the winner",
     ],
     "pt-BR": [
-        "01-lobby": "Escolha as categorias",
+        "01-lobby": "Amigos por perto, sem internet",
         "02-letter": "Uma letra nova a cada rodada",
         "03-writing": "Todo mundo escreve junto",
         "04-stop": "STOP! Lápis na mesa.",
-        "05-scoring": "Pontuem juntos, do seu jeito",
+        "05-scoring": "Leiam em voz alta e pontuem",
         "06-results": "Veja quem está ganhando",
-        "07-game-over": "Sem internet",
+        "07-game-over": "Coroe o vencedor",
     ],
 ]
 
-/// The app's accent (`AccentColor`, #C8360F) and a lighter tint of it for the top of the gradient.
-let gradientTop = CGColor(srgbRed: 0xF0 / 255, green: 0x5A / 255, blue: 0x2E / 255, alpha: 1)
-let gradientBottom = CGColor(srgbRed: 0xB0 / 255, green: 0x2B / 255, blue: 0x0A / 255, alpha: 1)
+/// The app's palette (`Stop/Features/Shared/Theme.swift`, light appearance).
+func rgb(_ value: UInt32) -> CGColor {
+    CGColor(srgbRed: CGFloat((value >> 16) & 0xFF) / 255, green: CGFloat((value >> 8) & 0xFF) / 255,
+            blue: CGFloat(value & 0xFF) / 255, alpha: 1)
+}
+/// The cream page, a shade warmer at the bottom (a vertical gradient keeps every row one color: small PNGs).
+let paperTop = rgb(0xFFF4E2)
+let paperBottom = rgb(0xFFE3B8)
+/// Caption fill (`Theme.accent`) and the dark-brown ink of outlines, hard edges and the caption's drop.
+let accent = rgb(0xC8360F)
+let ink = rgb(0x3A1A12)
+/// Confetti colors (the icon's yellow and teal, and the tiles' orange).
+let yellow = rgb(0xFFC93C)
+let teal = rgb(0x3CC2B3)
+let orange = rgb(0xFF9A52)
 
 func fail(_ message: String) -> Never {
     FileHandle.standardError.write(Data("error: \(message)\n".utf8))
@@ -80,9 +93,9 @@ func makeContext(_ size: CGSize, opaque: Bool = true) -> CGContext {
     return context
 }
 
-/// The caption's font: SF Pro Rounded Heavy, like the app's titles.
+/// The caption's font: SF Pro Rounded Black, like the app's display titles.
 func roundedFont(size: CGFloat) -> CTFont {
-    let base = NSFont.systemFont(ofSize: size, weight: .heavy)
+    let base = NSFont.systemFont(ofSize: size, weight: .black)
     let descriptor = base.fontDescriptor.withDesign(.rounded) ?? base.fontDescriptor
     return CTFontCreateWithFontDescriptor(descriptor as CTFontDescriptor, size, nil)
 }
@@ -94,7 +107,7 @@ func lineWidth(_ text: String, font: CTFont) -> CGFloat {
 
 /// One line if it fits, else two lines broken where they come out most even ("STOP! Pens / down." never
 /// leaves a lone word); the font shrinks until that fits. Returns the frame setter and the height it needs.
-func layoutCaption(_ text: String, width: CGFloat, fontSize: CGFloat) -> (CTFramesetter, CGFloat) {
+func layoutCaption(_ text: String, width: CGFloat, fontSize: CGFloat, color: NSColor) -> (CTFramesetter, CGFloat) {
     let words = text.split(separator: " ").map(String.init)
     var size = fontSize
     while true {
@@ -112,7 +125,7 @@ func layoutCaption(_ text: String, width: CGFloat, fontSize: CGFloat) -> (CTFram
             paragraph.alignment = .center
             paragraph.lineHeightMultiple = 0.95
             let attributed = NSAttributedString(string: lines.joined(separator: "\n"), attributes: [
-                .font: font, .foregroundColor: NSColor.white, .paragraphStyle: paragraph,
+                .font: font, .foregroundColor: color, .paragraphStyle: paragraph,
             ])
             let setter = CTFramesetterCreateWithAttributedString(attributed)
             let fit = CTFramesetterSuggestFrameSizeWithConstraints(
@@ -124,44 +137,77 @@ func layoutCaption(_ text: String, width: CGFloat, fontSize: CGFloat) -> (CTFram
     }
 }
 
+/// A confetti bit: a circle or a rounded square in `color`, outlined in ink.
+func confetti(_ context: CGContext, center: CGPoint, size: CGFloat, color: CGColor, square: Bool, angle: CGFloat) {
+    context.saveGState()
+    context.translateBy(x: center.x, y: center.y)
+    context.rotate(by: angle)
+    let rect = CGRect(x: -size / 2, y: -size / 2, width: size, height: size)
+    let path = square ? CGPath(roundedRect: rect, cornerWidth: size * 0.25, cornerHeight: size * 0.25, transform: nil)
+                      : CGPath(ellipseIn: rect, transform: nil)
+    context.setFillColor(color)
+    context.setStrokeColor(ink)
+    context.setLineWidth(size * 0.16)
+    context.addPath(path)
+    context.drawPath(using: .fillStroke)
+    context.restoreGState()
+}
+
 func frame(shot: CGImage, caption: String, size: CGSize) -> CGImage {
     let context = makeContext(size)
     let width = size.width, height = size.height
 
-    // Background gradient (CoreGraphics' origin is bottom-left).
-    let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [gradientTop, gradientBottom] as CFArray,
+    // Cream paper (CoreGraphics' origin is bottom-left).
+    let gradient = CGGradient(colorsSpace: CGColorSpace(name: CGColorSpace.sRGB), colors: [paperTop, paperBottom] as CFArray,
                               locations: [0, 1])!
-    // Vertical, so every row is one color: smaller PNGs than a diagonal.
     context.drawLinearGradient(gradient, start: CGPoint(x: 0, y: height), end: CGPoint(x: 0, y: 0), options: [])
 
-    // Caption band: the top 19% of the canvas.
+    // Confetti in the caption band's corners, clear of the text.
+    let bit = width * 0.034
+    confetti(context, center: CGPoint(x: width * 0.07, y: height * 0.965), size: bit, color: yellow, square: false, angle: 0)
+    confetti(context, center: CGPoint(x: width * 0.15, y: height * 0.985), size: bit * 0.7, color: teal, square: true, angle: 0.5)
+    confetti(context, center: CGPoint(x: width * 0.93, y: height * 0.975), size: bit * 0.85, color: teal, square: false, angle: 0)
+    confetti(context, center: CGPoint(x: width * 0.86, y: height * 0.955), size: bit * 0.6, color: orange, square: true, angle: -0.4)
+    confetti(context, center: CGPoint(x: width * 0.045, y: height * 0.83), size: bit * 0.65, color: orange, square: true, angle: 0.3)
+    confetti(context, center: CGPoint(x: width * 0.955, y: height * 0.835), size: bit * 0.75, color: yellow, square: true, angle: 0.8)
+
+    // Caption band: the top 19% of the canvas. The caption stands on a hard ink drop, like the app's pieces.
     let margin = width * 0.08
     let bandTop = height * 0.045
     let bandHeight = height * 0.15
-    let (setter, textHeight) = layoutCaption(caption, width: width - 2 * margin, fontSize: width * 0.088)
+    let fontSize = width * 0.088
+    let drop = width * 0.008
+    let (setter, textHeight) = layoutCaption(caption, width: width - 2 * margin, fontSize: fontSize,
+                                             color: NSColor(cgColor: accent)!)
+    let (shadowSetter, _) = layoutCaption(caption, width: width - 2 * margin, fontSize: fontSize,
+                                          color: NSColor(cgColor: ink)!)
     let textRect = CGRect(x: margin, y: height - bandTop - (bandHeight + textHeight) / 2,
                           width: width - 2 * margin, height: textHeight)
-    let textFrame = CTFramesetterCreateFrame(setter, CFRange(), CGPath(rect: textRect, transform: nil), nil)
-    CTFrameDraw(textFrame, context)
+    CTFrameDraw(CTFramesetterCreateFrame(shadowSetter, CFRange(), CGPath(rect: textRect.offsetBy(dx: 0, dy: -drop),
+                                                                          transform: nil), nil), context)
+    CTFrameDraw(CTFramesetterCreateFrame(setter, CFRange(), CGPath(rect: textRect, transform: nil), nil), context)
 
-    // The screenshot below, scaled to the remaining height, with the device's rounded corners and a shadow.
+    // The screenshot below, scaled to the remaining height, with the device's rounded corners: a dark-brown
+    // bezel standing on a hard edge (no blur, so the PNG stays small).
     let shotTop = bandTop + bandHeight + height * 0.01
-    let available = height - shotTop - height * 0.04
+    let depth = width * 0.014
+    let bottom = height * 0.04
+    let available = height - shotTop - bottom
     let scale = available / CGFloat(shot.height)
     let shotSize = CGSize(width: CGFloat(shot.width) * scale, height: CGFloat(shot.height) * scale)
-    let shotRect = CGRect(x: (width - shotSize.width) / 2, y: height * 0.04, width: shotSize.width, height: shotSize.height)
+    let shotRect = CGRect(x: (width - shotSize.width) / 2, y: bottom, width: shotSize.width, height: shotSize.height)
     let corner = shotSize.width * 0.12
     let bezel = shotSize.width * 0.022
     let bezelRect = shotRect.insetBy(dx: -bezel, dy: -bezel)
-    let bezelPath = CGPath(roundedRect: bezelRect, cornerWidth: corner + bezel, cornerHeight: corner + bezel, transform: nil)
+    func bezelPath(_ rect: CGRect) -> CGPath {
+        CGPath(roundedRect: rect, cornerWidth: corner + bezel, cornerHeight: corner + bezel, transform: nil)
+    }
 
-    context.saveGState()
-    context.setShadow(offset: CGSize(width: 0, height: -height * 0.006), blur: height * 0.02,
-                      color: CGColor(gray: 0, alpha: 0.35))
-    context.setFillColor(CGColor(srgbRed: 0.08, green: 0.08, blue: 0.09, alpha: 1))
-    context.addPath(bezelPath)
+    context.setFillColor(ink)
+    context.addPath(bezelPath(bezelRect.offsetBy(dx: 0, dy: -depth)))
     context.fillPath()
-    context.restoreGState()
+    context.addPath(bezelPath(bezelRect))
+    context.fillPath()
 
     context.saveGState()
     context.addPath(CGPath(roundedRect: shotRect, cornerWidth: corner, cornerHeight: corner, transform: nil))
