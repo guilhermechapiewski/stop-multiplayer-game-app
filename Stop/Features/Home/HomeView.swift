@@ -8,7 +8,7 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: Theme.Spacing.xxl) {
+            VStack(spacing: Theme.Spacing.xl) {
                 header
                 actions
             }
@@ -29,15 +29,16 @@ struct HomeView: View {
     }
 
     private var header: some View {
-        VStack(spacing: Theme.Spacing.m) {
-            StopSign(size: 132)
+        VStack(spacing: Theme.Spacing.s) {
+            LogoBurst(size: 168)
             Text(verbatim: AppInfo.name)
                 .font(Theme.Typography.display)
+                .foregroundStyle(Theme.text)
                 .accessibilityAddTraits(.isHeader)
             if let name = model.profile?.name {
                 Text("Hi, \(name)! Ready to play?")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .multilineTextAlignment(.center)
             }
         }
@@ -69,6 +70,30 @@ struct HomeView: View {
             .accessibilityIdentifier("practiceButton")
             #endif
         }
+    }
+}
+
+/// The logo on a sunburst disc, like the app icon. Decorative; the sunburst turns slowly unless Reduce Motion
+/// is on.
+struct LogoBurst: View {
+    var size: CGFloat = 168
+
+    @Environment(\.reduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .largeTitle) private var scale: CGFloat = 1
+
+    var body: some View {
+        let side = size * min(scale, 1.3)
+        ZStack {
+            Sunburst(isAnimated: !reduceMotion, rays: 20, period: 60, fades: false)
+                .clipShape(.circle)
+                .overlay { Circle().strokeBorder(Theme.outline, lineWidth: 2.5) }
+                .background { Circle().fill(Theme.edge).offset(y: 5) }
+                .frame(width: side * 0.9, height: side * 0.9)
+            StopSign(size: side)
+                .offset(y: -side * 0.02)
+        }
+        .frame(width: side, height: side)
+        .accessibilityHidden(true)
     }
 }
 

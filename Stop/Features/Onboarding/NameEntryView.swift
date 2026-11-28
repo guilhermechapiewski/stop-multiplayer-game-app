@@ -13,20 +13,20 @@ struct NameEntryView: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
             VStack(spacing: Theme.Spacing.m) {
-                StopSign(size: 112)
+                LogoBurst(size: 140)
                 Text("Welcome to \(AppInfo.name)")
                     .font(Theme.Typography.display)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 Text("The classic word game, played with friends nearby.")
                     .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .multilineTextAlignment(.center)
             }
 
             VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-                Text("What’s your name?")
-                    .font(Theme.Typography.headline)
+                BubbleLabel("What’s your name?")
                     .accessibilityHidden(true)
                 TextField("Your name", text: $name)
                     .font(Theme.Typography.headline)
@@ -39,13 +39,13 @@ struct NameEntryView: View {
                     .onChange(of: name) { name = PlayerName.limited($1) }
                     .padding(.horizontal, Theme.Spacing.m)
                     .frame(minHeight: 56)
-                    .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.control))
+                    .pieceField(isFocused: isFocused)
                     .accessibilityLabel("Your name")
                     .accessibilityHint("Friends see this name when you play together.")
                     .accessibilityIdentifier("nameField")
                 Text("Friends see this name when you play together.")
                     .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .accessibilityHidden(true)
             }
 

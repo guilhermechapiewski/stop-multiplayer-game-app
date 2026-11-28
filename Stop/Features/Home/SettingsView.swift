@@ -13,9 +13,11 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Group {
                 Section {
                     TextField("Your name", text: $name)
                         .font(Theme.Typography.headline)
+                        .foregroundStyle(Theme.text)
                         .textContentType(.givenName)
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled()
@@ -27,18 +29,21 @@ struct SettingsView: View {
                         .accessibilityLabel("Your name")
                         .accessibilityIdentifier("settingsNameField")
                 } header: {
-                    Text("Your name")
+                    ListSectionHeader("Your name")
                 } footer: {
                     Text("Friends see this name when you play together.")
+                        .foregroundStyle(Theme.secondaryText)
                 }
 
                 Section {
                     Toggle(isOn: soundsBinding) {
                         Label("Sounds", systemImage: "speaker.wave.2.fill")
+                            .labelStyle(.tile(Theme.yellow, symbol: Theme.ink))
                     }
                     .accessibilityIdentifier("soundsToggle")
                 } footer: {
                     Text("Sound effects never play while your phone is on silent.")
+                        .foregroundStyle(Theme.secondaryText)
                 }
 
                 Section {
@@ -51,16 +56,21 @@ struct SettingsView: View {
                         } icon: {
                             Image(systemName: "qrcode")
                         }
+                        .labelStyle(.tile(Theme.tealFill, symbol: Theme.ink))
                     }
                     .accessibilityIdentifier("tellAFriendLink")
                     NavigationLink {
                         AboutView()
                     } label: {
-                        Label("About", systemImage: "info.circle.fill")
+                        Label("About", systemImage: "info")
+                            .labelStyle(.tile(Theme.accentFill))
                     }
                     .accessibilityIdentifier("aboutLink")
                 }
+                }
+                .listRowBackground(Theme.surface)
             }
+            .themedList()
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

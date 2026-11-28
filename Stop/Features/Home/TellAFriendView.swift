@@ -26,19 +26,20 @@ struct TellAFriendView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: Theme.Spacing.l) {
-                StopSign(size: 64)
-                    .padding(.top, Theme.Spacing.m)
+                StopSign(size: 96)
+                    .padding(.top, Theme.Spacing.s)
 
                 VStack(spacing: Theme.Spacing.s) {
                     Text("Scan to get Stop",
                          comment: "Tell a friend screen title, above a QR code that opens the app's App Store page.")
                         .font(Theme.Typography.title)
+                        .foregroundStyle(Theme.text)
                         .multilineTextAlignment(.center)
                         .accessibilityAddTraits(.isHeader)
                     Text("Friends can point their iPhone camera at this code to open \(AppInfo.name) on the App Store.",
                          comment: "Tell a friend screen subtitle. The argument is the app's name.")
                         .font(Theme.Typography.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .multilineTextAlignment(.center)
                 }
 
@@ -49,9 +50,10 @@ struct TellAFriendView: View {
                         .resizable()
                         .scaledToFit()
                         .padding(Theme.Spacing.l)
-                        .background(.white, in: .rect(cornerRadius: Theme.Radius.card))
+                        .piece(RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous), fill: .white,
+                               lineWidth: 2.5, depth: 6)
                         .frame(maxWidth: 320)
-                        .shadow(color: .black.opacity(0.12), radius: 12, y: 4)
+                        .padding(.bottom, 6)
                         .accessibilityElement()
                         .accessibilityLabel(Text("QR code for the App Store page",
                                                  comment: "VoiceOver label of the Tell a friend QR code."))
@@ -65,11 +67,8 @@ struct TellAFriendView: View {
                     } icon: {
                         Image(systemName: "square.and.arrow.up")
                     }
-                    .font(Theme.Typography.headline)
-                    .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
+                .buttonStyle(.primary)
                 .frame(maxWidth: 320)
                 .accessibilityIdentifier("tellAFriendShareLink")
             }
@@ -77,6 +76,7 @@ struct TellAFriendView: View {
             .padding(.bottom, Theme.Spacing.l)
             .frame(maxWidth: .infinity)
         }
+        .background(Theme.background)
         .navigationTitle(Text("Tell a friend", comment: "Settings row and screen title: shows a QR code and a share link so friends can get the app."))
         .navigationBarTitleDisplayMode(.inline)
     }

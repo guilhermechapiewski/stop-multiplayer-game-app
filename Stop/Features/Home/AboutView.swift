@@ -24,20 +24,21 @@ struct AboutView: View {
         List {
             Section {
                 VStack(spacing: Theme.Spacing.m) {
-                    StopSign(size: 96)
+                    LogoBurst(size: 128)
                     VStack(spacing: Theme.Spacing.xs) {
                         Text(verbatim: AppInfo.name)
-                            .font(Theme.Typography.title)
+                            .font(Theme.Typography.display)
+                            .foregroundStyle(Theme.text)
                             .accessibilityAddTraits(.isHeader)
                         Text("Version \(AppVersion.display)")
                             .font(Theme.Typography.caption)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(Theme.secondaryText)
                             .accessibilityIdentifier("appVersion")
                     }
                     Text("Free and open source. No ads, no accounts, no tracking.")
                         .font(Theme.Typography.body)
                         .multilineTextAlignment(.center)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, Theme.Spacing.l)
@@ -47,20 +48,25 @@ struct AboutView: View {
             Section {
                 Link(destination: AboutLinks.privacyPolicy) {
                     Label("Privacy policy", systemImage: "lock.shield.fill")
+                        .labelStyle(.tile(Theme.tealFill, symbol: Theme.ink))
                 }
                 .accessibilityIdentifier("privacyPolicyLink")
                 Link(destination: AboutLinks.sourceCode) {
                     Label("Source code", systemImage: "chevron.left.forwardslash.chevron.right")
+                        .labelStyle(.tile(Theme.yellow, symbol: Theme.ink))
                 }
                 .accessibilityHint("Opens the project on GitHub.")
                 .accessibilityIdentifier("sourceCodeLink")
                 Link(destination: AboutLinks.reportProblem) {
                     Label("Report a problem", systemImage: "ladybug.fill")
+                        .labelStyle(.tile(Theme.accentFill))
                 }
                 .accessibilityHint("Opens a new issue on GitHub.")
                 .accessibilityIdentifier("reportProblemLink")
             }
+            .listRowBackground(Theme.surface)
         }
+        .themedList()
         .navigationTitle("About")
         .navigationBarTitleDisplayMode(.inline)
     }
