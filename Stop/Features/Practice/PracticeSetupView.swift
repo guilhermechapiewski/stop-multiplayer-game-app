@@ -25,6 +25,7 @@ struct PracticeSetupView: View {
                 speedSection
                 GameOptionsSections(setup: practice.setup, maxStops: practice.maxStops)
             }
+            .themedList()
             .animation(reduceMotion ? nil : .smooth(duration: 0.25), value: practice.botCount)
             .navigationTitle("Practice")
             .navigationBarTitleDisplayMode(.inline)
@@ -58,7 +59,7 @@ struct PracticeSetupView: View {
                     Text(practice.botCount, format: .number)
                         .font(Theme.Typography.headline)
                         .monospacedDigit()
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Theme.text)
                 }
             }
             .accessibilityIdentifier("botsStepper")
@@ -73,14 +74,18 @@ struct PracticeSetupView: View {
             .accessibilityLabel(Text("Playing against"))
             .accessibilityValue(Text(verbatim: practice.botNames.formatted(.list(type: .and))))
         } header: {
-            Text("Opponents")
+            ListSectionHeader("Opponents")
         } footer: {
-            if practice.hasCustomCategories {
-                Text("Bots don’t know your own categories — they guess there and score 0.")
-            } else {
-                Text("A solo game on this phone. No network needed.")
+            Group {
+                if practice.hasCustomCategories {
+                    Text("Bots don’t know your own categories — they guess there and score 0.")
+                } else {
+                    Text("A solo game on this phone. No network needed.")
+                }
             }
+            .foregroundStyle(Theme.secondaryText)
         }
+        .listRowBackground(Theme.surface)
     }
 
     private var speedSection: some View {
@@ -97,9 +102,10 @@ struct PracticeSetupView: View {
             .accessibilityLabel(Text("Bot speed"))
             .accessibilityIdentifier("botSpeedPicker")
         } header: {
-            Text("Bot speed")
+            ListSectionHeader("Bot speed")
         } footer: {
             Text(practice.speed.summary)
+                .foregroundStyle(Theme.secondaryText)
                 .contentTransition(.opacity)
                 .animation(reduceMotion ? nil : .smooth(duration: 0.2), value: practice.speed)
         }

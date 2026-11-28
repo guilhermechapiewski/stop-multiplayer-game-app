@@ -18,6 +18,7 @@ struct HostSetupView: View {
             List {
                 GameOptionsSections(setup: setup, maxStops: Self.maxStops)
             }
+            .themedList()
             .navigationTitle("New game")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -65,6 +66,7 @@ struct GameOptionsSections: View {
             addSection
             rulesSection
         }
+        .listRowBackground(Theme.surface)
         .animation(reduceMotion ? nil : .smooth(duration: 0.25), value: setup.selected)
     }
 
@@ -79,25 +81,27 @@ struct GameOptionsSections: View {
             }
             .onMove(perform: setup.move)
         } header: {
-            Text("Categories (\(setup.selected.count))")
+            ListSectionHeader("Categories (\(setup.selected.count))")
         } footer: {
             if setup.selected.isEmpty {
                 Label("Pick at least one category.", systemImage: "exclamationmark.circle.fill")
                     .foregroundStyle(Theme.accent)
             } else {
                 Text("Played in this order. Touch and hold a category to move it; tap to remove it.")
+                    .foregroundStyle(Theme.secondaryText)
                     .accessibilityIdentifier("categoriesFooter")
             }
         }
     }
 
     private var moreSection: some View {
-        Section("More categories") {
+        Section {
             ForEach(unselected, id: \.self) { category in
                 Button { setup.toggle(category) } label: {
                     HStack {
                         Text(category)
-                            .foregroundStyle(Color.primary)
+                            .font(Theme.Typography.body)
+                            .foregroundStyle(Theme.text)
                         Spacer()
                         Image(systemName: "plus.circle.fill")
                             .font(.title3)
@@ -115,6 +119,8 @@ struct GameOptionsSections: View {
                     }
                 }
             }
+        } header: {
+            ListSectionHeader("More categories")
         }
     }
 
@@ -132,12 +138,13 @@ struct GameOptionsSections: View {
                     }
                     .accessibilityIdentifier("customCategoryField")
                 Button("Add", action: addCategory)
-                    .bold()
+                    .font(Theme.Typography.headline)
                     .disabled(newCategory.trimmingCharacters(in: .whitespaces).isEmpty)
                     .accessibilityIdentifier("addCategoryButton")
             }
         } footer: {
             Text("Your categories are remembered on this phone for future games. Swipe left on one to forget it.")
+                .foregroundStyle(Theme.secondaryText)
         }
     }
 
@@ -148,7 +155,7 @@ struct GameOptionsSections: View {
                     Text(setup.stopsRequired, format: .number)
                         .font(Theme.Typography.headline)
                         .monospacedDigit()
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Theme.text)
                 }
             }
             .accessibilityIdentifier("stopsStepper")
@@ -156,12 +163,13 @@ struct GameOptionsSections: View {
                 .accessibilityIdentifier("allowGiveUpToggle")
             SilentModeToggle(isOn: $setup.silentScoring)
         } header: {
-            Text("Rules")
+            ListSectionHeader("Rules")
         } footer: {
             VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                 Text(RulesText.footer(stopsRequired: setup.stopsRequired, allowGiveUp: setup.allowGiveUp))
                 Text(RulesText.scoring(silent: setup.silentScoring))
             }
+            .foregroundStyle(Theme.secondaryText)
         }
     }
 
@@ -194,13 +202,14 @@ private struct SelectedCategoryRow: View {
         Button(action: onRemove) {
             HStack(spacing: Theme.Spacing.m) {
                 Text(number, format: .number)
-                    .font(Theme.Typography.caption.monospacedDigit())
-                    .foregroundStyle(Theme.accent)
+                    .font(Theme.Typography.label.monospacedDigit())
+                    .foregroundStyle(Theme.onAccent)
                     .frame(minWidth: badge, minHeight: badge)
-                    .background(Theme.accent.opacity(0.14), in: .circle)
+                    .piece(RoundedRectangle(cornerRadius: badge * 0.3, style: .continuous), fill: Theme.accentFill,
+                           outline: Theme.ink, lineWidth: 1.5, depth: 2)
                 Text(name)
                     .font(Theme.Typography.body.weight(.semibold))
-                    .foregroundStyle(Color.primary)
+                    .foregroundStyle(Theme.text)
                 Spacer()
                 Image(systemName: "checkmark.circle.fill")
                     .font(.title3)

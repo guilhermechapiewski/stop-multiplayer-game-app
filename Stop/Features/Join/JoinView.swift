@@ -64,15 +64,18 @@ struct JoinContent: View {
                 }
             } header: {
                 HStack(spacing: Theme.Spacing.s) {
-                    Text("Games nearby")
+                    ListSectionHeader("Games nearby")
                     ProgressView()
                         .controlSize(.mini)
                         .accessibilityHidden(true)
                 }
             } footer: {
                 Text("Don’t see your friend’s game? Make sure you’re both on the same Wi-Fi network.")
+                    .foregroundStyle(Theme.secondaryText)
             }
+            .listRowBackground(Theme.surface)
         }
+        .themedList()
     }
 }
 
@@ -94,16 +97,16 @@ private struct GameRow: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text("\(hostName)’s game")
                         .font(Theme.Typography.headline)
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Theme.text)
                     detail
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(Color.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 }
                 Spacer(minLength: Theme.Spacing.s)
                 if isTappable {
                     Image(systemName: "chevron.right")
                         .font(.body.weight(.semibold))
-                        .foregroundStyle(Color(.tertiaryLabel))
+                        .foregroundStyle(Theme.secondaryText)
                         .accessibilityHidden(true)
                 }
             }
