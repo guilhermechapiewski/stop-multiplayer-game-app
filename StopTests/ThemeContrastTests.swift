@@ -33,4 +33,16 @@ struct ThemeContrastTests {
         let ratio = Self.contrast(Theme.outline, Theme.background, traits: traits)
         #expect(ratio >= 3, "outline on the page is \(ratio):1")
     }
+
+    /// The small letter tiles' plain letter (no outline) keeps a margin over 4.5:1 on every cream stop, so the
+    /// glyph's edges still pass the accessibility audit (it flagged the chunky face's gradient, from 4.7:1).
+    @Test func smallTileLetterIsLegible() {
+        let traits = UITraitCollection(userInterfaceStyle: .light)
+        for face in LetterTile.plainFace {
+            for cream in LetterTile.cream {
+                let ratio = Self.contrast(face, cream, traits: traits)
+                #expect(ratio >= 6, "small tile letter on the cream is \(ratio):1")
+            }
+        }
+    }
 }

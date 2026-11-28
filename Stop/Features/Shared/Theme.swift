@@ -313,9 +313,15 @@ struct ChunkyText: View {
     /// How far the extrusion drops below the face.
     var depth: CGFloat = 6
     /// Top to bottom; every stop is at least 4.5:1 on the cream letter tile.
-    var face: [Color] = [Color(rgb: 0xC8360F), Color(rgb: 0xB8300C), Color(rgb: 0xA82A08)]
+    var face: [Color] = Self.defaultFace
+    static let defaultFace = [Color(rgb: 0xC8360F), Color(rgb: 0xB8300C), Color(rgb: 0xA82A08)]
     var ink: Color = Theme.ink
     var minimumScaleFactor: CGFloat = 1
+
+    /// One color is a solid face, more a top-to-bottom gradient.
+    private var faceStyle: AnyShapeStyle {
+        face.count == 1 ? AnyShapeStyle(face[0]) : AnyShapeStyle(LinearGradient(colors: face, startPoint: .top, endPoint: .bottom))
+    }
 
     /// Eight directions around the face, for the outline.
     private static let directions: [CGSize] = (0..<8).map { index in
@@ -326,7 +332,7 @@ struct ChunkyText: View {
     var body: some View {
         text
             .minimumScaleFactor(minimumScaleFactor)
-            .foregroundStyle(LinearGradient(colors: face, startPoint: .top, endPoint: .bottom))
+            .foregroundStyle(faceStyle)
             .background {
                 if outline > 0 || depth > 0 { outlineLayer }
             }

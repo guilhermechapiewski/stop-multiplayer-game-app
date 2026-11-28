@@ -124,16 +124,21 @@ struct LetterTile: View {
     @ScaledMetric private var scale: CGFloat = 1
 
     /// Light enough throughout for the red letter's 4.5:1.
-    private static let cream = [Color(rgb: 0xFFFFFF), Color(rgb: 0xFFF7E8), Color(rgb: 0xFFF1DC)]
+    static let cream = [Color(rgb: 0xFFFFFF), Color(rgb: 0xFFF7E8), Color(rgb: 0xFFF1DC)]
+    /// The plain letter on small tiles: one solid deeper red, about 6.3:1 on the cream. The chunky face's gradient
+    /// starts at about 4.7:1, and with no outline behind it the accessibility audit measured the small letter
+    /// under 4.5:1 (it reads a gradient-filled glyph's edges poorly).
+    static let plainFace = [Color(rgb: 0xA82A08)]
 
     var body: some View {
         let side = size * min(scale, 1.4)
         let shape = RoundedRectangle(cornerRadius: side * 0.24, style: .continuous)
         // Small tiles (the writing header, the countdown) show a plain red letter: at that size the outline
-        // would sit right against the face and pull its contrast under 4.5:1.
+        // would sit right against the face and pull its contrast under 4.5:1. Their letter is a solid deeper red.
         let chunky = side >= 100
         ChunkyText(text: Text(verbatim: letter).font(.system(size: side * 0.6, weight: .black, design: .rounded)),
-                   outline: chunky ? max(1.5, side * 0.025) : 0, depth: chunky ? max(1.5, side * 0.035) : 0)
+                   outline: chunky ? max(1.5, side * 0.025) : 0, depth: chunky ? max(1.5, side * 0.035) : 0,
+                   face: chunky ? ChunkyText.defaultFace : Self.plainFace)
             .contentTransition(.identity)
             .offset(y: -side * 0.02)
             .frame(width: side, height: side)
