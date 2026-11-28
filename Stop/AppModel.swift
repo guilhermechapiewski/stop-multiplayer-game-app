@@ -122,6 +122,7 @@ final class AppModel {
         } else {
             route = .home
             if let destination = launch.openRoute { navigate(to: destination) }
+            if let notice = launch.endNotice { endNotice = notice }
         }
     }
 
@@ -493,6 +494,9 @@ struct LaunchOptions: Equatable {
     /// `-openRoute hostSetup|join|practiceSetup`: open that screen instead of Home (screenshots, UI tests). Like
     /// every launch argument, Debug builds only.
     var openRoute: AppModel.Route?
+    /// `-demoEndNotice removed|versionMismatch|gameClosed`: Home opens with that "game ended" alert (design
+    /// previews). Debug builds only.
+    var endNotice: EndReason?
 
     /// Only Debug builds (development, UI tests, screenshots) honor these; a Release build ignores them all.
     init(arguments: [String]) {
@@ -507,6 +511,12 @@ struct LaunchOptions: Equatable {
         case "hostSetup": .hostSetup
         case "join": .join
         case "practiceSetup": .practiceSetup
+        default: nil
+        }
+        endNotice = switch Self.value(after: "-demoEndNotice", in: arguments) {
+        case "removed": .removed
+        case "versionMismatch": .versionMismatch
+        case "gameClosed": .gameClosed
         default: nil
         }
         #endif

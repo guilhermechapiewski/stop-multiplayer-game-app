@@ -68,17 +68,30 @@ enum PreviewData {
 }
 
 #if DEBUG
-/// `-demoPresence <kind>` (screenshots): the game screen as a guest sees it while the host is away
-/// (`hostAway`: round results, dimmed; `mayBeGone`; `writingAway`: the banner while writing) or with a presence
-/// banner (`banner`).
+/// `-demoPresence <kind>` (screenshots and design previews): the game screen as a guest sees it while the host
+/// is away (`hostAway`: round results, dimmed; `mayBeGone`; `writingAway`: the banner while writing), with a
+/// presence banner (`banner`), while the host collects answers (`collecting`, as the host), after being removed
+/// (`ended`), or the rejoining screen after a relaunch (`rejoining`, `rejoiningGone`).
 struct DemoPresenceScreen: View {
     let kind: String
 
-    @State private var client = PreviewData.client(isHost: false, phase: .writing)
+    @State private var client: PreviewGameClient
+
+    init(kind: String) {
+        self.kind = kind
+        _client = State(initialValue: PreviewData.client(isHost: kind == "collecting", phase: .writing))
+    }
 
     var body: some View {
-        GameScreen(client: client, banner: banner, onLeave: {})
-            .onAppear(perform: configure)
+        switch kind {
+        case "rejoining":
+            RejoiningView(hostName: "Ana") {}
+        case "rejoiningGone":
+            RejoiningView(hostName: "Ana", mayBeGone: true) {}
+        default:
+            GameScreen(client: client, banner: banner, onLeave: {})
+                .onAppear(perform: configure)
+        }
     }
 
     private var banner: Banner? {
@@ -96,6 +109,15 @@ struct DemoPresenceScreen: View {
             client.hostStatus = .mayBeGone
         case "writingAway":
             client.hostStatus = .away
+        case "collecting":
+            guard var state = client.state else { return }
+            let ids = state.players.map(\.id)
+            state.phase = .collecting
+            state.rounds[0].stops = [StopRecord(playerID: ids[1], kind: .stop)]
+            state.rounds[0].answers = [ids[0]: [], ids[1]: []]  // The host and Ana sent theirs.
+            client.state = state
+        case "ended":
+            client.hostStatus = .ended(.removed)
         default:
             break
         }

@@ -100,6 +100,15 @@ struct AppModelTests {
         #expect(LaunchOptions(arguments: ["-openRoute", "game"]).openRoute == nil)
     }
 
+    @Test func demoEndNoticeArgumentShowsTheNoticeOnHome() async {
+        let model = makeModel(arguments: ["-playerName", "Bia", "-demoEndNotice", "removed"])
+        await model.bootstrap()
+        #expect(model.route == .home)
+        #expect(model.endNotice == .removed)
+        #expect(LaunchOptions(arguments: ["-demoEndNotice", "gameOver"]).endNotice == nil)
+        #expect(LaunchOptions(arguments: []).endNotice == nil)
+    }
+
     @Test func uiTestingDisablesSounds() async {
         _ = await saveProfile()
         let model = makeModel(arguments: ["-uiTesting"])
