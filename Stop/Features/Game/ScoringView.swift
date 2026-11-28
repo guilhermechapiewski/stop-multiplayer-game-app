@@ -21,6 +21,8 @@ struct ScoringView: View {
     @State private var settledCategory: Int?
     /// Which way the last category change went; kept while the card slides.
     @State private var slideDirection = ScoringCategoryChange.Direction.forward
+    /// The "category done" badge's size; the card always leaves room above it for the badge.
+    @ScaledMetric(relativeTo: .title3) private var burstSide: CGFloat = CompletedBurst.defaultSide
 
     private var me: PlayerID { client.localPlayerID }
     private var presentation: ScoringPresentation { ScoringPresentation(state: state, viewer: me) }
@@ -101,7 +103,8 @@ struct ScoringView: View {
     // MARK: Answers
 
     private func answersCard(_ presentation: ScoringPresentation) -> some View {
-        VStack(spacing: 0) {
+        let burst = CompletedBurst.clampedSide(burstSide)
+        return VStack(spacing: 0) {
             ForEach(presentation.rows) { row in
                 VStack(alignment: .leading, spacing: Theme.Spacing.s) {
                     AnswerRow(row: row, isMe: row.playerID == me)
@@ -126,10 +129,12 @@ struct ScoringView: View {
                 .strokeBorder(isCompleted ? Theme.teal : Theme.outline,
                               lineWidth: isCompleted ? 3 : Theme.Stroke.outline)
         }
+        // Above the card's corner, clear of the first row's score badge.
         .overlay(alignment: .topTrailing) {
-            if isCompleted { CompletedBurst().offset(x: 10, y: -22) }
+            if isCompleted { CompletedBurst(side: burst).offset(x: 6, y: -burst * 0.86) }
         }
-        .padding(.top, isCompleted ? 12 : 0)
+        // The same room above the card whether or not the badge shows, so the card doesn't jump.
+        .padding(.top, max(0, burst * 0.86 - Theme.Spacing.l + 4))
     }
 
     // MARK: Picker and Next
@@ -424,12 +429,16 @@ private struct ScoreTileButtonStyle: ButtonStyle {
 
 /// The "category done" badge: a check on a small teal comic burst, popping in (fading with Reduce Motion).
 private struct CompletedBurst: View {
+    static let defaultSide: CGFloat = 52
+    /// Grows with the text, up to 64 pt.
+    static func clampedSide(_ scaled: CGFloat) -> CGFloat { min(scaled, 64) }
+
+    let side: CGFloat
+
     @Environment(\.reduceMotion) private var reduceMotion
     @State private var shown = false
-    @ScaledMetric(relativeTo: .title3) private var side: CGFloat = 52
 
     var body: some View {
-        let side = min(self.side, 64)
         let burst = Starburst(points: 10, innerRatio: 0.76)
         Image(systemName: "checkmark")
             .font(.system(size: side * 0.36, weight: .black))

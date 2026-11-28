@@ -233,7 +233,6 @@ struct PieceButtonBody: View {
                 shape.strokeBorder(isEnabled ? Theme.outline : Theme.outline.opacity(0.35),
                                    lineWidth: Theme.Stroke.button)
             }
-            .contentShape(shape)
             .offset(y: pressed ? depth : 0)
             .background {
                 if depth > 0 {
@@ -243,6 +242,8 @@ struct PieceButtonBody: View {
                 }
             }
             .padding(.bottom, Theme.Stroke.depth)
+            // The face and the edge under it: the whole button stays tappable while the face sinks.
+            .contentShape(.rect(cornerRadius: cornerRadius, style: .continuous))
             .animation(reduceMotion ? nil : .snappy(duration: 0.12), value: pressed)
     }
 }
@@ -273,12 +274,14 @@ struct SecondaryButtonStyle: ButtonStyle {
 }
 
 /// Small text actions (New letter, Back to scoring, End game): bold accent text with a 44 pt target that dims
-/// while pressed.
+/// while pressed, and turns the muted disabled color while disabled.
 struct LinkButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Theme.Typography.headline)
-            .foregroundStyle(Theme.accent)
+            .foregroundStyle(isEnabled ? Theme.accent : Theme.disabledText)
             .frame(minHeight: 44)
             .contentShape(.rect)
             .opacity(configuration.isPressed ? 0.55 : 1)
@@ -550,11 +553,11 @@ extension View {
         modifier(CenteredScrolling())
     }
 
-    /// A `List` or `Form` on the app's cream page, with surface rows.
+    /// A `List` or `Form` on the app's cream page. Rows get the surface color from their own
+    /// `.listRowBackground(Theme.surface)` (it has no effect on the list itself).
     func themedList() -> some View {
         scrollContentBackground(.hidden)
             .background(Theme.background)
-            .listRowBackground(Theme.surface)
     }
 }
 
