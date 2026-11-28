@@ -19,26 +19,16 @@ struct StatusMessageView<Actions: View>: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
             VStack(spacing: Theme.Spacing.m) {
-                switch icon {
-                case .symbol(let name):
-                    Image(systemName: name)
-                        .font(.system(size: 56, weight: .bold))
-                        .foregroundStyle(Theme.accent)
-                        .accessibilityHidden(true)
-                case .progress:
-                    ProgressView()
-                        .controlSize(.large)
-                        .tint(Theme.accent)
-                        .accessibilityHidden(true)
-                }
+                StatusBadge(icon: icon)
                 title
                     .font(Theme.Typography.title)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 if let message {
                     message
                         .font(Theme.Typography.body)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .multilineTextAlignment(.center)
                 }
             }
@@ -46,6 +36,40 @@ struct StatusMessageView<Actions: View>: View {
         }
         .padding(.horizontal, Theme.Spacing.l)
         .centeredScrolling()
+    }
+}
+
+/// A status screen's symbol (or spinner) on a round game piece over a yellow comic burst. Decorative.
+struct StatusBadge: View {
+    let icon: StatusIcon
+    var size: CGFloat = 88
+
+    @ScaledMetric(relativeTo: .largeTitle) private var scale: CGFloat = 1
+
+    var body: some View {
+        let side = size * min(scale, 1.4)
+        let burst = Starburst(points: 12, innerRatio: 0.8)
+        Group {
+            switch icon {
+            case .symbol(let name):
+                Image(systemName: name)
+                    .font(.system(size: side * 0.42, weight: .bold, design: .rounded))
+                    .foregroundStyle(Theme.accent)
+            case .progress:
+                ProgressView()
+                    .controlSize(.large)
+                    .tint(Theme.accent)
+            }
+        }
+        .frame(width: side, height: side)
+        .piece(Circle(), fill: Theme.surface, lineWidth: 2.5, depth: 5)
+        .background {
+            burst.fill(Theme.yellow)
+                .overlay { burst.strokeBorder(Theme.ink, lineWidth: 2) }
+                .frame(width: side * 1.45, height: side * 1.45)
+        }
+        .padding(side * 0.22)
+        .accessibilityHidden(true)
     }
 }
 

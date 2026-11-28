@@ -9,7 +9,11 @@ struct ConfettiView: View {
         let size: CGSize, color: Color, isCircle: Bool
     }
 
-    private static let colors: [Color] = [.red, .orange, .yellow, .green, .blue, .purple, .pink]
+    /// The app icon's colors: red-orange, yellow, teal, cream and orange, with a little violet.
+    private static let colors: [Color] = [Color(rgb: 0xE0441A), Color(rgb: 0xFFC93C), Color(rgb: 0x3CC2B3),
+                                          Color(rgb: 0xFFF1D6), Color(rgb: 0xFF9A52), Color(rgb: 0x7C5CD6),
+                                          Color(rgb: 0xC8360F)]
+    private static let outline = Color(rgb: 0x3A1A12)
     private static let duration: Double = 4.5
 
     @State private var start = Date.now
@@ -64,6 +68,7 @@ struct ConfettiView: View {
                 let path = piece.isCircle ? Path(ellipseIn: rect.insetBy(dx: 0, dy: (rect.height - rect.width) / 2))
                                           : Path(roundedRect: rect, cornerRadius: 2)
                 pieceContext.fill(path, with: .color(piece.color))
+                pieceContext.stroke(path, with: .color(Self.outline), lineWidth: 1.2)
             }
         }
     }

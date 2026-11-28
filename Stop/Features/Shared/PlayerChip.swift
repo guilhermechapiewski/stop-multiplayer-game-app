@@ -1,7 +1,7 @@
 import StopCore
 import SwiftUI
 
-/// A player's name in a capsule. Away players are greyed out with "reconnecting…".
+/// A player's name and initial on a game tile. Away players are greyed out with "reconnecting…".
 struct PlayerChip: View {
     let name: String
     let presence: Presence
@@ -14,11 +14,12 @@ struct PlayerChip: View {
 
     var body: some View {
         HStack(spacing: Theme.Spacing.s) {
-            PlayerInitial(name: name, dimmed: isAway, size: 32, isBot: isBot, isYou: isYou)
+            PlayerInitial(name: name, dimmed: isAway, size: 30, isBot: isBot, isYou: isYou)
             VStack(alignment: .leading, spacing: 0) {
                 HStack(spacing: Theme.Spacing.xs) {
                     Text(verbatim: name)
-                        .font(Theme.Typography.body.weight(.semibold))
+                        .font(Theme.Typography.body.weight(.bold))
+                        .foregroundStyle(isAway ? Theme.secondaryText : Theme.text)
                     if isHost {
                         Image(systemName: "crown.fill")
                             .font(.caption)
@@ -28,25 +29,24 @@ struct PlayerChip: View {
                 }
                 if isAway {
                     Text("reconnecting…")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .font(.system(.caption, design: .rounded, weight: .semibold))
+                        .foregroundStyle(Theme.secondaryText)
                 } else if isYou {
-                    // Primary, not secondary: grey on the accent-tinted capsule falls short of 4.5:1 contrast.
                     Text("you")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundStyle(.primary)
+                        .font(.system(.caption, design: .rounded, weight: .bold))
+                        .foregroundStyle(Theme.accent)
                 }
             }
         }
-        .padding(.leading, Theme.Spacing.xs)
+        .padding(.leading, Theme.Spacing.s)
         .padding(.trailing, Theme.Spacing.m)
-        .padding(.vertical, Theme.Spacing.xs)
-        .background(isAway ? AnyShapeStyle(.fill.tertiary) : AnyShapeStyle(Theme.accent.opacity(isYou ? 0.2 : 0.1)),
-                    in: .capsule)
-        .overlay {
-            if isYou { Capsule().strokeBorder(Theme.accent.opacity(0.5), lineWidth: 1.5) }
-        }
-        .opacity(isAway ? 0.6 : 1)
+        .padding(.vertical, Theme.Spacing.s)
+        // A game tile: cream, the local player's tinted and outlined in the accent; away players flat and grey.
+        .piece(RoundedRectangle(cornerRadius: Theme.Radius.tile + 2, style: .continuous),
+               fill: isAway ? Theme.sunken : isYou ? Theme.accentTint : Theme.surface,
+               outline: isAway ? Theme.outline.opacity(0.4) : isYou ? Theme.accent : Theme.outline,
+               depth: isAway ? 0 : 3)
+        .padding(.bottom, 3)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(verbatim: name))
         .accessibilityValue(accessibilityDetails)

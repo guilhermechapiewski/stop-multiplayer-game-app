@@ -7,6 +7,7 @@ struct StopApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        Theme.applyAppearance()
         let arguments = ProcessInfo.processInfo.arguments
         let store = StoreLocation.makeStore(wipe: LaunchOptions(arguments: arguments).wipesStore)
         var factory: any TransportFactory = NWTransportFactory()

@@ -1,16 +1,81 @@
 import SwiftUI
+import UIKit
 
-/// The app's visual language: bold rounded type, one warm "stop" accent (the `AccentColor` asset, tuned for
-/// light, dark and increased contrast), generous spacing. Everything scales with Dynamic Type.
+/// The app's visual language, drawn from the app icon: warm cream paper (a deep warm brown at night), chunky
+/// rounded type, dark-brown outlines and a red-orange "stop" accent with yellow and teal from the icon.
+/// Buttons, cards and tiles are "game pieces": outlined, standing on a hard bottom edge they sink into when
+/// pressed. Every text color meets WCAG AA (4.5:1) on the surfaces it is used on; everything scales with
+/// Dynamic Type.
 enum Theme {
-    static let accent = Color.accentColor
-    static let background = Color(.systemGroupedBackground)
-    static let surface = Color(.secondarySystemGroupedBackground)
-    /// The leader's crown: a deep gold in light mode (plain yellow is under 2:1 on the light, accent-tinted
-    /// rows), system yellow in dark mode.
-    static let crown = Color(uiColor: UIColor { traits in
-        traits.userInterfaceStyle == .dark ? .systemYellow : UIColor(red: 0.54, green: 0.35, blue: 0, alpha: 1)
-    })
+    // MARK: Colors
+
+    /// Text, icons and outlines in the accent (red-orange): #C8360F on cream, brighter at night.
+    static let accent = dynamic(light: 0xC8360F, dark: 0xFF7F57, lightHigh: 0xA82A08, darkHigh: 0xFF9B7A)
+    /// The accent as a fill behind white text (primary buttons, the 10-point badge).
+    static let accentFill = dynamic(light: 0xC8360F, dark: 0xD23C14, lightHigh: 0xA82A08, darkHigh: 0xB8300C)
+    /// The darker edge a filled accent piece stands on.
+    static let accentEdge = dynamic(light: 0x7A1C04, dark: 0x5E1504)
+    /// A soft accent wash: the local player's rows and chips.
+    static let accentTint = dynamic(light: 0xFFECE1, dark: 0x45231A)
+    /// White on `accentFill`.
+    static let onAccent = Color.white
+
+    /// Yellow from the icon's sparkle: fills behind `ink` text (labels, the 5-point badge, highlights).
+    static let yellow = dynamic(light: 0xFFC93C, dark: 0xF2B92E)
+    /// Teal: "done" and "back" states. `teal` for text and icons, `tealFill` behind `ink` text.
+    static let teal = dynamic(light: 0x08706A, dark: 0x5BD1C4, lightHigh: 0x075E58, darkHigh: 0x86E2D7)
+    static let tealFill = dynamic(light: 0x3CC2B3, dark: 0x2FA797)
+
+    /// The page: warm cream, or a deep warm brown-black at night.
+    static let background = dynamic(light: 0xFFF4E2, dark: 0x1C1410)
+    /// Cards, fields and list rows.
+    static let surface = dynamic(light: 0xFFFDF8, dark: 0x2B201A)
+    /// Read-only fields and empty slots, a step down from `surface`.
+    static let sunken = dynamic(light: 0xF8ECDA, dark: 0x231A15)
+    /// Text on every surface above.
+    static let text = dynamic(light: 0x2B140D, dark: 0xFFF3E3)
+    /// Secondary text (at least 5.7:1 on every surface above, the tints included).
+    static let secondaryText = dynamic(light: 0x6B4E42, dark: 0xD2BCAC, lightHigh: 0x4A3128, darkHigh: 0xEBDACB)
+    /// Dark-brown outlines of the playful pieces (a warm mid-brown at night, where they sit on dark surfaces).
+    static let outline = dynamic(light: 0x3A1A12, dark: 0x5E4335, lightHigh: 0x2A0F08, darkHigh: 0x8A6A58)
+    /// The hard edge and drop shadow under pieces.
+    static let edge = dynamic(light: 0x3A1A12, dark: 0x080403)
+    /// Dark-brown text on the yellow and teal fills, in both appearances.
+    static let ink = Color(rgb: 0x3A1A12)
+    /// Disabled buttons: a flat fill and a muted (still legible) label.
+    static let disabledFill = dynamic(light: 0xEADCC8, dark: 0x352923)
+    static let disabledText = dynamic(light: 0x5A463C, dark: 0xBBA697)
+    /// Hairlines between rows inside a card.
+    static let divider = dynamic(light: 0xEAD8C0, dark: 0x3D2F27)
+
+    /// The leader's crown: a deep gold in light mode (plain yellow is under 2:1 on the light rows), the icon's
+    /// yellow at night.
+    static let crown = dynamic(light: 0x8A5900, dark: 0xF2B92E)
+
+    /// The sunburst's two ray colors (behind the letter, the STOP! stamp and the winner).
+    static let sunburstRay = dynamic(light: 0xFFB347, dark: 0xB8410F)
+    static let sunburstGap = dynamic(light: 0xFFD98A, dark: 0x7A2A0C)
+
+    /// Player tiles: each player gets one of these fills, with a letter color that passes 4.5:1 on it.
+    static let tileColors: [(fill: Color, letter: Color)] = [
+        (accentFill, .white),
+        (Color(rgb: 0xFFC93C), ink),
+        (Color(rgb: 0x3CC2B3), ink),
+        (Color(rgb: 0xFF9A52), ink),
+        (Color(rgb: 0x7C5CD6), .white),
+    ]
+
+    /// A color for light and dark appearances (and, optionally, Increase Contrast).
+    static func dynamic(light: UInt32, dark: UInt32, lightHigh: UInt32? = nil, darkHigh: UInt32? = nil) -> Color {
+        Color(uiColor: UIColor { traits in
+            let high = traits.accessibilityContrast == .high
+            let value = traits.userInterfaceStyle == .dark ? (high ? darkHigh ?? dark : dark)
+                                                           : (high ? lightHigh ?? light : light)
+            return UIColor(rgb: value)
+        })
+    }
+
+    // MARK: Metrics
 
     enum Spacing {
         static let xs: CGFloat = 4
@@ -22,52 +87,194 @@ enum Theme {
     }
 
     enum Radius {
-        static let control: CGFloat = 20
-        static let card: CGFloat = 24
+        static let control: CGFloat = 18
+        static let card: CGFloat = 22
+        static let tile: CGFloat = 12
+    }
+
+    /// Outlines and the hard edge under pieces.
+    enum Stroke {
+        static let outline: CGFloat = 2
+        static let button: CGFloat = 2.5
+        /// How far a piece stands on its edge (and sinks when pressed).
+        static let depth: CGFloat = 4
     }
 
     enum Typography {
         static let display = Font.system(.largeTitle, design: .rounded, weight: .black)
-        static let title = Font.system(.title, design: .rounded, weight: .bold)
+        static let title = Font.system(.title, design: .rounded, weight: .heavy)
         static let headline = Font.system(.title3, design: .rounded, weight: .bold)
         static let body = Font.system(.body, design: .rounded)
-        static let caption = Font.system(.subheadline, design: .rounded, weight: .medium)
+        static let caption = Font.system(.subheadline, design: .rounded, weight: .semibold)
+        /// Bubble labels and buttons' small print.
+        static let label = Font.system(.subheadline, design: .rounded, weight: .heavy)
+    }
+
+    /// UIKit chrome (navigation bar titles) in the app's type, set once at launch.
+    @MainActor static func applyAppearance() {
+        func rounded(_ style: UIFont.TextStyle, _ weight: UIFont.Weight) -> UIFont {
+            let size = UIFont.preferredFont(forTextStyle: style).pointSize
+            let base = UIFont.systemFont(ofSize: size, weight: weight)
+            let font = base.fontDescriptor.withDesign(.rounded).map { UIFont(descriptor: $0, size: size) } ?? base
+            return UIFontMetrics(forTextStyle: style).scaledFont(for: font)
+        }
+        let text = UIColor(rgb: 0x2B140D, dark: 0xFFF3E3)
+        let bar = UINavigationBar.appearance()
+        bar.titleTextAttributes = [.font: rounded(.headline, .heavy), .foregroundColor: text]
+        bar.largeTitleTextAttributes = [.font: rounded(.largeTitle, .black), .foregroundColor: text]
+    }
+}
+
+extension Color {
+    /// An sRGB color from 0xRRGGBB.
+    init(rgb: UInt32) {
+        self.init(.sRGB, red: Double((rgb >> 16) & 0xFF) / 255, green: Double((rgb >> 8) & 0xFF) / 255,
+                  blue: Double(rgb & 0xFF) / 255)
+    }
+}
+
+extension UIColor {
+    convenience init(rgb: UInt32) {
+        self.init(red: CGFloat((rgb >> 16) & 0xFF) / 255, green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                  blue: CGFloat(rgb & 0xFF) / 255, alpha: 1)
+    }
+
+    /// Light and dark variants.
+    convenience init(rgb light: UInt32, dark: UInt32) {
+        self.init { $0.userInterfaceStyle == .dark ? UIColor(rgb: dark) : UIColor(rgb: light) }
+    }
+}
+
+// MARK: Pieces
+
+/// The look of a game piece: a fill with an outline, standing on a hard edge `depth` below it. Draws only the
+/// background; the content's frame is the piece's face (the edge hangs below it).
+struct PieceBackground<S: InsettableShape>: View {
+    let shape: S
+    var fill: Color = Theme.surface
+    var outline: Color = Theme.outline
+    var edge: Color = Theme.edge
+    var lineWidth: CGFloat = Theme.Stroke.outline
+    var depth: CGFloat = Theme.Stroke.depth
+
+    var body: some View {
+        ZStack {
+            if depth > 0 {
+                shape.fill(edge).offset(y: depth)
+            }
+            shape.fill(fill)
+            shape.strokeBorder(outline, lineWidth: lineWidth)
+        }
+    }
+}
+
+extension View {
+    /// A card: the surface, outlined, on a hard edge.
+    func pieceCard(fill: Color = Theme.surface, cornerRadius: CGFloat = Theme.Radius.card,
+                   depth: CGFloat = Theme.Stroke.depth) -> some View {
+        background(PieceBackground(shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
+                                   fill: fill, depth: depth))
+    }
+
+    /// A text field's box: cream and outlined, the outline turning red-orange (and thicker) while focused;
+    /// read-only fields sit flat on the sunken color.
+    func pieceField(isFocused: Bool, isReadOnly: Bool = false, cornerRadius: CGFloat = 14) -> some View {
+        background(PieceBackground(shape: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous),
+                                   fill: isReadOnly ? Theme.sunken : Theme.surface,
+                                   outline: isFocused ? Theme.accent : Theme.outline.opacity(isReadOnly ? 0.35 : 1),
+                                   lineWidth: isFocused ? 3 : Theme.Stroke.outline, depth: isReadOnly ? 0 : 3))
+    }
+
+    /// A piece of any shape (tiles, chips, badges).
+    func piece<S: InsettableShape>(_ shape: S, fill: Color, outline: Color = Theme.outline, edge: Color = Theme.edge,
+                                   lineWidth: CGFloat = Theme.Stroke.outline,
+                                   depth: CGFloat = Theme.Stroke.depth) -> some View {
+        background(PieceBackground(shape: shape, fill: fill, outline: outline, edge: edge, lineWidth: lineWidth,
+                                   depth: depth))
     }
 }
 
 // MARK: Buttons
 
-/// The main call to action: full width, filled with the accent.
-struct PrimaryButtonStyle: ButtonStyle {
-    @Environment(\.isEnabled) private var isEnabled
-    @Environment(\.reduceMotion) private var reduceMotion
-    @ScaledMetric(relativeTo: .title3) private var minHeight: CGFloat = 60
+/// A game-piece button: outlined, on an edge it sinks into while pressed (no movement with Reduce Motion
+/// beyond the sink itself, which isn't animated then).
+struct PieceButtonBody: View {
+    let configuration: ButtonStyleConfiguration
+    let fill: Color
+    let foreground: Color
+    let edge: Color
+    let minHeight: CGFloat
+    let isEnabled: Bool
+    let reduceMotion: Bool
+    var font: Font = Theme.Typography.headline
+    var cornerRadius: CGFloat = Theme.Radius.control
 
-    func makeBody(configuration: Configuration) -> some View {
+    private var depth: CGFloat { isEnabled ? Theme.Stroke.depth : 0 }
+
+    var body: some View {
+        let pressed = configuration.isPressed && isEnabled
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         configuration.label
-            .font(Theme.Typography.headline)
-            .foregroundStyle(isEnabled ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
-            .frame(maxWidth: .infinity, minHeight: minHeight)
+            .font(font)
+            .foregroundStyle(isEnabled ? foreground : Theme.disabledText)
+            .multilineTextAlignment(.center)
             .padding(.horizontal, Theme.Spacing.m)
-            .background(isEnabled ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.fill),
-                        in: .rect(cornerRadius: Theme.Radius.control))
-            .pressEffect(configuration.isPressed, reduceMotion: reduceMotion)
+            .padding(.vertical, Theme.Spacing.s)
+            .frame(maxWidth: .infinity, minHeight: minHeight)
+            .background {
+                shape.fill(isEnabled ? fill : Theme.disabledFill)
+                shape.strokeBorder(isEnabled ? Theme.outline : Theme.outline.opacity(0.35),
+                                   lineWidth: Theme.Stroke.button)
+            }
+            .contentShape(shape)
+            .offset(y: pressed ? depth : 0)
+            .background {
+                if depth > 0 {
+                    shape.fill(edge)
+                        .overlay { shape.strokeBorder(Theme.outline, lineWidth: Theme.Stroke.button) }
+                        .offset(y: depth)
+                }
+            }
+            .padding(.bottom, Theme.Stroke.depth)
+            .animation(reduceMotion ? nil : .snappy(duration: 0.12), value: pressed)
     }
 }
 
-/// Secondary actions: full width, tinted with the accent.
-struct SecondaryButtonStyle: ButtonStyle {
+/// The main call to action: full width, red-orange, white text.
+struct PrimaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
     @Environment(\.reduceMotion) private var reduceMotion
-    @ScaledMetric(relativeTo: .title3) private var minHeight: CGFloat = 60
+    @ScaledMetric(relativeTo: .title3) private var minHeight: CGFloat = 56
 
+    func makeBody(configuration: Configuration) -> some View {
+        PieceButtonBody(configuration: configuration, fill: Theme.accentFill, foreground: Theme.onAccent,
+                        edge: Theme.accentEdge, minHeight: minHeight, isEnabled: isEnabled,
+                        reduceMotion: reduceMotion)
+    }
+}
+
+/// Secondary actions: full width, cream with red-orange text.
+struct SecondaryButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.reduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .title3) private var minHeight: CGFloat = 56
+
+    func makeBody(configuration: Configuration) -> some View {
+        PieceButtonBody(configuration: configuration, fill: Theme.surface, foreground: Theme.accent,
+                        edge: Theme.edge, minHeight: minHeight, isEnabled: isEnabled, reduceMotion: reduceMotion)
+    }
+}
+
+/// Small text actions (New letter, Back to scoring, End game): bold accent text with a 44 pt target that dims
+/// while pressed.
+struct LinkButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(Theme.Typography.headline)
             .foregroundStyle(Theme.accent)
-            .frame(maxWidth: .infinity, minHeight: minHeight)
-            .padding(.horizontal, Theme.Spacing.m)
-            .background(Theme.accent.opacity(0.14), in: .rect(cornerRadius: Theme.Radius.control))
-            .pressEffect(configuration.isPressed, reduceMotion: reduceMotion)
+            .frame(minHeight: 44)
+            .contentShape(.rect)
+            .opacity(configuration.isPressed ? 0.55 : 1)
     }
 }
 
@@ -79,18 +286,187 @@ extension ButtonStyle where Self == SecondaryButtonStyle {
     static var secondary: SecondaryButtonStyle { SecondaryButtonStyle() }
 }
 
-private extension View {
-    func pressEffect(_ pressed: Bool, reduceMotion: Bool) -> some View {
-        self
-            .opacity(pressed ? 0.85 : 1)
-            .scaleEffect(pressed && !reduceMotion ? 0.97 : 1)
-            .animation(reduceMotion ? nil : .spring(duration: 0.2), value: pressed)
+extension ButtonStyle where Self == LinkButtonStyle {
+    static var link: LinkButtonStyle { LinkButtonStyle() }
+}
+
+// MARK: Display type
+
+/// Big chunky letters like the icon's "STOP!": a red-orange face with a dark-brown outline and a dark
+/// extrusion below. `text` keeps its accessibility (it stays the element); the outline copies behind it are
+/// hidden from VoiceOver. Pass a `Text` that already has its font.
+struct ChunkyText: View {
+    let text: Text
+    /// The outline's thickness, in points.
+    var outline: CGFloat = 4
+    /// How far the extrusion drops below the face.
+    var depth: CGFloat = 6
+    var face: [Color] = [Color(rgb: 0xF0532A), Color(rgb: 0xD63A12), Color(rgb: 0xB52D0B)]
+    var ink: Color = Theme.ink
+    var minimumScaleFactor: CGFloat = 1
+
+    /// Eight directions around the face, for the outline.
+    private static let directions: [CGSize] = (0..<8).map { index in
+        let angle = Double(index) / 8 * 2 * .pi
+        return CGSize(width: cos(angle), height: sin(angle))
+    }
+
+    var body: some View {
+        text
+            .minimumScaleFactor(minimumScaleFactor)
+            .foregroundStyle(LinearGradient(colors: face, startPoint: .top, endPoint: .bottom))
+            .background {
+                ZStack {
+                    ForEach(0..<Self.directions.count, id: \.self) { index in
+                        let direction = Self.directions[index]
+                        copy.offset(x: direction.width * outline, y: direction.height * outline + depth)
+                        copy.offset(x: direction.width * outline, y: direction.height * outline)
+                    }
+                }
+                .accessibilityHidden(true)
+            }
+    }
+
+    private var copy: some View {
+        text
+            .minimumScaleFactor(minimumScaleFactor)
+            .foregroundStyle(ink)
+    }
+}
+
+// MARK: Labels
+
+/// A comic speech bubble: a rounded body with a small tail, at the bottom leading corner (labels) or centred
+/// on top (a caption under what it talks about). The rect includes the tail: pad the content by `tailSize`
+/// on that side.
+struct SpeechBubble: InsettableShape {
+    var cornerRadius: CGFloat = 12
+    var tailSize: CGFloat = 8
+    var tailOnTop = false
+    var inset: CGFloat = 0
+
+    func path(in rect: CGRect) -> Path {
+        let body = CGRect(x: rect.minX, y: rect.minY + (tailOnTop ? tailSize : 0), width: rect.width,
+                          height: rect.height - tailSize)
+            .insetBy(dx: inset, dy: inset)
+        let radius = min(cornerRadius, body.height / 2)
+        var path = Path(roundedRect: body, cornerRadius: radius, style: .continuous)
+        var tail = Path()
+        if tailOnTop {
+            tail.move(to: CGPoint(x: body.midX - tailSize, y: body.minY + 1))
+            tail.addLine(to: CGPoint(x: body.midX - tailSize * 0.2, y: body.minY - tailSize + inset))
+            tail.addLine(to: CGPoint(x: body.midX + tailSize, y: body.minY + 1))
+        } else {
+            let start = body.minX + radius + 2
+            tail.move(to: CGPoint(x: start, y: body.maxY - 1))
+            tail.addLine(to: CGPoint(x: start - tailSize * 0.4, y: body.maxY + tailSize - inset))
+            tail.addLine(to: CGPoint(x: start + tailSize * 1.4, y: body.maxY - 1))
+        }
+        tail.closeSubpath()
+        path.addPath(tail)
+        return path.normalized(eoFill: false)
+    }
+
+    func inset(by amount: CGFloat) -> SpeechBubble {
+        var copy = self
+        copy.inset += amount
+        return copy
+    }
+}
+
+/// A section's title on a yellow speech bubble ("Players (4)"), dark-brown text, a header for VoiceOver.
+struct BubbleLabel: View {
+    let title: Text
+    var systemImage: String?
+    var fill: Color = Theme.yellow
+
+    @ScaledMetric(relativeTo: .subheadline) private var tail: CGFloat = 7
+
+    init(_ title: LocalizedStringKey, systemImage: String? = nil, fill: Color = Theme.yellow) {
+        self.title = Text(title)
+        self.systemImage = systemImage
+        self.fill = fill
+    }
+
+    init(_ title: Text, systemImage: String? = nil, fill: Color = Theme.yellow) {
+        self.title = title
+        self.systemImage = systemImage
+        self.fill = fill
+    }
+
+    var body: some View {
+        HStack(spacing: Theme.Spacing.xs + 2) {
+            if let systemImage {
+                Image(systemName: systemImage)
+                    .imageScale(.small)
+                    .accessibilityHidden(true)
+            }
+            title
+        }
+        .font(Theme.Typography.label)
+        .foregroundStyle(Theme.ink)
+        .padding(.horizontal, Theme.Spacing.s + 4)
+        .padding(.vertical, Theme.Spacing.xs + 2)
+        .padding(.bottom, tail)
+        .background {
+            let shape = SpeechBubble(cornerRadius: 12, tailSize: tail)
+            shape.fill(Theme.edge).offset(y: 2.5)
+            shape.fill(fill)
+            shape.strokeBorder(Theme.ink, lineWidth: Theme.Stroke.outline)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
+    }
+}
+
+/// A `List` section's header: chunky, warm brown, in sentence case.
+struct ListSectionHeader: View {
+    let title: Text
+
+    init(_ title: LocalizedStringKey) { self.title = Text(title) }
+    init(_ title: Text) { self.title = title }
+
+    var body: some View {
+        title
+            .font(Theme.Typography.label)
+            .foregroundStyle(Theme.secondaryText)
+            .textCase(nil)
+    }
+}
+
+/// A list row's icon on a small outlined tile, like a settings icon cut from the game's pieces.
+struct TileIconLabelStyle: LabelStyle {
+    var fill: Color = Theme.accentFill
+    var symbolColor: Color = .white
+
+    @ScaledMetric(relativeTo: .body) private var side: CGFloat = 30
+
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: Theme.Spacing.m) {
+            configuration.icon
+                .font(.system(size: side * 0.5, weight: .bold))
+                .foregroundStyle(symbolColor)
+                .frame(width: side, height: side)
+                .piece(RoundedRectangle(cornerRadius: side * 0.28, style: .continuous), fill: fill,
+                       outline: Theme.ink, lineWidth: 1.5, depth: 2)
+                .accessibilityHidden(true)
+            configuration.title
+                .font(Theme.Typography.body.weight(.semibold))
+                .foregroundStyle(Theme.text)
+        }
+    }
+}
+
+extension LabelStyle where Self == TileIconLabelStyle {
+    static func tile(_ fill: Color, symbol: Color = .white) -> TileIconLabelStyle {
+        TileIconLabelStyle(fill: fill, symbolColor: symbol)
     }
 }
 
 // MARK: Players
 
-/// A player's initial in a tinted circle. Decorative: the name is always shown beside it.
+/// A player's initial on a small game tile, in a color of their own. Decorative: the name is always shown
+/// beside it.
 struct PlayerInitial: View {
     let name: String
     var dimmed = false
@@ -119,12 +495,24 @@ struct PlayerInitial: View {
         return source.first.map { String($0).uppercased() } ?? "?"
     }
 
+    /// A stable color slot for `name` (the same on every phone and every launch).
+    nonisolated static func colorIndex(for name: String, count: Int) -> Int {
+        guard count > 0 else { return 0 }
+        let sum = name.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFF }
+        return sum % count
+    }
+
     var body: some View {
+        let side = size * scale
+        let colors = Theme.tileColors[Self.colorIndex(for: name, count: Theme.tileColors.count)]
+        let shape = RoundedRectangle(cornerRadius: side * 0.3, style: .continuous)
         Text(verbatim: Self.initial(for: name, isBot: Self.showsBotInitial(name: name, isBot: isBot, isPractice: isPractice, isYou: isYou)))
-            .font(.system(size: size * scale * 0.45, weight: .heavy, design: .rounded))
-            .foregroundStyle(.white)
-            .frame(width: size * scale, height: size * scale)
-            .background(dimmed ? AnyShapeStyle(Color(.systemGray)) : AnyShapeStyle(Theme.accent.gradient), in: .circle)
+            .font(.system(size: side * 0.5, weight: .black, design: .rounded))
+            .foregroundStyle(dimmed ? Theme.disabledText : colors.letter)
+            .frame(width: side, height: side)
+            .piece(shape, fill: dimmed ? Theme.disabledFill : colors.fill,
+                   outline: dimmed ? Theme.outline.opacity(0.4) : Theme.ink,
+                   lineWidth: max(1.5, side * 0.05), depth: dimmed ? 0 : max(2, side * 0.07))
             .accessibilityHidden(true)
             .accessibilityIdentifier("playerInitial")
     }
@@ -137,6 +525,13 @@ extension View {
     /// makes it taller than the screen.
     func centeredScrolling() -> some View {
         modifier(CenteredScrolling())
+    }
+
+    /// A `List` or `Form` on the app's cream page, with surface rows.
+    func themedList() -> some View {
+        scrollContentBackground(.hidden)
+            .background(Theme.background)
+            .listRowBackground(Theme.surface)
     }
 }
 

@@ -46,6 +46,8 @@ struct SilentModeInfo: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(idealWidth: 320, maxHeight: 420)
+        .foregroundStyle(Theme.text)
+        .presentationBackground(Theme.surface)
         .presentationCompactAdaptation(.popover)
         .accessibilityIdentifier("silentModeInfo")
     }
