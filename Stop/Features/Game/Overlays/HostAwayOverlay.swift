@@ -32,7 +32,7 @@ struct HostAwayOverlay: View {
                 banner
             case .fullScreen:
                 ZStack {
-                    Color.black.opacity(0.4)
+                    Theme.edge.opacity(0.5)
                         .ignoresSafeArea()
                         .accessibilityHidden(true)
                     card
@@ -52,8 +52,9 @@ struct HostAwayOverlay: View {
             HStack(alignment: .top, spacing: Theme.Spacing.s) {
                 icon(size: 22)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(copy.title).font(.system(.headline, design: .rounded, weight: .bold))
-                    Text(copy.message).font(Theme.Typography.caption).foregroundStyle(.secondary)
+                    Text(copy.title).font(.system(.headline, design: .rounded, weight: .heavy))
+                        .foregroundStyle(Theme.text)
+                    Text(copy.message).font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -61,10 +62,10 @@ struct HostAwayOverlay: View {
             actions(compact: true)
         }
         .padding(Theme.Spacing.m)
-        .background(.regularMaterial, in: .rect(cornerRadius: Theme.Radius.card))
-        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+        .pieceCard()
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.top, Theme.Spacing.s)
+        .padding(.bottom, Theme.Stroke.depth)
         .accessibilityIdentifier("hostAwayBanner")
     }
 
@@ -75,20 +76,20 @@ struct HostAwayOverlay: View {
             VStack(spacing: Theme.Spacing.m) {
                 icon(size: 44)
                 Text(copy.title)
-                    .font(Theme.Typography.headline)
+                    .font(Theme.Typography.title)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 Text(copy.message)
                     .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .multilineTextAlignment(.center)
             }
             actions(compact: false)
         }
         .padding(Theme.Spacing.l)
         .frame(maxWidth: 420)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
-        .shadow(color: .black.opacity(0.2), radius: 20, y: 8)
+        .pieceCard(depth: 6)
         .accessibilityElement(children: .contain)
         .accessibilityAddTraits(.isModal)
         .accessibilityIdentifier("hostAwayOverlay")
@@ -97,18 +98,21 @@ struct HostAwayOverlay: View {
     // MARK: Parts
 
     @ViewBuilder private func icon(size: CGFloat) -> some View {
-        Group {
-            if let symbol = copy.systemImage {
-                Image(systemName: symbol)
-                    .font(.system(size: size, weight: .bold))
-                    .foregroundStyle(Theme.accent)
-            } else {
-                ProgressView()
-                    .controlSize(size > 30 ? .large : .regular)
-                    .tint(Theme.accent)
+        if size > 30 {
+            StatusBadge(icon: copy.systemImage.map(StatusIcon.symbol) ?? .progress, size: 72)
+        } else {
+            Group {
+                if let symbol = copy.systemImage {
+                    Image(systemName: symbol)
+                        .font(.system(size: size, weight: .bold))
+                        .foregroundStyle(Theme.accent)
+                } else {
+                    ProgressView()
+                        .tint(Theme.accent)
+                }
             }
+            .accessibilityHidden(true)
         }
-        .accessibilityHidden(true)
     }
 
     @ViewBuilder private func actions(compact: Bool) -> some View {
@@ -278,16 +282,28 @@ private struct OverlayButtonStyle: ViewModifier {
 
     func body(content: Content) -> some View {
         if compact {
-            if prominent {
-                content.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
-            } else {
-                content.buttonStyle(.bordered).buttonBorderShape(.capsule)
-            }
+            content.buttonStyle(CompactPieceButtonStyle(prominent: prominent))
         } else if prominent {
             content.buttonStyle(.primary)
         } else {
             content.buttonStyle(.secondary)
         }
+    }
+}
+
+/// A small game-piece button for the host-away banner.
+private struct CompactPieceButtonStyle: ButtonStyle {
+    let prominent: Bool
+
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.reduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .subheadline) private var minHeight: CGFloat = 40
+
+    func makeBody(configuration: Configuration) -> some View {
+        PieceButtonBody(configuration: configuration, fill: prominent ? Theme.accentFill : Theme.surface,
+                        foreground: prominent ? Theme.onAccent : Theme.accent,
+                        edge: prominent ? Theme.accentEdge : Theme.edge, minHeight: minHeight, isEnabled: isEnabled,
+                        reduceMotion: reduceMotion, font: Theme.Typography.label, cornerRadius: 12)
     }
 }
 

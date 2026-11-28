@@ -124,11 +124,11 @@ struct PresenceBannerView: View {
             Image(systemName: symbol)
                 .foregroundStyle(tint)
         }
-        .font(Theme.Typography.caption)
+        .font(Theme.Typography.label)
+        .foregroundStyle(Theme.text)
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.vertical, Theme.Spacing.s + 2)
-        .background(.regularMaterial, in: .capsule)
-        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+        .piece(Capsule(), fill: Theme.surface, depth: 3)
         .padding(.horizontal, Theme.Spacing.m)
         .padding(.top, Theme.Spacing.s)
         .accessibilityElement(children: .combine)
@@ -148,8 +148,8 @@ struct PresenceBannerView: View {
 
     private var tint: Color {
         switch banner.style {
-        case .back: .green
-        case .away, .left, .removed: .secondary
+        case .back: Theme.teal
+        case .away, .left, .removed: Theme.secondaryText
         }
     }
 }

@@ -29,25 +29,26 @@ struct CollectingView: View {
     var body: some View {
         VStack(spacing: Theme.Spacing.xl) {
             VStack(spacing: Theme.Spacing.m) {
-                StopSign(size: 96)
+                StopSign(size: 112)
                 Text("Collecting answers…")
                     .font(Theme.Typography.title)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
                     .accessibilityAddTraits(.isHeader)
                 Text(round.forceEnded ? "The host ended the round." : "Round \(round.number) is over. Scoring starts in a moment.")
                     .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .multilineTextAlignment(.center)
             }
 
             VStack(spacing: 0) {
                 ForEach(players, id: \.id) { player in
                     row(player)
-                    if player.id != players.last?.id { Divider().padding(.leading, 56) }
+                    if player.id != players.last?.id { Divider().overlay(Theme.divider).padding(.leading, 56) }
                 }
             }
             .padding(.vertical, Theme.Spacing.s)
-            .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+            .pieceCard()
 
             if offersContinue {
                 VStack(spacing: Theme.Spacing.s) {
@@ -56,7 +57,7 @@ struct CollectingView: View {
                         .accessibilityIdentifier("continueAnywayButton")
                     Text("Missing answers count as blank until they reconnect.")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .transition(.opacity)
@@ -94,20 +95,21 @@ struct CollectingView: View {
         return HStack(spacing: Theme.Spacing.m) {
             PlayerInitial(name: name, dimmed: away, size: 32, isYou: player.id == client.localPlayerID)
             Text(verbatim: name)
-                .font(Theme.Typography.body.weight(.semibold))
+                .font(Theme.Typography.body.weight(.bold))
+                .foregroundStyle(Theme.text)
             Spacer(minLength: Theme.Spacing.s)
             if hasSent(player.id) {
                 Label("Sent", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(Theme.teal)
             } else if away {
                 Label("Reconnecting…", systemImage: "wifi.exclamationmark")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
             } else {
                 HStack(spacing: Theme.Spacing.xs) {
                     ProgressView().controlSize(.small)
                     Text("Sending…")
                 }
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
             }
         }
         .font(Theme.Typography.caption)
@@ -118,8 +120,8 @@ struct CollectingView: View {
     }
 }
 
-/// The full-screen "STOP!" stamp shown the moment a round locks: the sign slams down (fades in with Reduce
-/// Motion) with who called it.
+/// The full-screen "STOP!" stamp shown the moment a round locks: the sign slams down on a yellow comic burst
+/// over the sunburst (everything fades in with Reduce Motion), with who called it in a speech bubble.
 struct StopStampOverlay: View {
     let state: GameState
     let round: Round
@@ -139,19 +141,40 @@ struct StopStampOverlay: View {
     }
 
     var body: some View {
+        let burst = Starburst(points: 16, innerRatio: 0.74)
         ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            Theme.background.opacity(0.92)
                 .ignoresSafeArea()
                 .opacity(stamped ? 1 : 0)
+            Sunburst(isAnimated: !reduceMotion, rays: 26, period: 18)
+                .frame(width: 640, height: 640)
+                .opacity(stamped ? 1 : 0)
             VStack(spacing: Theme.Spacing.l) {
-                StopSign(size: 240)
+                StopSign(size: 230)
+                    .background {
+                        burst.fill(Theme.yellow)
+                            .overlay { burst.strokeBorder(Theme.ink, lineWidth: 4) }
+                            .background { burst.fill(Theme.edge).offset(x: 4, y: 8) }
+                            .frame(width: 300, height: 270)
+                            .rotationEffect(.degrees(reduceMotion ? 0 : (stamped ? 6 : -30)))
+                            .scaleEffect(reduceMotion ? 1 : (stamped ? 1 : 0.2))
+                    }
                     .rotationEffect(.degrees(reduceMotion ? 0 : (stamped ? -8 : -20)))
                     .scaleEffect(reduceMotion ? 1 : (stamped ? 1 : 2.4))
+                    .padding(.vertical, Theme.Spacing.m)
                 caption
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal, Theme.Spacing.m)
+                    .padding(.vertical, Theme.Spacing.s)
+                    .padding(.top, 10)
+                    .background {
+                        let bubble = SpeechBubble(cornerRadius: 16, tailSize: 10, tailOnTop: true)
+                        bubble.fill(Theme.edge).offset(x: 2, y: 3)
+                        bubble.fill(Theme.surface)
+                        bubble.strokeBorder(Theme.outline, lineWidth: Theme.Stroke.outline)
+                    }
                     .padding(.horizontal, Theme.Spacing.l)
             }
             .opacity(stamped ? 1 : 0)

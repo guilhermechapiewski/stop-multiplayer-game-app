@@ -77,24 +77,23 @@ struct ScoringView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
             Text("Round \(round.number) · Letter \(round.letter)")
                 .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
             HStack(alignment: .firstTextBaseline) {
                 Text(verbatim: presentation.categoryName)
                     .font(Theme.Typography.display)
+                    .foregroundStyle(Theme.text)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
                 Spacer(minLength: Theme.Spacing.s)
                 Text("\(presentation.categoryIndex + 1) of \(presentation.total)")
                     .font(Theme.Typography.headline.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
             .accessibilityIdentifier("scoringCategory-\(presentation.categoryIndex)")
-            ProgressView(value: Double(presentation.categoryIndex + (isCompleted ? 1 : 0)),
-                         total: Double(max(1, presentation.total)))
-                .tint(Theme.accent)
-                .accessibilityHidden(true)
+            ChunkyProgress(value: Double(presentation.categoryIndex + (isCompleted ? 1 : 0)),
+                           total: Double(max(1, presentation.total)))
         }
         .padding(.top, Theme.Spacing.s)
     }
@@ -115,16 +114,22 @@ struct ScoringView: View {
                 }
                 .padding(.horizontal, Theme.Spacing.m)
                 .padding(.vertical, Theme.Spacing.s + 2)
-                .background(row.playerID == me ? Theme.accent.opacity(0.1) : .clear)
-                if row.id != presentation.rows.last?.id { Divider().padding(.leading, 64) }
+                .background(row.playerID == me ? Theme.accentTint : .clear)
+                if row.id != presentation.rows.last?.id { Divider().overlay(Theme.divider).padding(.leading, 64) }
             }
         }
-        .background(Theme.surface)
-        .clipShape(.rect(cornerRadius: Theme.Radius.card))
+        .clipShape(.rect(cornerRadius: Theme.Radius.card, style: .continuous))
+        .background(PieceBackground(shape: RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous),
+                                    outline: .clear))
         .overlay {
-            RoundedRectangle(cornerRadius: Theme.Radius.card)
-                .strokeBorder(Theme.accent.opacity(0.6), lineWidth: isCompleted ? 1.5 : 0)
+            RoundedRectangle(cornerRadius: Theme.Radius.card, style: .continuous)
+                .strokeBorder(isCompleted ? Theme.teal : Theme.outline,
+                              lineWidth: isCompleted ? 3 : Theme.Stroke.outline)
         }
+        .overlay(alignment: .topTrailing) {
+            if isCompleted { CompletedBurst().offset(x: 10, y: -22) }
+        }
+        .padding(.top, isCompleted ? 12 : 0)
     }
 
     // MARK: Picker and Next
@@ -134,12 +139,13 @@ struct ScoringView: View {
             if !isParticipant {
                 Text("You’ll play from the next round.")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .frame(minHeight: 44)
             } else {
                 Text(isCompleted ? "Everyone has scored!" : "Score your answer")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(isCompleted ? Theme.accent : Color.primary)
+                    .fontWeight(.heavy)
+                    .foregroundStyle(isCompleted ? Theme.teal : Theme.text)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .accessibilityAddTraits(.isHeader)
                     .accessibilityIdentifier(isCompleted ? "categoryCompleted" : "scorePickerTitle")
@@ -154,13 +160,13 @@ struct ScoringView: View {
                 if presentation.myAnswerIsBlank {
                     Text("Blank answers score 0.")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 } else if presentation.isReadAloud, presentation.myScore == nil,
                           !dynamicTypeSize.isAccessibilitySize {
                     // Left out at accessibility sizes, where the pinned bar has no room to spare.
                     Text("Read your answer out loud, then score it.")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityIdentifier("readAloudHint")
                 }
@@ -173,7 +179,7 @@ struct ScoringView: View {
                         .accessibilityHidden(true)
                     Text("Waiting for \(presentation.hostName) to continue…")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .multilineTextAlignment(.center)
                 }
                 .frame(minHeight: 32)
@@ -253,7 +259,7 @@ struct ScoringView: View {
         if !waiting.isEmpty {
             Text("Waiting for \(waiting.map(\.name).formatted(.list(type: .and)))")
                 .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
                 .lineLimit(2)
                 .multilineTextAlignment(.center)
         }
@@ -289,17 +295,17 @@ private struct AnswerRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: nameLine)
                     .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                 if row.isHidden {
                     // Read aloud: shown once this player scores it.
                     Text(verbatim: "…")
                         .font(Theme.Typography.headline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .transition(.opacity)
                 } else {
                     Text(verbatim: row.answer)
                         .font(Theme.Typography.headline)
-                        .foregroundStyle(isBlank ? .secondary : .primary)
+                        .foregroundStyle(isBlank ? Theme.secondaryText : Theme.text)
                         .transition(reduceMotion ? .opacity
                                     : .asymmetric(insertion: .scale(scale: 0.85, anchor: .leading)
                                                       .combined(with: .opacity),
@@ -328,8 +334,8 @@ private struct AnswerRow: View {
     }
 }
 
-/// A player's points for the category: filled for 10 and 5, muted for 0, "…" while not scored yet. A minimum
-/// width keeps the answers lined up whatever the score.
+/// A player's points for the category as a chunky tile: red-orange for 10, yellow for 5, flat for 0, a dashed
+/// slot while not scored yet. A minimum width keeps the answers lined up whatever the score.
 private struct ScoreBadge: View {
     let score: Int?
 
@@ -337,30 +343,37 @@ private struct ScoreBadge: View {
     @ScaledMetric(relativeTo: .title3) private var height: CGFloat = 34
 
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 10, style: .continuous)
         if let score {
             Text(score, format: .number)
-                .font(Theme.Typography.headline.monospacedDigit())
-                .foregroundStyle(score > 0 ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+                .font(Theme.Typography.headline.monospacedDigit().weight(.black))
+                .foregroundStyle(colors(score).text)
                 .padding(.horizontal, Theme.Spacing.s)
                 .frame(minWidth: width, minHeight: height)
-                .background(fill(score), in: .capsule)
+                .piece(shape, fill: colors(score).fill, outline: score > 0 ? Theme.ink : Theme.outline,
+                       depth: score > 0 ? 3 : 0)
+                .padding(.bottom, 3)
                 .contentTransition(.numericText(value: Double(score)))
                 .transition(.scale.combined(with: .opacity))
         } else {
             Text(verbatim: "…")
                 .font(Theme.Typography.headline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
                 .frame(minWidth: width, minHeight: height)
-                .overlay { Capsule().strokeBorder(.tertiary, style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])) }
+                .overlay {
+                    shape.strokeBorder(Theme.secondaryText.opacity(0.6), style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
+                }
+                .padding(.bottom, 3)
                 .accessibilityLabel(Text("Not scored yet"))
         }
     }
 
-    private func fill(_ score: Int) -> AnyShapeStyle {
+    /// 10 on red-orange, 5 on yellow, 0 sunk flat.
+    private func colors(_ score: Int) -> (fill: Color, text: Color) {
         switch score {
-        case 10: AnyShapeStyle(Theme.accent)
-        case 5: AnyShapeStyle(Theme.accent.opacity(0.7))
-        default: AnyShapeStyle(.fill.tertiary)
+        case 10: (Theme.accentFill, Theme.onAccent)
+        case 5: (Theme.yellow, Theme.ink)
+        default: (Theme.sunken, Theme.secondaryText)
         }
     }
 }
@@ -379,19 +392,86 @@ private struct ScorePicker: View {
                 let selected = selection == points
                 Button { onPick(points) } label: {
                     Text(points, format: .number)
-                        .font(Theme.Typography.title.monospacedDigit())
-                        .frame(maxWidth: .infinity, minHeight: height)
-                        .foregroundStyle(selected ? .white : Theme.accent)
-                        .background(selected ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(Theme.accent.opacity(0.14)),
-                                    in: .rect(cornerRadius: Theme.Radius.control))
+                        .monospacedDigit()
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(ScoreTileButtonStyle(selected: selected, minHeight: height))
                 .accessibilityLabel(Text(verbatim: AccessibilityText.score(points)))
                 .accessibilityAddTraits(selected ? .isSelected : [])
                 .accessibilityIdentifier("score-\(points)")
             }
         }
         .animation(.snappy(duration: 0.2), value: selection)
+    }
+}
+
+/// A score choice as a game piece: red-orange once picked, cream before.
+private struct ScoreTileButtonStyle: ButtonStyle {
+    let selected: Bool
+    let minHeight: CGFloat
+    var font: Font = Theme.Typography.title.weight(.black)
+
+    @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.reduceMotion) private var reduceMotion
+
+    func makeBody(configuration: Configuration) -> some View {
+        PieceButtonBody(configuration: configuration, fill: selected ? Theme.accentFill : Theme.surface,
+                        foreground: selected ? Theme.onAccent : Theme.accent,
+                        edge: selected ? Theme.accentEdge : Theme.edge, minHeight: minHeight, isEnabled: isEnabled,
+                        reduceMotion: reduceMotion, font: font)
+    }
+}
+
+/// The "category done" badge: a check on a small teal comic burst, popping in (fading with Reduce Motion).
+private struct CompletedBurst: View {
+    @Environment(\.reduceMotion) private var reduceMotion
+    @State private var shown = false
+    @ScaledMetric(relativeTo: .title3) private var side: CGFloat = 52
+
+    var body: some View {
+        let burst = Starburst(points: 10, innerRatio: 0.76)
+        Image(systemName: "checkmark")
+            .font(.system(size: side * 0.36, weight: .black))
+            .foregroundStyle(Theme.ink)
+            .frame(width: side, height: side)
+            .background {
+                burst.fill(Theme.edge).offset(x: 1.5, y: 3)
+                burst.fill(Theme.tealFill)
+                burst.strokeBorder(Theme.ink, lineWidth: 2)
+            }
+            .rotationEffect(.degrees(reduceMotion || shown ? -8 : -60))
+            .scaleEffect(reduceMotion || shown ? 1 : 0.2)
+            .opacity(shown ? 1 : 0)
+            .accessibilityHidden(true)
+            .onAppear {
+                withAnimation(reduceMotion ? .easeOut(duration: 0.2) : .spring(duration: 0.45, bounce: 0.5)) {
+                    shown = true
+                }
+            }
+    }
+}
+
+/// Progress through the categories: a chunky outlined bar. Decorative (the header says "3 of 12").
+struct ChunkyProgress: View {
+    let value: Double
+    let total: Double
+
+    @ScaledMetric(relativeTo: .body) private var height: CGFloat = 14
+
+    var body: some View {
+        let fraction = total > 0 ? min(1, max(0, value / total)) : 0
+        Capsule()
+            .fill(Theme.sunken)
+            .overlay(alignment: .leading) {
+                GeometryReader { proxy in
+                    Capsule()
+                        .fill(Theme.accentFill)
+                        .frame(width: max(fraction > 0 ? height : 0, proxy.size.width * fraction))
+                }
+            }
+            .clipShape(.capsule)
+            .overlay { Capsule().strokeBorder(Theme.outline, lineWidth: Theme.Stroke.outline) }
+            .frame(height: height)
+            .accessibilityHidden(true)
     }
 }
 
@@ -406,17 +486,16 @@ private struct HostScoreControl: View {
         HStack(spacing: Theme.Spacing.s) {
             Text(row.presence == .away ? "Away — score for \(row.name)" : "Left — score for \(row.name)")
                 .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
                 .frame(maxWidth: .infinity, alignment: .leading)
             ForEach(isBlank ? [0] : [10, 5, 0], id: \.self) { points in
                 Button { onPick(points) } label: {
                     Text(points, format: .number)
-                        .font(Theme.Typography.caption.monospacedDigit().weight(.bold))
-                        .frame(minWidth: 40, minHeight: 32)
+                        .monospacedDigit()
                 }
-                .buttonStyle(.bordered)
-                .buttonBorderShape(.capsule)
-                .tint(Theme.accent)
+                .buttonStyle(ScoreTileButtonStyle(selected: false, minHeight: 36,
+                                                  font: Theme.Typography.caption.weight(.heavy)))
+                .fixedSize()
                 .accessibilityLabel(Text("Give \(row.name) \(points) points"))
                 .accessibilityIdentifier("hostScore-\(points)")
             }

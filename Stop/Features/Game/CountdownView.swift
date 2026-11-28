@@ -25,18 +25,18 @@ struct CountdownView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Round \(round.number)")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                     Text("Letter \(round.letter)")
                         .font(Theme.Typography.title)
+                        .foregroundStyle(Theme.text)
                 }
             }
             .accessibilityElement(children: .combine)
 
-            Text(secondsRemaining, format: .number)
-                .font(.system(size: 200, weight: .black, design: .rounded))
-                .minimumScaleFactor(0.5)
-                .monospacedDigit()
-                .foregroundStyle(Theme.accent)
+            ChunkyText(text: Text(secondsRemaining, format: .number)
+                .font(.system(size: 200, weight: .black, design: .rounded).monospacedDigit()),
+                       outline: 6, depth: 9, minimumScaleFactor: 0.5)
+                .padding(.bottom, 9)
                 .id(secondsRemaining)
                 .transition(reduceMotion
                             ? .opacity
@@ -47,7 +47,7 @@ struct CountdownView: View {
 
             Text("Get ready to write!")
                 .font(Theme.Typography.headline)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
                 .multilineTextAlignment(.center)
             if let onReroll { NewLetterButton(action: onReroll) }
         }

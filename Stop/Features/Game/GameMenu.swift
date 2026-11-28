@@ -198,11 +198,11 @@ private struct RemovePlayerSheet: View {
                         VStack(alignment: .leading) {
                             Text(verbatim: name)
                                 .font(Theme.Typography.body.weight(.semibold))
-                                .foregroundStyle(Color.primary)
+                                .foregroundStyle(Theme.text)
                             if player.presence == .away {
                                 Text("reconnecting…")
                                     .font(Theme.Typography.caption)
-                                    .foregroundStyle(Color.secondary)
+                                    .foregroundStyle(Theme.secondaryText)
                             }
                         }
                         Spacer()
@@ -212,7 +212,9 @@ private struct RemovePlayerSheet: View {
                     }
                 }
                 .accessibilityHint("Asks to confirm removing this player.")
+                .listRowBackground(Theme.surface)
             }
+            .themedList()
             .navigationTitle("Remove a player")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

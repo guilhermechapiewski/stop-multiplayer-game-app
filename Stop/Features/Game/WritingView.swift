@@ -74,7 +74,9 @@ struct WritingView: View {
             .background {
                 Theme.background
                     .ignoresSafeArea(edges: .top)
-                    .overlay(alignment: .bottom) { Divider() }
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(Theme.outline.opacity(0.25)).frame(height: 1.5)
+                    }
             }
             .accessibilityElement(children: .contain)
             .accessibilityIdentifier("writingHeader")
@@ -93,7 +95,7 @@ struct WritingView: View {
                 if !compact {
                     Text("Round \(round.number) · Letter \(round.letter)")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .accessibilityAddTraits(.isHeader)
                 }
                 StopsCounter(state: state, round: round)
@@ -109,10 +111,10 @@ struct WritingView: View {
         Label("This round started before you joined. You’ll play from the next one.",
               systemImage: "hourglass")
             .font(Theme.Typography.body)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Theme.secondaryText)
             .padding(Theme.Spacing.m)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+            .pieceCard()
     }
 
     // MARK: Fields
@@ -196,12 +198,13 @@ struct StopsCounter: View {
         HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.xs) {
             Text("Stops \(round.stops.count)/\(required)")
                 .font(Theme.Typography.headline.monospacedDigit())
-                .foregroundStyle(round.stops.isEmpty ? Color.primary : Theme.accent)
+                .fontWeight(.heavy)
+                .foregroundStyle(round.stops.isEmpty ? Theme.text : Theme.accent)
                 .contentTransition(.numericText())
             if !names.isEmpty {
                 Text(verbatim: "— " + names.formatted(.list(type: .and, width: .short)))
                     .font(Theme.Typography.body)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                     .lineLimit(2)
             }
         }
@@ -240,11 +243,14 @@ private struct StoppedBanner: View {
                 .accessibilityHidden(true)
             Text(kind == .giveUp ? "You gave up — waiting for others" : "You stopped — waiting for others")
                 .font(Theme.Typography.headline)
+                .foregroundStyle(Theme.text)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, minHeight: 60)
+        .frame(maxWidth: .infinity, minHeight: 56)
         .padding(.horizontal, Theme.Spacing.m)
-        .background(Theme.accent.opacity(0.14), in: .rect(cornerRadius: Theme.Radius.control))
+        .padding(.vertical, Theme.Spacing.xs)
+        .pieceCard(fill: Theme.accentTint, cornerRadius: Theme.Radius.control, depth: 0)
+        .padding(.bottom, Theme.Stroke.depth)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("stoppedBanner")
     }

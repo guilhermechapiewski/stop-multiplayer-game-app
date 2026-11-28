@@ -36,12 +36,12 @@ struct AnswerField: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             HStack(spacing: Theme.Spacing.xs) {
                 Text(verbatim: category)
-                    .font(Theme.Typography.caption)
-                    .foregroundStyle(isFocused ? Theme.accent : .secondary)
+                    .font(Theme.Typography.label)
+                    .foregroundStyle(isFocused ? Theme.accent : Theme.secondaryText)
                 Spacer(minLength: 0)
                 Image(systemName: isFilled ? "checkmark.circle.fill" : "circle")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(isFilled ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.tertiary))
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(isFilled ? Theme.teal : Theme.secondaryText.opacity(0.5))
                     .contentTransition(.symbolEffect(.replace))
             }
             .padding(.horizontal, Theme.Spacing.xs)
@@ -50,7 +50,7 @@ struct AnswerField: View {
             Group {
                 if let frozenText {
                     Text(verbatim: frozenText.isEmpty ? "—" : frozenText)
-                        .foregroundStyle(frozenText.isEmpty ? .secondary : .primary)
+                        .foregroundStyle(frozenText.isEmpty ? Theme.secondaryText : Theme.text)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .accessibilityLabel(Text(verbatim: category))
                         .accessibilityValue(frozenText.isEmpty ? Text("Blank") : Text(verbatim: frozenText))
@@ -66,14 +66,10 @@ struct AnswerField: View {
                 }
             }
             .font(Theme.Typography.headline)
+            .foregroundStyle(Theme.text)
             .padding(.horizontal, Theme.Spacing.m)
             .frame(minHeight: 52)
-            .background(isFrozen ? AnyShapeStyle(.fill.quaternary) : AnyShapeStyle(Theme.surface),
-                        in: .rect(cornerRadius: 14))
-            .overlay {
-                RoundedRectangle(cornerRadius: 14)
-                    .strokeBorder(isFocused ? Theme.accent : Color.clear, lineWidth: 2)
-            }
+            .pieceField(isFocused: isFocused, isReadOnly: isFrozen)
             .contentShape(.rect)
             .onTapGesture { if !isFrozen { focus.wrappedValue = index } }
             .accessibilityIdentifier("answerField-\(index)")

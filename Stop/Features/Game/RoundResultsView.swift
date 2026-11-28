@@ -34,9 +34,10 @@ struct RoundResultsView: View {
                 VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
                     Text("Round \(round.number) · Letter \(round.letter)")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                     Text("Round results")
                         .font(Theme.Typography.display)
+                        .foregroundStyle(Theme.text)
                         .accessibilityAddTraits(.isHeader)
                 }
                 .padding(.top, Theme.Spacing.s)
@@ -66,15 +67,13 @@ struct RoundResultsView: View {
 
     private var rulesCard: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
-            Label("Next round", systemImage: "slider.horizontal.3")
-                .font(Theme.Typography.headline)
-                .accessibilityAddTraits(.isHeader)
+            BubbleLabel("Next round", systemImage: "slider.horizontal.3")
             Stepper(value: stopsBinding, in: 1...max(1, activeCount)) {
                 LabeledContent("Stops to end a round") {
                     Text(stopsRequired, format: .number)
                         .font(Theme.Typography.headline)
                         .monospacedDigit()
-                        .foregroundStyle(Color.primary)
+                        .foregroundStyle(Theme.text)
                 }
             }
             .accessibilityIdentifier("resultsStopsStepper")
@@ -85,15 +84,16 @@ struct RoundResultsView: View {
             SilentModeToggle(isOn: silentBinding, identifier: "resultsSilentModeToggle")
             Text(RulesText.footer(stopsRequired: stopsRequired, allowGiveUp: state.settings.allowGiveUp))
                 .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
             Text(RulesText.scoring(silent: state.settings.silentScoring))
                 .font(Theme.Typography.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
         }
         .font(Theme.Typography.body)
+        .foregroundStyle(Theme.text)
         .padding(Theme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .pieceCard()
     }
 
     private var stopsBinding: Binding<Int> {
@@ -124,18 +124,14 @@ struct RoundResultsView: View {
         } label: {
             Label("Back to scoring", systemImage: "arrow.uturn.backward")
         }
-        .font(Theme.Typography.headline)
-        .foregroundStyle(Theme.accent)
-        .frame(minHeight: 44)
+        .buttonStyle(.link)
         .accessibilityHint(Text("Takes everyone back to the last category to correct a score."))
         .accessibilityIdentifier("backToScoringButton")
     }
 
     private var endGameButton: some View {
         Button { confirmingEnd = true } label: { Text(Self.endTitle(isPractice: isPractice)) }
-            .font(Theme.Typography.headline)
-            .foregroundStyle(Theme.accent)
-            .frame(minHeight: 44)
+            .buttonStyle(.link)
             .accessibilityIdentifier("endGameButton")
     }
 
@@ -158,7 +154,7 @@ struct RoundResultsView: View {
                         .accessibilityHidden(true)
                     Text("Waiting for \(hostName)…")
                         .font(Theme.Typography.headline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 }
                 .frame(minHeight: 44)
                 .accessibilityElement(children: .combine)
@@ -181,9 +177,7 @@ struct StandingsCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s) {
-            Label(title, systemImage: systemImage)
-                .font(Theme.Typography.headline)
-                .accessibilityAddTraits(.isHeader)
+            BubbleLabel(title, systemImage: systemImage)
                 .padding(.horizontal, Theme.Spacing.m)
                 .padding(.top, Theme.Spacing.m)
             VStack(spacing: 0) {
@@ -191,13 +185,15 @@ struct StandingsCard: View {
                     StandingRow(entry: entry, name: names[entry.playerID] ?? "", isMe: entry.playerID == me,
                                 hasLeft: players.first { $0.id == entry.playerID }?.presence.isActive == false,
                                 crowned: highlightTop && entry.rank == 1 && entry.points > 0)
-                    if entry.playerID != entries.last?.playerID { Divider().padding(.leading, 64) }
+                    if entry.playerID != entries.last?.playerID {
+                        Divider().overlay(Theme.divider).padding(.leading, 64)
+                    }
                 }
             }
             .padding(.bottom, Theme.Spacing.s)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .pieceCard()
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(identifier)
     }
@@ -211,6 +207,7 @@ struct StandingRow: View {
     var crowned = false
 
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @ScaledMetric(relativeTo: .title3) private var rankSide: CGFloat = 32
 
     var body: some View {
         Group {
@@ -235,7 +232,7 @@ struct StandingRow: View {
         }
         .padding(.horizontal, Theme.Spacing.s)
         .padding(.vertical, Theme.Spacing.s + 2)
-        .background(isMe ? Theme.accent.opacity(0.1) : .clear, in: .rect(cornerRadius: 14))
+        .background(isMe ? Theme.accentTint : .clear, in: .rect(cornerRadius: 14, style: .continuous))
         .padding(.horizontal, Theme.Spacing.s)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("Rank \(entry.rank), \(name)"))
@@ -243,16 +240,21 @@ struct StandingRow: View {
         .accessibilityIdentifier("standingRow")
     }
 
+    /// The rank on a small tile: yellow for the leaders.
     private var rank: some View {
         Text(entry.rank, format: .number)
-            .font(Theme.Typography.headline.monospacedDigit())
-            .foregroundStyle(entry.rank == 1 ? Theme.accent : .secondary)
-            .frame(minWidth: 28, alignment: .leading)
+            .font(Theme.Typography.headline.monospacedDigit().weight(.black))
+            .foregroundStyle(entry.rank == 1 ? Theme.ink : Theme.secondaryText)
+            .frame(minWidth: rankSide, minHeight: rankSide)
+            .piece(RoundedRectangle(cornerRadius: 9, style: .continuous),
+                   fill: entry.rank == 1 ? Theme.yellow : Theme.sunken,
+                   outline: entry.rank == 1 ? Theme.ink : Theme.outline.opacity(0.35), depth: entry.rank == 1 ? 2 : 0)
     }
 
     private var points: some View {
         Text("\(entry.points) pts")
-            .font(Theme.Typography.headline.monospacedDigit())
+            .font(Theme.Typography.headline.monospacedDigit().weight(.heavy))
+            .foregroundStyle(Theme.text)
     }
 
     /// "Gui (you) · left" as one Text, so it wraps as a sentence instead of splitting into columns, then the
@@ -271,14 +273,15 @@ struct StandingRow: View {
     }
 
     private var nameText: some View {
-        var parts = [Text(verbatim: name).font(Theme.Typography.body.weight(isMe ? .bold : .semibold))]
+        var parts = [Text(verbatim: name).font(Theme.Typography.body.weight(isMe ? .heavy : .semibold))
+            .foregroundStyle(Theme.text)]
         if isMe {
             parts.append(Text(verbatim: " "))
-            parts.append(Text("(you)").font(Theme.Typography.caption).foregroundStyle(.secondary))
+            parts.append(Text("(you)").font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText))
         }
         if hasLeft {
             parts.append(Text(verbatim: " "))
-            parts.append(Text("· left").font(Theme.Typography.caption).foregroundStyle(.secondary))
+            parts.append(Text("· left").font(Theme.Typography.caption).foregroundStyle(Theme.secondaryText))
         }
         return parts.dropFirst().reduce(parts[0]) { Text(TextJoin.pair($0, $1)) }
             .fixedSize(horizontal: false, vertical: true)

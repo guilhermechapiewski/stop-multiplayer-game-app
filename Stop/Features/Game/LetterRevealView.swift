@@ -21,15 +21,17 @@ struct LetterRevealView: View {
             VStack(spacing: Theme.Spacing.xs) {
                 Text("Round \(round.number)")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                 Text(landed ? "The letter is…" : "Picking a letter…")
-                    .font(Theme.Typography.title)
+                    .font(Theme.Typography.display)
+                    .foregroundStyle(Theme.text)
+                    .multilineTextAlignment(.center)
                     .contentTransition(.opacity)
             }
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isHeader)
 
-            LetterTile(letter: shown ?? " ", size: 168)
+            SunburstTile(letter: shown ?? " ", size: 160)
                 .keyframeAnimator(initialValue: 1.0, trigger: landed) { tile, scale in
                     tile.scaleEffect(scale)
                 } keyframes: { _ in
@@ -102,37 +104,59 @@ struct NewLetterButton: View {
 
     var body: some View {
         Button(action: action) {
-            Label("New letter", systemImage: "dice")
+            Label("New letter", systemImage: "dice.fill")
         }
-        .font(Theme.Typography.headline)
-        .foregroundStyle(Theme.accent)
-        .frame(minHeight: 44)
+        .buttonStyle(.link)
         .accessibilityHint(Text("Draws another letter for everyone and restarts the countdown."))
         .accessibilityIdentifier("newLetterButton")
     }
 }
 
-/// The round's letter on an accent tile.
+/// The round's letter as a game tile cut from the icon: a chunky red-orange letter, outlined in dark brown,
+/// on a cream tile that stands on a hard edge. The tile is cream in dark mode too, like the icon's bubble.
 struct LetterTile: View {
     let letter: String
     var size: CGFloat = 120
 
     @ScaledMetric private var scale: CGFloat = 1
 
+    private static let cream = [Color(rgb: 0xFFFFFF), Color(rgb: 0xFFF6E2), Color(rgb: 0xF6DDB4)]
+
     var body: some View {
         let side = size * min(scale, 1.4)
-        Text(verbatim: letter)
-            .font(.system(size: side * 0.62, weight: .black, design: .rounded))
-            .foregroundStyle(.white)
+        let shape = RoundedRectangle(cornerRadius: side * 0.24, style: .continuous)
+        ChunkyText(text: Text(verbatim: letter).font(.system(size: side * 0.6, weight: .black, design: .rounded)),
+                   outline: max(1.5, side * 0.025), depth: max(1.5, side * 0.035))
             .contentTransition(.identity)
+            .offset(y: -side * 0.02)
             .frame(width: side, height: side)
-            .background(Theme.accent.gradient, in: .rect(cornerRadius: side * 0.24))
-            .overlay {
-                RoundedRectangle(cornerRadius: side * 0.2)
-                    .inset(by: side * 0.05)
-                    .strokeBorder(.white.opacity(0.5), lineWidth: max(1.5, side * 0.02))
+            .background {
+                ZStack {
+                    shape.fill(Theme.ink).offset(y: max(3, side * 0.05))
+                    shape.fill(LinearGradient(colors: Self.cream, startPoint: .top, endPoint: .bottom))
+                    shape.strokeBorder(Theme.ink, lineWidth: max(2, side * 0.03))
+                }
             }
-            .shadow(color: Theme.accent.opacity(0.3), radius: side * 0.08, y: side * 0.04)
+            .padding(.bottom, max(3, side * 0.05))
+    }
+}
+
+/// A letter tile at the centre of a sunburst: the big reveal.
+struct SunburstTile: View {
+    let letter: String
+    var size: CGFloat = 168
+
+    @Environment(\.reduceMotion) private var reduceMotion
+    @ScaledMetric private var scale: CGFloat = 1
+
+    var body: some View {
+        let side = size * min(scale, 1.4)
+        LetterTile(letter: letter, size: size)
+            .background {
+                Sunburst(isAnimated: !reduceMotion, rays: 22, period: 24)
+                    .frame(width: side * 2.1, height: side * 2.1)
+            }
+            .padding(.vertical, side * 0.3)
     }
 }
 

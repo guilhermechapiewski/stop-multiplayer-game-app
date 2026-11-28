@@ -66,25 +66,27 @@ struct GameOverView: View {
 
     private var hero: some View {
         VStack(spacing: Theme.Spacing.m) {
-            Image(systemName: winners.isEmpty ? "flag.checkered" : "trophy.fill")
-                .font(.system(size: 88, weight: .bold))
-                .foregroundStyle(winners.isEmpty ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(Color.yellow.gradient))
-                .shadow(color: .orange.opacity(0.35), radius: 16, y: 6)
+            WinnerBadge(hasWinner: !winners.isEmpty)
                 .scaleEffect(appeared || reduceMotion ? 1 : 0.3)
                 .rotationEffect(.degrees(appeared || reduceMotion ? 0 : -25))
-                .accessibilityHidden(true)
             VStack(spacing: Theme.Spacing.xs) {
                 Text("Game over")
                     .font(Theme.Typography.headline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                 title
                     .font(Theme.Typography.display)
+                    .foregroundStyle(Theme.text)
                     .multilineTextAlignment(.center)
                     .accessibilityIdentifier("winnerTitle")
                 if let points = standings.first?.points, !winners.isEmpty {
                     Text("\(points) points")
-                        .font(Theme.Typography.headline.monospacedDigit())
-                        .foregroundStyle(Theme.accent)
+                        .font(Theme.Typography.headline.monospacedDigit().weight(.black))
+                        .foregroundStyle(Theme.ink)
+                        .padding(.horizontal, Theme.Spacing.m)
+                        .padding(.vertical, Theme.Spacing.xs + 2)
+                        .piece(Capsule(), fill: Theme.yellow, outline: Theme.ink, depth: 3)
+                        .padding(.top, Theme.Spacing.xs)
+                        .padding(.bottom, 3)
                 }
             }
             .accessibilityElement(children: .combine)
@@ -104,6 +106,35 @@ struct GameOverView: View {
             return Text("You tie with \(others.formatted(.list(type: .and)))!")
         default: return Text("\(winnerNames.formatted(.list(type: .and))) tie!")
         }
+    }
+}
+
+/// The trophy (or the chequered flag when nobody scored) on a round piece over the sunburst, which turns
+/// slowly unless Reduce Motion is on. Decorative.
+private struct WinnerBadge: View {
+    let hasWinner: Bool
+
+    @Environment(\.reduceMotion) private var reduceMotion
+    @ScaledMetric(relativeTo: .largeTitle) private var scale: CGFloat = 1
+
+    var body: some View {
+        let side = 112 * min(scale, 1.3)
+        Image(systemName: hasWinner ? "trophy.fill" : "flag.checkered")
+            .font(.system(size: side * 0.5, weight: .bold))
+            .foregroundStyle(hasWinner ? Theme.yellow : Theme.accent)
+            .shadow(color: Theme.ink, radius: 0, x: 0, y: 3)
+            .shadow(color: Theme.ink, radius: 0, x: 1.5, y: 0)
+            .shadow(color: Theme.ink, radius: 0, x: -1.5, y: 0)
+            .frame(width: side, height: side)
+            .piece(Circle(), fill: Theme.surface, lineWidth: 3, depth: 6)
+            .background {
+                if hasWinner {
+                    Sunburst(isAnimated: !reduceMotion, rays: 24, period: 30)
+                        .frame(width: side * 2.6, height: side * 2.6)
+                }
+            }
+            .padding(.vertical, Theme.Spacing.l)
+            .accessibilityHidden(true)
     }
 }
 

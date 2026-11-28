@@ -44,10 +44,11 @@ struct LobbyView: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.xs) {
             title
                 .font(Theme.Typography.display)
+                .foregroundStyle(Theme.text)
                 .accessibilityAddTraits(.isHeader)
             subtitle
                 .font(Theme.Typography.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
         }
         .padding(.top, Theme.Spacing.s)
     }
@@ -89,12 +90,12 @@ struct LobbyView: View {
             .accessibilityAddTraits(.isHeader)
             Text("Local Network access is off, so friends nearby can’t find your game. Turn it on in Settings.")
                 .font(Theme.Typography.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Theme.secondaryText)
             OpenSettingsButton()
         }
         .padding(Theme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .pieceCard()
         .accessibilityIdentifier("lobbyNetworkDenied")
     }
 
@@ -126,7 +127,7 @@ struct LobbyView: View {
                             Text(stopsRequired, format: .number)
                                 .font(Theme.Typography.headline)
                                 .monospacedDigit()
-                                .foregroundStyle(Color.primary)
+                                .foregroundStyle(Theme.text)
                         }
                     }
                     .accessibilityIdentifier("lobbyStopsStepper")
@@ -152,15 +153,16 @@ struct LobbyView: View {
                 Text(RulesText.footer(stopsRequired: stopsRequired,
                                       allowGiveUp: state.settings.allowGiveUp))
                     .font(Theme.Typography.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Theme.secondaryText)
                 // The host has the switch and its ⓘ; the others get the mode explained here.
                 if !client.isHost {
                     Text(RulesText.scoring(silent: state.settings.silentScoring))
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 }
             }
             .font(Theme.Typography.body)
+            .foregroundStyle(Theme.text)
         }
     }
 
@@ -193,11 +195,12 @@ struct LobbyView: View {
                 ForEach(Array(state.settings.categories.enumerated()), id: \.offset) { index, category in
                     HStack(alignment: .firstTextBaseline, spacing: Theme.Spacing.s) {
                         Text(index + 1, format: .number)
-                            .font(Theme.Typography.caption.monospacedDigit())
+                            .font(Theme.Typography.label.monospacedDigit())
                             .foregroundStyle(Theme.accent)
                             .frame(minWidth: 24, alignment: .trailing)
                         Text(verbatim: category)
                             .font(Theme.Typography.body)
+                            .foregroundStyle(Theme.text)
                     }
                     .accessibilityElement(children: .combine)
                 }
@@ -230,7 +233,7 @@ struct LobbyView: View {
                 if !canStart {
                     Text("Waiting for players…")
                         .font(Theme.Typography.caption)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                         .accessibilityHidden(true)
                 }
             } else {
@@ -239,7 +242,7 @@ struct LobbyView: View {
                         .accessibilityHidden(true)
                     Text("Waiting for \(hostName) to start…")
                         .font(Theme.Typography.headline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Theme.secondaryText)
                 }
                 .frame(minHeight: 44)
                 .accessibilityElement(children: .combine)
@@ -248,7 +251,7 @@ struct LobbyView: View {
     }
 }
 
-/// A titled rounded card on the lobby's grouped background.
+/// A card with its title on a speech bubble, on the lobby's cream page.
 private struct LobbyCard<Content: View>: View {
     let title: LocalizedStringKey
     let systemImage: String
@@ -256,15 +259,12 @@ private struct LobbyCard<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.m) {
-            Label(title, systemImage: systemImage)
-                .font(Theme.Typography.headline)
-                .foregroundStyle(Color.primary)
-                .accessibilityAddTraits(.isHeader)
+            BubbleLabel(title, systemImage: systemImage)
             content
         }
         .padding(Theme.Spacing.m)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Theme.surface, in: .rect(cornerRadius: Theme.Radius.card))
+        .pieceCard()
     }
 }
 
