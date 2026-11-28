@@ -36,8 +36,9 @@ enum Theme {
     static let text = dynamic(light: 0x2B140D, dark: 0xFFF3E3)
     /// Secondary text (at least 5.7:1 on every surface above, the tints included).
     static let secondaryText = dynamic(light: 0x6B4E42, dark: 0xD2BCAC, lightHigh: 0x4A3128, darkHigh: 0xEBDACB)
-    /// Dark-brown outlines of the playful pieces (a warm mid-brown at night, where they sit on dark surfaces).
-    static let outline = dynamic(light: 0x3A1A12, dark: 0x5E4335, lightHigh: 0x2A0F08, darkHigh: 0x8A6A58)
+    /// Dark-brown outlines of the playful pieces (a warm mid-brown at night, where they sit on dark surfaces):
+    /// at least 3:1 against the page in every appearance, so fields and cards show where they are.
+    static let outline = dynamic(light: 0x3A1A12, dark: 0x7C5E4D, lightHigh: 0x2A0F08, darkHigh: 0x8A6A58)
     /// The hard edge and drop shadow under pieces.
     static let edge = dynamic(light: 0x3A1A12, dark: 0x080403)
     /// Dark-brown text on the yellow and teal fills, in both appearances.
